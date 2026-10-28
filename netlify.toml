@@ -1,6 +1,6 @@
 [build]
-  publish = "sociogram-netlify/public"
-  functions = "sociogram-netlify/netlify/functions"
+  publish = "public"
+  functions = "functions"
 
 [dev]
   port = 8888
