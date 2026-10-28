@@ -1,0 +1,15 @@
+{
+  "name": "sociogram-netlify",
+  "version": "1.0.0",
+  "description": "Sociogram Toolkit - Netlify proof of concept (formuliermodule)",
+  "scripts": {
+    "dev": "netlify dev",
+    "build": "echo 'Static build, nothing to compile'"
+  },
+  "dependencies": {
+    "@netlify/blobs": "^7.0.0"
+  },
+  "devDependencies": {
+    "netlify-cli": "^17.0.0"
+  }
+}
