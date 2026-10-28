@@ -1,0 +1,2257 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sociogram - Visualisatie-tool</title>
+
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><line x1='48' y1='20' x2='82' y2='32' stroke='%23666' stroke-width='4'/><line x1='48' y1='20' x2='65' y2='65' stroke='%23666' stroke-width='4'/><line x1='48' y1='20' x2='15' y2='48' stroke='%23666' stroke-width='4'/><line x1='82' y1='32' x2='65' y2='65' stroke='%23666' stroke-width='4'/><line x1='15' y1='48' x2='25' y2='85' stroke='%23666' stroke-width='4'/><line x1='15' y1='48' x2='65' y2='65' stroke='%23666' stroke-width='4'/><circle cx='48' cy='20' r='16' fill='%23e8607a' stroke='%23b03050' stroke-width='3'/><circle cx='82' cy='32' r='9' fill='%234a9fd4' stroke='%232a70a8' stroke-width='3'/><circle cx='65' cy='65' r='12' fill='%23e8607a' stroke='%23b03050' stroke-width='3'/><circle cx='15' cy='48' r='13' fill='%234a9fd4' stroke='%232a70a8' stroke-width='3'/><circle cx='25' cy='85' r='8' fill='%23e8607a' stroke='%23b03050' stroke-width='3'/></svg>">
+
+    <!-- External Libraries -->
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+        
+        /* Header */
+        header {
+            background-color: #3498db;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 30px;
+        }
+        
+        /* Tables */
+        table {
+            width: 450px;
+            border-collapse: collapse;
+			table-layout:auto;
+            margin: 20px auto;
+            background: white;
+			margin-left: auto;
+			margin-right: auto;
+        }
+        
+        td, th {
+            margin: 5px;
+            padding: 1px;
+            border: 1px solid #ccc;
+            text-align: center;
+            font-size: 14px;
+			width: fit-content;
+			white-space:nowrap;			
+        }
+        
+        th {
+            background: #3498db;
+            color: white;
+            font-weight: bold;
+        }
+        
+        tr:nth-of-type(odd) {
+            background: #eee;
+        }
+        
+        input:focus {
+            background-color: lightgrey;
+        }
+        
+        input[type=text] {
+            border: 1px solid black;
+--			border: none;
+            border-radius: 3px;
+        }
+		
+		  input[type="range"] {
+			width: 200px;
+		  }		
+        
+        .rotated {
+            writing-mode: tb-rl;
+            transform: rotate(-180deg);
+        }
+        
+        /* Buttons */
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+		
+        
+        /* Layout */
+        .center {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .controls-section {
+            text-align: center;
+            width: 1000px;
+            height: 900px;
+            margin: 0 auto;
+            display: none;
+        }
+        
+        .style-settings {
+            text-align: left;
+            width: 700px;
+            height: 900px;
+            margin: 0 auto;
+        }
+        
+        /* SVG Styles */
+        svg text {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            pointer-events: none;
+        }
+		
+/* Create two equal columns that floats next to each other */
+.column {
+  float: left;
+  width: 50%;
+  padding: 50px;
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+        
+/* Footer styling - verbeterde versie */
+.page-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.main-content {
+    flex: 1 0 auto;
+}
+
+
+/* Zorg ervoor dat er altijd minimaal ruimte is voor de footer */
+body {
+    margin: 0;
+    padding: 0;
+    padding-bottom: 120px; /* Ruimte voor footer */
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f5f5f5;
+    min-height: 100vh;
+    position: relative;
+}
+
+
+		
+		/* Context menu styling */
+.context-menu {
+    position: absolute;
+    background: white;
+    border: 2px solid #333;
+    border-radius: 6px;
+    padding: 4px 0;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    z-index: 1000;
+    min-width: 180px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.context-menu-item {
+    padding: 4px 20px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    transition: all 0.2s ease;
+    display: block;
+}
+
+.context-menu-item:hover {
+    background-color: #3498db;
+    color: white;
+}
+
+.context-menu-item:active {
+    background-color: #2980b9;
+}
+
+.context-menu-separator {
+    height: 1px;
+    background-color: #ddd;
+    margin: 8px 15px;
+}
+
+/* Specifieke styling voor verschillende menu items */
+.context-menu-item.edit {
+    color: #2c3e50;
+}
+
+.context-menu-item.delete {
+    color: #e74c3c;
+}
+
+.context-menu-item.delete:hover {
+    background-color: #e74c3c;
+    color: white;
+}
+
+/* Highlight selected elements */
+.node-selected {
+    stroke: #ff6600 !important;
+    stroke-width: 3px !important;
+}
+
+.link-selected {
+    stroke: #ff6600 !important;
+    stroke-width: 4px !important;
+}
+    </style>
+</head>
+
+<body>
+	<header><img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><line x1='48' y1='20' x2='82' y2='32' stroke='%23ffffff' stroke-width='2'/><line x1='48' y1='20' x2='65' y2='65' stroke='%23ffffff' stroke-width='2'/><line x1='48' y1='20' x2='15' y2='48' stroke='%23ffffff' stroke-width='2'/><line x1='82' y1='32' x2='65' y2='65' stroke='%23ffffff' stroke-width='2'/><line x1='15' y1='48' x2='25' y2='85' stroke='%23ffffff' stroke-width='2'/><line x1='15' y1='48' x2='65' y2='65' stroke='%23ffffff' stroke-width='2'/><circle cx='48' cy='20' r='16' fill='%23ffaaaa' stroke='%23ffffff' stroke-width='2'/><circle cx='82' cy='32' r='9' fill='%23aaddff' stroke='%23ffffff' stroke-width='2'/><circle cx='65' cy='65' r='12' fill='%23ffaaaa' stroke='%23ffffff' stroke-width='2'/><circle cx='15' cy='48' r='13' fill='%23aaddff' stroke='%23ffffff' stroke-width='2'/><circle cx='25' cy='85' r='8' fill='%23ffaaaa' stroke='%23ffffff' stroke-width='2'/></svg>" style="height:80px; vertical-align:middle; margin-right:10px;">Sociogram - Visualisatie-tool</header>
+	
+	<!-- Laden vanuit sessie (Netlify) -->
+	<div id="sessieLoader" style="background:#eaf4fb; border:1px solid #aed6f1; border-radius:8px; max-width:600px; margin:20px auto; padding:20px;">
+		<h3 style="margin-top:0; color:#2471a3;">📊 Laden vanuit vragenlijstsessie</h3>
+		<p style="margin:0 0 12px; font-size:14px; color:#555;">Vul het sessie-ID en beheertoken in om de antwoorden automatisch te laden. Je vindt deze gegevens op de beheerpagina.</p>
+		<div style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;">
+			<div>
+				<label style="display:block; font-size:13px; font-weight:bold; margin-bottom:4px;">Sessie-ID</label>
+				<input type="text" id="sessieIdInput" placeholder="bijv. a3f2c81e9d042b7f" style="width:200px; padding:6px 8px; border:1px solid #ccc; border-radius:4px; font-size:14px;">
+			</div>
+			<div>
+				<label style="display:block; font-size:13px; font-weight:bold; margin-bottom:4px;">Beheertoken</label>
+				<input type="text" id="sessieTokenInput" placeholder="beheertoken" style="width:280px; padding:6px 8px; border:1px solid #ccc; border-radius:4px; font-size:14px;">
+			</div>
+			<div>
+				<button onclick="laadVanuitSessie()" style="background-color:#2471a3; padding:8px 16px;">▶ Laden</button>
+			</div>
+		</div>
+		<div id="sessieLoaderStatus" style="margin-top:10px; font-size:13px; color:#555;"></div>
+		<div style="margin-top:10px;">
+			<label style="font-size:13px; font-weight:bold;">Vraag voor links:</label>
+			<select id="vraagSelectie" style="margin-left:8px; font-size:13px; padding:4px 8px; border-radius:4px; border:1px solid #ccc;">
+				<option value="">— laad eerst een sessie —</option>
+			</select>
+			<button onclick="bouwSociogramVanSessie()" id="bouwBtn" style="display:none; background-color:#27ae60; margin-left:8px;">🔨 Sociogram bouwen</button>
+		</div>
+	</div>
+
+	<div class="center">
+		<button onclick="document.getElementById('importFile').click()" style="align:center; background-color: #27ae60;">📁 Snel starten: Importeer sociogram-data</button>
+	</div>
+
+<div class="center" style="font-style:italic;">
+    <span style="background-color:#3498db; color:white; font-size:11px; font-weight:bold; padding:2px 6px; border-radius:3px; margin-right:6px; font-style:normal;">TIP!</span>Nog geen vragenlijst verstuurd? Maak een sessie aan via <a href="/beheer.html" target="_blank">de beheerpagina</a>.
+</div>
+
+
+	
+    <!-- Step 1: Number of Students -->
+    <div id="numOfPupilsForm" class="center">
+        Stap 1: Voer het aantal leerlingen in (1-50):
+        <br><br>
+        <input id="numOfRows" type="number" min="1" max="50" style="height:30px; text-align:center; font-size:18px">
+    </div>
+    
+    <!-- Step 2: Student Details -->
+    <div id="namesForm" class="center" style="display: none">
+        Stap 2: Voer de namen, geslachten en gefingeerde namen in
+        <br>
+        (je kunt deze gegevens copy-pasten vanuit Excel):
+        
+        <table id="myTable1d" border="0" cellspacing="2px" style='width:538px'>
+            <thead>
+                <tr>
+                    <th style='width:20px'>Id</th>
+                    <th style='width:200px'>Naam</th>
+                    <th style='width:80px'>Geslacht (M/V/X)</th>
+                    <th style='width:200px'>Gefingeerde naam (optioneel)</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+<button onclick="maakTabel1Leeg()" style="background-color:#e74c3c;">Tabel leegmaken</button>
+        
+		<button onclick="createSociomatrix();">Genereer sociomatrix</button>
+    </div>
+    
+    <!-- Step 3: Relations Matrix -->
+    <div id="SocioMatrixForm" class="center" style="display: none">
+        Stap 3: Voer de relatiesterktes in (als getal van 0 tot 10, of gewoon als 0/1)
+        <br>
+        (ook hier kun je gegevens copy-pasten):
+	    
+		        <div class="center">
+				
+        <table id="myTable2d" border="0" cellspacing="2px" style="width:750px">
+            <thead>
+                <tr>
+                    <th style='width:20px'>Id</th>
+                    <th style='width:fit-content'>Naam</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+		
+		</div>
+
+<button onclick="maakTabel2Leeg()" style="background-color:#e74c3c;">Tabel leegmaken</button>
+        <button onclick="createSociogram()">Genereer sociogram</button>
+    </div>
+    
+    <!-- Step 4: Sociogram Visualization -->
+    <div id="SociogramControls" class="controls-section">
+        <div class="center">
+            <h3>Besturing:</h3>
+            Sleep leerlingen om ze te verplaatsen tijdens de simulatie. Of pauzeer de simulatie eerst om leerlingen vrij te kunnen slepen.
+            <br><br>
+            <button onclick="pauseSimulation()">Simulatie pauzeren</button>
+            <button onclick="resumeSimulation()">Simulatie hervatten</button>
+            <button onclick="randomisePositions()">Posities randomiseren</button>			
+			
+    <br><br>
+    <h3>Opslaan en laden:</h3>
+    <button onclick="exportSociogramData()">Exporteer sociogram-data</button>
+    <button onclick="document.getElementById('importFile').click()">Importeer sociogram-data</button>
+    <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importSociogramData(event)">
+            <button id="savepicture">Opslaan als afbeelding</button>
+<!--			<button onclick="exportData()" style="text-align:center">Sociogram exporteren</button>
+			<button onclick="document.getElementById('importFile').click()" style="text-align:center">Sociogram importeren</button>	
+!-->
+		
+        </div>
+        <br>
+        
+        <canvas id="canvas" style="display: none"></canvas>
+        <div id="sociogram"></div>
+        
+        <div id="StyleSettings" class="style-settings">
+			<br><br>
+			
+			<div class="row">
+				<div class="column">
+
+					<h3>Opmaak-instellingen:</h3>
+					<input type="checkbox" id="fakeNameCheck"> Gefingeerde namen gebruiken<br>
+					<input type="checkbox" id="margshapeCheck" checked> Marginalen als vierkanten<br>
+					<input type="checkbox" id="nodeColorCheck" checked> Kleur afhankelijk van geslacht<br>
+					<input type="checkbox" id="myCheck" checked> Wederzijdse keuzes in rood<br>
+					<input type="checkbox" id="nodeSizeCheck" checked> Grootte afhankelijk van aantal keer gekozen<br>
+					<input type="checkbox" id="linkSizeCheck" checked> Lijndikte afhankelijk van gewicht<br>
+					<input type="checkbox" id="shadowCheck"> Schaduw-effect<br>
+					<input type="checkbox" id="numConnsInLabelCheck"> Aantal keer gekozen in label<br>
+					Jongens/meisjes:<br>
+					<input type="radio" id="boysgirlsBoth" name="selectionBoysGirls" value="boysgirlsBoth" checked onChange="updateVisualization()"> <label for="boysgirlsBoth">Jongens en meisjes</label><br>
+					<input type="radio" id="boysgirlsBoys" name="selectionBoysGirls" value="boysgirlsBoys" onChange="updateVisualization()"> <label for="boysgirlsBoys">Alleen de jongens</label><br>
+					<input type="radio" id="boysgirlsGirls" name="selectionBoysGirls" value="boysgirlsGirls" onChange="updateVisualization()"> <label for="boysgirlsGirls">Alleen de meisjes</label><br>
+				</div>
+				
+				<div class="column">
+					<h3>Geavanceerde instellingen:</h3>
+					<button onclick="resetAdvSettings()">Reset naar default-waarden</button>
+				<div>
+				
+				<label for="forceSlider">Many body force (default: -500):</label>
+				<br>
+				<input type="range" id="forceSlider" min="-800" max="800" step="1" value="-500" class="slider" oninput="updateValueForce(this.value)">
+				<span id="forceSliderValue">-500</span>
+				<br><br>
+				<label for="linkStrength">Link strength (default: 200):</label>
+				<br>
+				<input type="range" id="linkStrength" min="0" max="800" step="1" value="200" class="slider" oninput="updateValueLinkStrength(this.value)">
+				<span id="lsSliderValue">200</span>
+				<br><br>			
+				<label for="linkDistance">Link distance (default: 150):</label>
+				<br>
+				<input type="range" id="linkDistance" min="0" max="400" step="1" value="150" class="slider"  oninput="updateValueLinkDistance(this.value)">
+				<span id="ldSliderValue">150</span>				
+
+			</div>					
+			</div>
+			</div>		
+		
+        </div>
+
+    </div>
+    
+    <div id="bottomtext" class="center">
+		<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        Deze tool is ontwikkeld door Gerben de Klerk, en is vrij te gebruiken en te distribueren.
+        <br>
+        Als je vragen of suggesties hebt, neem dan contact op via gerbendeklerk[at]yahoo.com.
+    </div>
+
+
+    <script>
+// Global variables
+var simulation;
+var paused = false;
+var nodes_data_temp = [];
+var links_temp = [];
+var selectedNode = null;
+var selectedLink = null;
+var randomised = false;
+
+const version = "3.0";
+
+var node, link, text;
+
+    function updateValueForce(value) {
+      document.getElementById('forceSliderValue').textContent = value;
+	  			//var value = document.getElementById("linkDistance");
+				console.log("Force was set to: " + value);
+	  updateVisualization();
+    }
+
+    function updateValueLinkDistance(value) {
+      document.getElementById('ldSliderValue').textContent = value;
+	  			//var value = document.getElementById("linkDistance");
+				console.log("Link distance was set to: " + value);
+	  updateVisualization();
+    }
+	
+	    function updateValueLinkStrength(value) {
+			document.getElementById('lsSliderValue').textContent = value;
+	  			//var value = document.getElementById("linkStrength");
+				console.log("Link strength was set to: " + value);
+	  updateVisualization();
+    }
+	
+	function resetAdvSettings() {
+				document.getElementById('forceSliderValue').textContent = -500;
+				document.getElementById('forceSlider').value = -500;
+				document.getElementById('lsSliderValue').textContent = 200;
+				document.getElementById('linkStrength').value = 200;
+				document.getElementById('ldSliderValue').textContent = 150;
+				document.getElementById('linkDistance').value = 150;
+
+				updateVisualization();
+				console.log("Advanced settings were reset to default values");				
+	}
+
+// Event listeners
+$(document).ready(function() {
+    $('.inputs').keydown(function (e) {
+        if (e.which === 13) {
+            var index = $('.inputs').index(this) + 1;
+            $('.inputs').eq(index).focus();
+        }
+    });
+    
+    var input = document.getElementById("numOfRows");
+    input.addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            createTable1d();
+        }
+    });
+    
+    document.getElementById('myTable1d').style.display = 'none';
+    document.getElementById('myTable2d').style.display = 'none';
+    
+    // Copy-paste functionality
+$('table').on('paste', 'input', function(e){
+    var $this = $(this);
+    $.each(e.originalEvent.clipboardData.items, function(i, v){
+        if (v.type === 'text/plain'){
+            v.getAsString(function(text){
+                var x = $this.closest('td').index();
+                var y = $this.closest('tr').index();
+                var tabel = $this.closest('table');
+
+                // Ondersteun zowel \r\n (Windows) als \n (Mac/Google Sheets)
+                text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+                // Verwijder trailing newline
+                text = text.replace(/\n$/, '');
+
+                var regels = text.split('\n');
+
+                $.each(regels, function(i2, regel){
+                    var cellen = regel.split('\t');
+                    $.each(cellen, function(i3, waarde){
+                        var rij = y + i2;
+                        var col = x + i3;
+                        var input = tabel.find('tr:eq(' + rij + ') td:eq(' + col + ') input');
+                        // Sla disabled cellen (diagonaal) over
+                        if (input.length && !input.prop('readonly')) {
+                            input.val(waarde);
+                        }
+                    });
+                });
+            });
+        }
+    });
+    return false;
+});
+    
+    // Hide context menu when clicking elsewhere
+    $(document).click(function() {
+        hideContextMenu();
+    });
+});
+
+// Context menu functions
+function showNodeContextMenu(x, y, node) {
+    hideContextMenu();
+    
+    var menu = $(`
+        <div class="context-menu" id="nodeContextMenu" style="left: ${x}px; top: ${y}px;">
+            <button class="context-menu-item edit" onclick="editNodeName(${node.id})">
+                Naam wijzigen
+            </button>
+            <div class="context-menu-separator"></div>
+            <button class="context-menu-item delete" onclick="deleteNode(${node.id})">
+                Leerling verwijderen
+            </button>
+        </div>
+    `);
+    
+    $('body').append(menu);
+    
+    // Positionering binnen scherm
+    var menuElement = menu[0];
+    var rect = menuElement.getBoundingClientRect();
+    
+    if (rect.right > window.innerWidth) {
+        menu.css('left', (x - rect.width) + 'px');
+    }
+    if (rect.bottom > window.innerHeight) {
+        menu.css('top', (y - rect.height) + 'px');
+    }
+}
+
+function showLinkContextMenu(x, y, link) {
+    hideContextMenu();
+    
+    var sourceName = link.source.label || 'Leerling';
+    var targetName = link.target.label || 'Leerling';
+    
+    var menu = $(`
+        <div class="context-menu" id="linkContextMenu" style="left: ${x}px; top: ${y}px;">
+            <div style="padding: 4px 20px; color: #666; font-size: 12px; border-bottom: 1px solid #eee; font-weight: bold;">
+                ${sourceName} → ${targetName}
+            </div>
+            <button class="context-menu-item delete" onclick="deleteLink(${link.source.id}, ${link.target.id})">
+                Verbinding verwijderen
+            </button>
+        </div>
+    `);
+    
+    $('body').append(menu);
+    
+    // Positionering binnen scherm
+    var menuElement = menu[0];
+    var rect = menuElement.getBoundingClientRect();
+    
+    if (rect.right > window.innerWidth) {
+        menu.css('left', (x - rect.width) + 'px');
+    }
+    if (rect.bottom > window.innerHeight) {
+        menu.css('top', (y - rect.height) + 'px');
+    }
+}
+
+function hideContextMenu() {
+    $('.context-menu').remove();
+    selectedNode = null;
+    selectedLink = null;
+    // Remove selection highlights
+    d3.selectAll('.node-selected').classed('node-selected', false);
+    d3.selectAll('.link-selected').classed('link-selected', false);
+}
+
+function editNodeName(nodeId) {
+    var node = nodes_data_temp.find(n => n.id === nodeId);
+    if (!node) return;
+    
+    var newName = prompt("Nieuwe naam:", node.label);
+    if (newName && newName.trim()) {
+        node.label = newName.trim();
+        // Update visualization
+        updateVisualization();
+		// Update table:
+		var name_cell = document.getElementById("myTable2d").rows[node.id].cells[1];
+		name_cell.innerHTML = newName;
+		var name_cell_vertical = document.getElementById("myTable2d").rows[0].cells[node.id + 1];
+		name_cell.innerHTML = newName;		
+    }
+    hideContextMenu();
+}
+
+function deleteNode(nodeId) {
+    if (!confirm("Weet je zeker dat je deze leerling wilt verwijderen?")) {
+        return;
+    }
+    
+    // Remove node from array
+    nodes_data_temp = nodes_data_temp.filter(n => n.id !== nodeId);
+    
+    // Remove all links connected to this node
+    links_temp = links_temp.filter(l => l.source !== nodeId && l.target !== nodeId);
+    
+    // Update visualization
+    updateVisualization();
+    hideContextMenu();
+}
+
+function deleteLink(sourceId, targetId) {
+    if (!confirm("Weet je zeker dat je deze verbinding wilt verwijderen?")) {
+        return;
+    }
+    
+    // Remove link from array
+    links_temp = links_temp.filter(l => 
+        !((l.source.id || l.source) === sourceId && (l.target.id || l.target) === targetId)
+    );
+    
+    // Update visualization
+    updateVisualization();
+    hideContextMenu();
+}
+
+
+function updateVisualization() {
+    // Clear and recreate the sociogram
+    document.getElementById('sociogram').innerHTML = '';
+
+    console.log("Updating the visualization...");
+    
+    // Set up the SVG container
+    const width = 800;
+    const height = 600;
+    const svg = d3.select("#sociogram")
+        .append("svg")
+        .attr("id", "svg_sociogram")
+        .attr("width", width)
+        .attr("height", height);
+
+    svg.append("rect")
+        .attr('x', 2)
+        .attr('y', 2)
+        .attr('width', width - 4)
+        .attr('height', height - 4)
+        .style("fill", 'white')
+        .style("stroke", 'black')
+        .style("stroke-width", 2);
+
+    svg.append("text")
+        .attr('x', width - 8)
+        .attr('y', height - 28)
+        .attr('text-anchor', 'end')
+        .attr('font-size', 14)
+        .attr('font-family', 'Arial')
+        .attr('fill', '#aaaaaa')
+        .text('🄯 GdK 2026');
+
+    svg.append("text")
+        .attr('x', width - 8)
+        .attr('y', height - 10)
+        .attr('text-anchor', 'end')
+        .attr('font-size', 14)
+        .attr('font-family', 'Arial')
+        .attr('fill', '#aaaaaa')
+        .text('v' + version);
+        
+    // Arrow markers
+    svg.append("svg:defs").append("svg:marker")
+        .attr("id", "arrow")
+        .attr("markerUnits", "userSpaceOnUse")
+        .attr("viewBox", "0 -5 10 10")
+        .attr('refX', 35)
+        .attr("markerWidth", 12)
+        .attr("markerHeight", 12)
+        .attr("orient", "auto")
+        .append("svg:path")
+        .style("fill", 'black')
+        .attr("d", "M0,-5L10,0L0,5");
+        
+    svg.append("svg:defs").append("svg:marker")
+        .attr("id", "arrowred")
+        .attr("markerUnits", "userSpaceOnUse")
+        .attr("viewBox", "0 -5 10 10")
+        .attr('refX', 35)
+        .attr("markerWidth", 12)
+        .attr("markerHeight", 12)
+        .attr("orient", "auto")
+        .append("svg:path")
+        .style("fill", 'red')
+        .attr("d", "M0,-5L10,0L0,5");
+
+
+	console.log("Temporary node data: ")
+	console.log(nodes_data_temp);
+	console.log("Temporary link data: ")
+	console.log(links_temp);
+
+    var nodes_data_boys = nodes_data_temp.filter(node => node.sex === "M");
+	console.log("Node data boys only:")
+	console.log(nodes_data_boys);
+
+    var nodes_data_girls = nodes_data_temp.filter(node => node.sex === "V");
+	console.log("Node data girls only:")
+	console.log(nodes_data_girls);
+
+	function findSexByID(id) {
+		return nodes_data_temp.find(node => node.id === id).sex
+	}
+
+function getSex(nodeOrId) {
+    if (typeof nodeOrId === "object") return nodeOrId.sex;
+    var found = nodes_data_temp.find(function(n) { return n.id === nodeOrId; });
+    return found ? found.sex : "";
+}
+
+function isBoyBoyLink(link) {
+    return getSex(link.source) === "M" && getSex(link.target) === "M";
+}
+
+function isGirlGirlLink(link) {
+    return getSex(link.source) === "V" && getSex(link.target) === "V";
+}
+
+	console.log("Link data boys only:")
+    var links_data_boys = links_temp.filter(isBoyBoyLink);
+	console.log(links_data_boys);
+
+	console.log("Link data girls only:")
+    var links_data_girls = links_temp.filter(isGirlGirlLink);
+	console.log(links_data_girls);
+
+	var selection = document.querySelector('input[name="selectionBoysGirls"]:checked').value;
+	console.log("Selection:");
+	console.log(selection);
+
+	if (selection == "boysgirlsBoys") {
+		var nodes_data = nodes_data_boys;
+		var links_data = links_data_boys;
+	}
+	else if (selection == "boysgirlsGirls") {
+		var nodes_data = nodes_data_girls;
+		var links_data = links_data_girls;
+	}
+	else {
+		var nodes_data = nodes_data_temp;
+		var links_data = links_temp;
+	}
+
+	console.log("Final nodes data: ")
+	console.log(nodes_data);
+	console.log("Final links data: ")
+	console.log(links_data);
+
+    // Position nodes in circle
+    function on_circle(node) {
+        var angle = 360 / 30 * Math.PI / 180;
+        var radius = 300;
+        if (node.x == null) { node.x = radius * Math.cos(angle * node.id); }
+        if (node.y == null) { node.y = radius * Math.sin(angle * node.id); }
+    }
+	
+	function randompos(node) {
+		node.x = Math.random() * width; 
+		node.y = Math.random() * height;	
+		
+	}
+
+	if (randomised) {
+		nodes_data.map(randompos);		
+		randomised = false;
+	}
+	else
+	{
+		nodes_data.map(on_circle);
+	}
+
+
+    // Drag behavior
+    var dragDrop = d3.drag()
+        .on('start', function (node) {
+            if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+            node.fx = node.x;
+            node.fy = node.y;
+            
+            d3.select(this).attr("stroke", "black")
+                .style("stroke-dasharray", '5,5');
+                
+            if (paused) {
+                fix_nodes(node);
+            } else {
+                unfix_nodes(node);
+            }
+        })
+        .on('drag', function (node) {
+            simulation.alphaTarget(0.2).restart();
+            node.fx = d3.event.x;
+            node.fy = d3.event.y;
+			
+			node.x = d3.event.x;  // ? Voeg dit toe
+			node.y = d3.event.y;  // ? Voeg dit toe
+
+			
+            
+            if (paused) {
+                fix_nodes(node);
+            } else {
+                unfix_nodes(node);
+            }
+			simulation.tick();
+        })
+        .on('end', function (node) {
+            if (!d3.event.active) {
+                // simulation.alphaTarget(0.0)
+            }
+            
+            if (paused) {
+                node.fx = node.x;
+                node.fy = node.y;
+            } else {
+                node.fx = null;
+                node.fy = null;
+            }
+
+            simulation.alphaTarget(0.0).restart();
+	    simulation.tick();
+            
+            d3.select(this).attr("stroke", "black")
+                .style("stroke-dasharray", 'none');
+        });
+
+    // Set up the simulation
+		    var ls = document.getElementById('linkStrength').value;
+	    var ld = document.getElementById('linkDistance').value;	
+			    var ff = document.getElementById('forceSlider').value;	
+	
+    simulation = d3.forceSimulation()
+    .nodes(nodes_data)
+    .alphaDecay(0.02);  // iets langzamer afkoelen voor betere resultaten
+
+
+		
+	console.log("Simulation settings changed to: charge = " + ff + "; link strength = " + ls + "; link distance = " + ld);
+
+	simulation
+    .force("charge", d3.forceManyBody().strength(ff))
+    .force("center", d3.forceCenter(width / 2, height / 2))
+//  .force("link",   d3.forceLink(links_data.slice())
+//                     .id(function(d) { return d.id; })
+//                     .strength(ls / 200)   // normaliseer: slider gaat 0-800, D3 verwacht 0-1
+//              .distance(ld))
+//    .force("link", d3.forceLink(links_data).id(d => d.id).strength(ls))
+//    .force("link", d3.forceLink(links_data).distance(ld))
+
+     .force("link", d3.forceLink(links_data).id(d => d.id).strength(ls / 600).distance(ld))
+
+    .force("x", d3.forceX(width / 2))
+    .force("y", d3.forceY(height / 2));
+
+    // Draw links
+     link = svg.append("g")
+        .attr("class", "links")
+        .selectAll("line")
+        .data(links_data)
+        .enter()
+        .append("line")
+        //.on("contextmenu", function(d) {
+        //    d3.event.preventDefault();
+        //    selectedLink = d;
+        //    d3.select(this).classed('link-selected', true);
+        //    showLinkContextMenu(d3.event.pageX, d3.event.pageY, d);
+        //})
+        .style("cursor", "pointer");
+
+    // Draw nodes
+     node = svg.append("g")
+        .attr("class", "nodes")
+        .selectAll("rect")
+        .data(nodes_data)
+        .enter()
+        .append("rect")
+        //.on("contextmenu", function(d) {
+        //    d3.event.preventDefault();
+        //    selectedNode = d;
+        //    d3.select(this).classed('node-selected', true);
+        //    showNodeContextMenu(d3.event.pageX, d3.event.pageY, d);
+        //});
+		.call(dragDrop);
+
+    // Show names as text
+     text = svg.append("g")
+        .attr("class", "text")
+        .selectAll("text")
+        .data(nodes_data, function (node) { return node.id })
+        .enter()
+        .append("text")
+        .attr('text', function (node) { return node.label })
+        .attr('font-size', 12)
+        .attr('dy', 5)
+        .attr('font-family', 'Arial')
+        .attr('text-anchor', 'middle')
+        .attr('fill', 'black');
+
+    // Tick function
+    simulation.on("tick", tickActions);
+	
+    var link_force = d3.forceLink(links_data).id(function(d) { return d.id; });
+    simulation.force("links", link_force);
+    
+    // Helper functions (same as before)
+    function getNodeSize(node) {
+        var connections = numOfConnections(node);
+        if (document.getElementById("nodeSizeCheck").checked === true) {
+            return Math.min(20 + 7.5 * connections, 60);
+        } else {
+            if (document.getElementById("margshapeCheck").checked === true && connections === 0) {
+                return 20;
+            } else {
+                return 40;
+            }
+        }
+    }
+
+    function getMarkerSymbol(link) {
+        if (document.getElementById("myCheck").checked) {
+            return issym(link) ? '' : 'url(#arrow)';
+        } else {
+            return 'url(#arrow)';
+        }
+    }
+    
+    function getLinkSize(link) {
+
+	factor = issym(link) ? 2 : 1;
+
+        if (document.getElementById("linkSizeCheck").checked) {
+            return (link.strength + 1) * factor;
+        } else {
+            return 2 * factor;
+        }
+    }
+
+    function getNodeColor(node) {
+        if (document.getElementById("nodeColorCheck").checked) {
+            return node.sex === 'M' ? 'lightblue' : (node.sex === 'V' ? 'pink' : 'darkseagreen');
+        } else {
+            return 'lightgrey';
+        }
+    }
+        
+    function issym(link) {
+        const reverselink = links_data.filter(l => l.target.id === link.source.id && l.source.id === link.target.id);
+        return reverselink.length;
+    }
+
+    function getLinkColor(link) {
+        if (document.getElementById("myCheck").checked) {
+            return issym(link) ? 'red' : 'black';
+        } else {
+            return 'black';
+        }
+    }
+    
+    function numOfConnections(node) {
+        var connections = links_data.filter(function(l) {
+            return l.target.id === node.id;
+        });
+        return connections.length;
+    }
+    
+    function getNodeLabelText(node) {
+        var name_label;
+        if (document.getElementById("fakeNameCheck").checked) {
+            name_label = node.label_fake;
+        } else {
+            name_label = node.label;
+        }
+        
+        var conn_label;
+        if (document.getElementById("numConnsInLabelCheck").checked) {
+            conn_label = " (" + numOfConnections(node) + ")";
+        } else {
+            conn_label = "";
+        }
+        
+        return name_label + conn_label;
+    }
+
+    function unfix_nodes(this_node) {
+        node.each(function(d) {
+            if (this_node != d) {
+                d.fx = null;
+                d.fy = null;
+            }
+        });
+    }
+
+    function fix_nodes(this_node) {
+        node.each(function(d) {
+            if (this_node != d) {
+                d.fx = d.x;
+                d.fy = d.y;
+            }
+        });
+    }
+    
+    function getShadowEffect() {
+        if (document.getElementById("shadowCheck").checked === true) {
+            return "drop-shadow(3px 3px 2px rgb(0 0 0 / 0.4))";
+        } else {
+            return "";
+        }
+    }
+                
+    function tickActions() {
+	
+	console.log("paused status: " + paused);
+	    if (paused) {
+        simulation.stop();
+		//simulation.alpha(0);
+    } else {
+//        simulation.restart();
+    }
+
+		var marge = 0;
+
+        node
+            .attr("cx", function(d) {
+                var radius = getNodeSize(d);
+                d.x = Math.max(radius + marge, Math.min(width - radius - marge, d.x));
+                return Math.max(radius + marge, Math.min(width - radius - marge, d.x));
+            })
+            .attr("cy", function(d) {
+                var radius = getNodeSize(d);
+                d.y = Math.max(radius + marge, Math.min(height - radius - marge, d.y));
+                return Math.max(radius + marge, Math.min(height - radius - marge, d.y));
+            })
+			
+			.attr("rx", function (d) { var n = numOfConnections(d); if (document.getElementById("margshapeCheck").checked === true && n===0) { return 0 } else {	return getNodeSize(d); } } )
+			.attr("ry", function (d) { var n = numOfConnections(d); if (document.getElementById("margshapeCheck").checked === true && n===0) { return 0 } else {	return getNodeSize(d); } } )			
+
+			.attr("x", function(d) { var radius = getNodeSize(d); d.x = Math.max(radius + marge, Math.min(width - radius - marge, d.x)); return Math.max(radius + marge, Math.min(width - radius - marge, d.x)) - radius / 2; })			
+			.attr("y", function(d) { var radius = getNodeSize(d); d.y = Math.max(radius + marge, Math.min(height - radius - marge, d.y)); return Math.max(radius + marge, Math.min(height - radius - marge, d.y)) - radius / 2; })			
+
+			.attr("height", function(d) { return getNodeSize(d); })
+			.attr("width", function(d) { return getNodeSize(d); })					
+
+			
+            .attr('r', function (d) { return getNodeSize(d) / 2; })
+            .attr('fill', function (node) { return getNodeColor(node); })
+            .attr('stroke', 'black')
+            //.call(dragDrop)
+            .on("mouseover", function() {
+                d3.select(this).attr("stroke", "black")
+                    .style("stroke-dasharray", ("5, 5"))
+                    .style("cursor", "pointer");
+            })
+            .on("mouseout", function() {
+                if (!d3.select(this).classed('node-selected')) {
+                    d3.select(this).attr("stroke", "black")
+                        .style("stroke-dasharray", 'none')
+                        .style("cursor", "default");
+                }
+            })
+            .attr("filter", getShadowEffect());
+
+        link
+            .attr("x1", function(d) { return d.source.x; })
+            .attr("y1", function(d) { return d.source.y; })
+            .attr("x2", function(d) { return d.target.x; })
+            .attr("y2", function(d) { return d.target.y; })
+            .attr('stroke-width', function (link) { return getLinkSize(link); })
+            .attr('stroke', function (link) { return getLinkColor(link); })
+            .attr('marker-end', function (link) { return getMarkerSymbol(link); })
+            .attr("filter", getShadowEffect());
+          
+        text
+            .text(function (node) { return getNodeLabelText(node); })
+            .attr('x', function (node) { return node.x; })
+            .attr('y', function (node) { return node.y; });
+    }
+}
+
+// Voeg de rest van de originele functies toe...
+// (createTable1d, createSociomatrix, etc. blijven hetzelfde)
+
+// Save functionality
+const btn = document.getElementById("savepicture");
+btn.addEventListener('click', function () {
+    const svgNode = document.querySelector('svg');
+    const svgString = (new XMLSerializer()).serializeToString(svgNode);
+    const svgBlob = new Blob([svgString], {
+        type: 'image/svg+xml;charset=utf-8'
+    });
+
+    const DOMURL = window.URL || window.webkitURL || window;
+    const url = DOMURL.createObjectURL(svgBlob);
+
+    const image = new Image();
+    image.width = svgNode.width.baseVal.value;
+    image.height = svgNode.height.baseVal.value;
+    image.src = url;
+    image.onload = function () {
+        const canvas = document.getElementById('canvas');
+        canvas.width = image.width;
+        canvas.height = image.height;
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(image, 0, 0);
+        DOMURL.revokeObjectURL(url);
+
+        const imgURI = canvas
+            .toDataURL('image/png')
+            .replace('image/png', 'image/octet-stream');
+        triggerDownload(imgURI);
+    };
+	
+
+});
+
+function triggerDownload(imgURI) {
+    const a = document.createElement('a');
+	
+	       var now = new Date();
+        var dateString = now.getFullYear() + '-' + 
+                        String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                        String(now.getDate()).padStart(2, '0') + '_' +
+                        String(now.getHours()).padStart(2, '0') + '-' +
+                        String(now.getMinutes()).padStart(2, '0');
+        
+        var filename = 'Sociogram afbeelding ' + dateString + '.png';
+		
+    a.download = filename;
+    a.target = '_blank';
+    a.href = imgURI;
+    a.dispatchEvent(new MouseEvent('click', {
+        view: window,
+        bubbles: false,
+        cancelable: true
+    }));
+	
+		alert("Afbeelding succesvol opgeslagen als:\n" + filename);
+}
+
+// Data structures
+function Node(id, label, sex, label_fake) {
+    this.id = id;
+    this.label = label;
+    this.sex = sex;
+    this.label_fake = label_fake;
+}
+
+function Link(source, target, strength) {
+    this.source = source;
+    this.target = target;
+    this.strength = strength;
+}
+
+// Simulation control
+function pauseSimulation() {
+
+   if (paused === false) {
+        paused = true;
+        if (simulation) {
+            //simulation.stop(); // Stop de simulatie, maar laat tick werken
+        }
+    }
+}
+
+function resumeSimulation() {
+	
+    if (paused === true) {
+       paused = false;
+      if (simulation) {
+            simulation.alpha(0.1).restart(); // Herstart normaal
+			            simulation.tick();
+       }
+    }
+}
+
+
+// Randomise positions of nodes
+function randomisePositions () {
+
+    if (!nodes_data_temp || nodes_data_temp.length === 0) {
+        alert("Maak eerst een sociogram voordat je posities randomiseert.");
+        return;
+    }
+    
+    // Zet alle nodes op random posities
+    nodes_data_temp.forEach(function(node) {
+        node.x = Math.random() * 800; // width
+        node.y = Math.random() * 600; // height
+        
+        // Als de simulatie gepauzeerd is, zet ook de fixed posities
+        if (paused) {
+            node.fx = node.x;
+            node.fy = node.y;
+        }
+    });
+    
+    // Restart de simulatie kort om de nieuwe posities te laten zien
+    if (simulation) {
+        simulation.alpha(0.2).restart();
+        
+        // Als het gepauzeerd was, stop het weer na een korte tijd
+        if (paused) {
+            setTimeout(function() {
+                simulation.stop();
+            }, 100);
+        }
+    }
+}
+
+// Utility functions
+function DeleteRows(table) {
+    var rowCount = table.rows.length;
+    for (var i = rowCount - 1; i > 0; i--) {
+        table.deleteRow(i);
+    }
+}
+
+// Step 1: Create student table
+function createTable1d() {
+    document.getElementById('namesForm').style.display = 'block';
+    document.getElementById('SocioMatrixForm').style.display = 'none';
+    document.getElementById('myTable2d').style.display = 'none';
+
+    var rn = document.getElementById("numOfRows").value;
+    
+    DeleteRows(document.getElementById('myTable1d'));
+    
+    for(var r = 0; r < rn; r++) {
+        var newrow = document.getElementById('myTable1d').insertRow(r + 1);
+        
+        var Id_col = newrow.insertCell(0);
+        Id_col.innerHTML = r + 1;
+        Id_col.style.width = '20px';
+        
+        var Name_col = newrow.insertCell(1);
+        Name_col.innerHTML = "<input type='text' style='width:200px'>";
+        
+        var Gender_col = newrow.insertCell(2);
+        Gender_col.innerHTML = "<input type='text' style='width:100%'>";
+
+        var FictitiousName_col = newrow.insertCell(3);
+        FictitiousName_col.innerHTML = "<input type='text' style='width:200px'>";
+    }
+    document.getElementById('myTable1d').style.display = 'block';
+}
+
+// Step 2: Create relation matrix
+function createSociomatrix() {
+    console.log("createSociomatrix called");
+
+// Sla huidige matrixwaarden op
+    var savedValues = {};
+    var existingRows = document.getElementById('myTable2d').rows;
+    for (var sr = 1; sr < existingRows.length; sr++) {
+        for (var sc = 2; sc < existingRows[sr].cells.length; sc++) {
+            var inp = existingRows[sr].cells[sc].getElementsByTagName('input')[0];
+            if (inp && !inp.disabled && inp.value) {
+                savedValues[sr + '-' + sc] = inp.value;
+            }
+        }
+    }
+    
+    document.getElementById('myTable1d').style.display = 'block';
+   
+	var num_of_header_cells = document.getElementById("myTable2d").rows[0].cells.length;
+	
+	var rn = document.getElementById("numOfRows").value;
+	var tablewidth = rn * 25.5 + 70;
+	
+	document.getElementById('myTable2d').style.width = tablewidth + 'px';	
+//	document.getElementById('myTable2d').style.width = 'auto';		
+
+    for(var c = num_of_header_cells - 1; c > 1; c--) {
+        document.getElementById('myTable2d').rows[0].deleteCell(c);
+    }
+        
+    var rn = parseInt(document.getElementById("numOfRows").value);
+    console.log("Number of rows:", rn);
+    
+    if (!rn || rn <= 0) {
+        alert("Geen geldig aantal leerlingen gevonden!");
+        return;
+    }
+    
+    DeleteRows(document.getElementById('myTable2d'));
+    
+    var headerrow = document.getElementById('myTable2d').tHead.children[0];
+    
+    nodes_data_temp = [];
+
+    for(var r = 0; r < rn; r++) {
+        console.log("Processing row:", r);
+        
+        var newrow = document.getElementById('myTable2d').insertRow(r + 1);
+        
+        var Id_col = newrow.insertCell(0);
+        Id_col.innerHTML = r + 1;
+
+        var Name_col = newrow.insertCell(1);
+        
+        var studentRow = document.getElementById('myTable1d').rows[r + 1];
+        if (!studentRow) {
+            console.error("Student row not found for index:", r + 1);
+            continue;
+        }
+        
+        var nameCell = studentRow.cells[1];
+        if (!nameCell || !nameCell.children[0]) {
+            console.error("Name cell or input not found for row:", r + 1);
+            continue;
+        }
+        
+        var studentName = nameCell.children[0].value || "Leerling " + (r + 1);
+        Name_col.innerHTML = "<style='width:fit-content;>" + studentName;
+        
+        var fakeName = "";
+        var sex = "";
+        
+        if (studentRow.cells[3] && studentRow.cells[3].children[0]) {
+            fakeName = studentRow.cells[3].children[0].value || "";
+        } else {
+            fakeName = "";
+        }
+        
+        if (studentRow.cells[2] && studentRow.cells[2].children[0]) {
+            sex = studentRow.cells[2].children[0].value || "";
+        } else {
+            sex = "";
+        }
+        
+        console.log("Creating node:", {id: r + 1, name: studentName, sex: sex, fakeName: fakeName});
+        
+        var new_element = new Node(r + 1, studentName, sex, fakeName);
+        nodes_data_temp.push(new_element);
+
+        for(var c = 0; c < rn; c++) {
+            var strength_cell = newrow.insertCell(c + 2);
+            
+            if (r == c) {
+		strength_cell.innerHTML = "<input type='text' style='width:20px; text-align:center; background-color:darkgrey; cursor:default;' readonly>";
+            } else {
+                strength_cell.innerHTML = "<input type='text' style='width:20px; text-align:center'>";
+            }
+                        
+            if (r == 0) {
+                var th = document.createElement('th');
+                th.className = 'rotated';
+                
+                var headerStudentRow = document.getElementById('myTable1d').rows[c + 1];
+                var headerName = "Leerling " + (c + 1);
+                
+                if (headerStudentRow && headerStudentRow.cells[1] && headerStudentRow.cells[1].children[0]) {
+                    headerName = headerStudentRow.cells[1].children[0].value || headerName;
+                }
+                
+                th.innerHTML = headerName;
+                var header_cell = headerrow.appendChild(th);
+                header_cell.width = 20;
+            }
+        }
+    }
+    
+    console.log("nodes_data_temp:", nodes_data_temp);
+    
+    document.getElementById('SocioMatrixForm').style.display = 'block';
+    document.getElementById('myTable2d').style.display = 'block';
+
+// Herstel matrixwaarden
+    var newRows = document.getElementById('myTable2d').rows;
+    for (var tr = 1; tr < newRows.length; tr++) {
+        for (var tc = 2; tc < newRows[tr].cells.length; tc++) {
+            var key = tr + '-' + tc;
+            if (savedValues[key]) {
+                var cell = newRows[tr].cells[tc].getElementsByTagName('input')[0];
+                if (cell && !cell.disabled) {
+                    cell.value = savedValues[key];
+                }
+            }
+        }
+    }
+    
+    console.log("Matrix created successfully");
+}
+
+// Step 3: Create sociogram
+function createSociogram() {
+    document.getElementById('SociogramControls').style.display = 'block';
+    
+    var rn = parseInt(document.getElementById("numOfRows").value);
+    var coln = rn + 2;
+    
+    links_temp = [];
+
+    for (var r = 1; r <= rn; r++) {
+        var link_source_name = document.getElementById("myTable2d").rows[r].cells[1].innerHTML;
+        var link_source_id = r;
+
+        for(var c = 2; c < coln; c++) {
+            var link_target_name = document.getElementById("myTable2d").rows[0].cells[c].innerHTML;
+            var link_target_id = c - 1;
+            
+            var cell = parseInt(document.getElementById("myTable2d").rows[r].cells[c].getElementsByTagName('input')[0].value);
+
+            if (cell > 0) {
+                var new_link = new Link(link_source_id, link_target_id, cell);
+                links_temp.push(new_link);
+            }
+        }
+    }
+    
+    // Use the new updateVisualization function
+    updateVisualization();
+	
+	console.log("Sociogram data geïmporteerd:");
+	//alert("Sociogram data succesvol geïmporteerd!");
+}
+
+// Export/Import functionaliteit
+function exportSociogramData() {
+    try {
+        // Controleer of er data is om te exporteren
+        if (!nodes_data_temp || nodes_data_temp.length === 0) {
+            alert("Geen sociogram data om te exporteren. Maak eerst een sociogram.");
+            return;
+        }
+        
+        // Verzamel alle data
+        var exportData = {
+            metadata: {
+                exportDate: new Date().toISOString(),
+                version: version,
+                description: "Sociogram data export",
+                totalStudents: nodes_data_temp.length,
+                totalConnections: links_temp.length
+            },
+            settings: {
+                numOfStudents: document.getElementById("numOfRows").value,
+                styleSettings: {
+                    fakeNames: document.getElementById("fakeNameCheck").checked,
+                    marginalShape: document.getElementById("margshapeCheck").checked,
+                    nodeColor: document.getElementById("nodeColorCheck").checked,
+                    mutualConnections: document.getElementById("myCheck").checked,
+                    nodeSize: document.getElementById("nodeSizeCheck").checked,
+                    linkSize: document.getElementById("linkSizeCheck").checked,
+                    shadow: document.getElementById("shadowCheck").checked,
+                    connectionCount: document.getElementById("numConnsInLabelCheck").checked,
+		    boysGirlsSelection: document.querySelector('input[name="selectionBoysGirls"]:checked').value
+                },
+				
+				advanced: {
+					manybodyForce: document.getElementById("forceSlider").value,
+					linkForce: document.getElementById("linkStrength").value,
+					linkDistance: document.getElementById("linkDistance").value
+				}
+            },
+            students: nodes_data_temp.map(node => ({
+                id: node.id,
+                name: node.label,
+                gender: node.sex,
+                fakeName: node.label_fake,
+                    x: node.x || 0,
+                    y: node.y || 0
+//                    fx: node.fx || null, // Fixed x position (if dragged)
+//                    fy: node.fy || null  // Fixed y position (if dragged)
+            })),
+            connections: links_temp.map(link => ({
+                source: link.source.id || link.source,
+                target: link.target.id || link.target,
+                strength: link.strength
+            }))
+        };
+        
+        // Converteer naar JSON
+        var jsonString = JSON.stringify(exportData, null, 2);
+        
+        // Maak download bestand
+        var blob = new Blob([jsonString], { type: 'application/json' });
+        var url = URL.createObjectURL(blob);
+        
+        // Genereer bestandsnaam met datum
+        var now = new Date();
+        var dateString = now.getFullYear() + '-' + 
+                        String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                        String(now.getDate()).padStart(2, '0') + '_' +
+                        String(now.getHours()).padStart(2, '0') + '-' +
+                        String(now.getMinutes()).padStart(2, '0');
+        
+        var filename = 'Sociogram ' + dateString + '.json';
+        
+        // Trigger download
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        console.log("Sociogram-data geëxporteerd:", exportData);
+        alert("Sociogram-data succesvol geëxporteerd als:\n" + filename);
+        
+    } catch (error) {
+        console.error("Fout bij exporteren:", error);
+        alert("Er is een fout opgetreden bij het exporteren van de data.");
+    }
+}
+
+function importSociogramData(event) {
+    try {
+        var file = event.target.files[0];
+        if (!file) {
+            return;
+        }
+        
+        // Controleer bestandstype
+        if (!file.name.toLowerCase().endsWith('.json')) {
+            alert("Selecteer een geldig JSON bestand.");
+            return;
+        }
+        
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                var importData = JSON.parse(e.target.result);
+                
+                // Valideer data structuur
+                if (!validateImportData(importData)) {
+                    alert("Het geselecteerde bestand bevat geen geldige sociogram data.");
+                    return;
+                }
+                
+                // Laad de data
+                loadImportedData(importData);
+                
+            } catch (parseError) {
+                console.error("Fout bij parseren van JSON:", parseError);
+                alert("Het bestand kon niet gelezen worden. Controleer of het een geldig JSON bestand is.");
+            }
+        };
+        
+        reader.onerror = function() {
+            alert("Er is een fout opgetreden bij het lezen van het bestand.");
+        };
+        
+        reader.readAsText(file);
+        
+        // Reset file input
+        event.target.value = '';
+        
+    } catch (error) {
+        console.error("Fout bij importeren:", error);
+        alert("Er is een fout opgetreden bij het importeren van de data.");
+    }
+}
+
+function validateImportData(data) {
+    // Controleer of de data de juiste structuur heeft
+    if (!data || typeof data !== 'object') {
+        return false;
+    }
+    
+    // Controleer verplichte velden
+    if (!data.students || !Array.isArray(data.students)) {
+        return false;
+    }
+    
+    if (!data.connections || !Array.isArray(data.connections)) {
+        return false;
+    }
+    
+    // Controleer student data structuur
+    for (var i = 0; i < data.students.length; i++) {
+        var student = data.students[i];
+        if (!student.id || !student.name) {
+            return false;
+        }
+    }
+    
+    // Controleer connection data structuur
+    for (var j = 0; j < data.connections.length; j++) {
+        var connection = data.connections[j];
+        if (connection.source === undefined || connection.target === undefined) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+function loadImportedData(importData) {
+    try {
+        // Reset huidige data
+        nodes_data_temp = [];
+        links_temp = [];
+        
+        // Laad student data
+        importData.students.forEach(function(studentData) {
+            var node = new Node(
+                studentData.id,
+                studentData.name,
+                studentData.gender || '',
+                studentData.fakeName || '',
+            );
+            nodes_data_temp.push(node);
+			
+            // Herstel posities als beschikbaar (versie 1.1+)
+  
+                node.x = studentData.x || Math.random() * 800;
+                node.y = studentData.y || Math.random() * 600;
+//                node.fx = studentData.fx || null;
+//					node.fy = studentData.fy || null;
+                
+                console.log(`Restored position for ${node.label}: (${node.x}, ${node.y})`);
+ 		
+        });
+        
+        // Laad connection data
+        importData.connections.forEach(function(connectionData) {
+            var link = new Link(
+                connectionData.source,
+                connectionData.target,
+                connectionData.strength || 1
+            );
+            links_temp.push(link);
+        });
+        
+        // Update aantal studenten en rebuild stap 1
+        var numStudents = nodes_data_temp.length;
+        document.getElementById("numOfRows").value = numStudents;
+        
+        // Rebuild stap 1 tabel
+        rebuildStep1Table(numStudents);
+        
+        // Rebuild stap 2 tabel met student data
+        rebuildStep2Table(importData.students);
+        
+        // Rebuild stap 3 matrix met connection data
+        rebuildStep3Matrix(importData.students, importData.connections);
+        
+        // Laad style settings indien beschikbaar
+        if (importData.settings && importData.settings.styleSettings) {
+            var settings = importData.settings.styleSettings;
+            
+            document.getElementById("fakeNameCheck").checked = settings.fakeNames || false;
+            document.getElementById("margshapeCheck").checked = settings.marginalShape !== false;
+            document.getElementById("nodeColorCheck").checked = settings.nodeColor !== false;
+            document.getElementById("myCheck").checked = settings.mutualConnections !== false;
+            document.getElementById("nodeSizeCheck").checked = settings.nodeSize !== false;
+            document.getElementById("linkSizeCheck").checked = settings.linkSize !== false;
+            document.getElementById("shadowCheck").checked = settings.shadow || false;
+            document.getElementById("numConnsInLabelCheck").checked = settings.connectionCount || false;
+	    if (settings.boysGirlsSelection) {
+		    var radio = document.querySelector('input[name="selectionBoysGirls"][value="' + settings.boysGirlsSelection + '"]');
+		    if (radio) radio.checked = true;
+	    }
+	}
+		
+        // Laad advanced settings indien beschikbaar
+        if (importData.settings && importData.settings.advanced) {
+            var advanced = importData.settings.advanced;
+            
+            document.getElementById("forceSlider").value = advanced.manybodyForce || -500;
+            document.getElementById("linkStrength").value = advanced.linkForce || 200;
+			document.getElementById("linkDistance").value = advanced.linkDistance || 150;
+        }		
+		else {
+            document.getElementById("forceSlider").value = -500;
+            document.getElementById("linkStrength").value = 200;
+			document.getElementById("linkDistance").value = 150;		
+		}
+		
+		document.getElementById('forceSliderValue').textContent = document.getElementById("forceSlider").value;
+		document.getElementById('ldSliderValue').textContent = document.getElementById("linkStrength").value;
+		document.getElementById('lsSliderValue').textContent = document.getElementById("linkStrength").value;
+        
+        // Toon alle secties
+        document.getElementById('namesForm').style.display = 'block';
+        document.getElementById('SocioMatrixForm').style.display = 'block';
+        document.getElementById('SociogramControls').style.display = 'block';
+        
+        document.getElementById('myTable1d').style.display = 'block';
+        document.getElementById('myTable2d').style.display = 'block';
+        
+        // Update de visualisatie
+        updateVisualization();
+        
+        // Log import info
+        if (importData.metadata) {
+            console.log("Geïmporteerd bestand info:", {
+                exportDate: importData.metadata.exportDate,
+                version: importData.metadata.version,
+                totalStudents: importData.metadata.totalStudents,
+                totalConnections: importData.metadata.totalConnections
+            });
+        }
+        
+        console.log("Alle tabellen en visualisatie bijgewerkt na import");
+        
+    } catch (error) {
+        console.error("Fout bij laden van geïmporteerde data:", error);
+        alert("Er is een fout opgetreden bij het laden van de geïmporteerde data.");
+    }
+}
+
+// Helper functie om stap 1 tabel te rebuilden
+function rebuildStep1Table(numStudents) {
+    console.log("Rebuilding step 1 table with", numStudents, "students");
+    
+    // Clear existing table
+    DeleteRows(document.getElementById('myTable1d'));
+    
+    // Rebuild table structure
+    for(var r = 0; r < numStudents; r++) {
+        var newrow = document.getElementById('myTable1d').insertRow(r + 1);
+        
+        var Id_col = newrow.insertCell(0);
+        Id_col.innerHTML = r + 1;
+        Id_col.style.width = '20px';
+        
+        var Name_col = newrow.insertCell(1);
+        Name_col.innerHTML = "<input type='text' style='width:200px'>";
+        
+        var Gender_col = newrow.insertCell(2);
+        Gender_col.innerHTML = "<input type='text' style='width:100%'>";
+
+        var FictitiousName_col = newrow.insertCell(3);
+        FictitiousName_col.innerHTML = "<input type='text' style='width:200px'>";
+    }
+}
+
+// Helper functie om stap 2 tabel te rebuilden met student data
+function rebuildStep2Table(students) {
+    console.log("Rebuilding step 2 table with student data");
+    
+    // Fill in the student data in step 1 table
+    students.forEach(function(student, index) {
+        var rowIndex = index + 1;
+        var row = document.getElementById('myTable1d').rows[rowIndex];
+        
+        if (row) {
+            // Fill name
+            if (row.cells[1] && row.cells[1].children[0]) {
+                row.cells[1].children[0].value = student.name || '';
+            }
+            
+            // Fill gender
+            if (row.cells[2] && row.cells[2].children[0]) {
+                row.cells[2].children[0].value = student.gender || '';
+            }
+            
+            // Fill fake name
+            if (row.cells[3] && row.cells[3].children[0]) {
+                row.cells[3].children[0].value = student.fakeName || '';
+            }
+        }
+    });
+    
+    // Now rebuild the step 2 matrix structure
+    var num_of_header_cells = document.getElementById("myTable2d").rows[0].cells.length;
+
+    // Remove extra header cells
+    for(var c = num_of_header_cells - 1; c > 1; c--) {
+        document.getElementById("myTable2d").rows[0].deleteCell(c);
+    }
+    
+    var rn = students.length;
+    DeleteRows(document.getElementById('myTable2d'));
+	
+	var tablewidth = rn * 25.5 + 70;
+	
+	document.getElementById('myTable2d').style.width = tablewidth + 'px';	
+
+    
+    var headerrow = document.getElementById('myTable2d').tHead.children[0];
+
+    for(var r = 0; r < rn; r++) {
+        var newrow = document.getElementById('myTable2d').insertRow(r + 1);
+        
+        var Id_col = newrow.insertCell(0);
+        Id_col.innerHTML = r + 1;
+
+        var Name_col = newrow.insertCell(1);
+        Name_col.innerHTML = students[r].name;
+
+        // Create relation cells
+        for(var c = 0; c < rn; c++) {
+            var strength_cell = newrow.insertCell(c + 2);
+            
+            if (r == c) {
+		strength_cell.innerHTML = "<input type='text' style='width:20px; background-color:darkgrey; cursor:default;' readonly>";
+            } else {
+                strength_cell.innerHTML = "<input type='text' style='width:20px; text-align: center'>";
+            }
+                        
+            // Add header for first row
+            if (r == 0) {
+                var th = document.createElement('th');
+                th.className = 'rotated';
+                th.innerHTML = students[c].name;
+                var header_cell = headerrow.appendChild(th);
+                header_cell.width = 20;
+            }
+        }
+    }
+}
+
+// Helper functie om stap 3 matrix te rebuilden met connection data
+function rebuildStep3Matrix(students, connections) {
+    console.log("Rebuilding step 3 matrix with connection data");
+    
+    // Fill in the connection strengths in the matrix
+    connections.forEach(function(connection) {
+        var sourceId = connection.source;
+        var targetId = connection.target;
+        var strength = connection.strength || 1;
+        
+        console.log("Setting connection:", sourceId, "->", targetId, "=", strength);
+        
+        // Find the correct matrix cell
+        var sourceRowIndex = sourceId; // Row index in matrix (1-based)
+        var targetColIndex = targetId + 1; // Column index in matrix (2-based, +1 for ID and Name columns)
+        
+        var matrixTable = document.getElementById('myTable2d');
+        if (sourceRowIndex < matrixTable.rows.length && targetColIndex < matrixTable.rows[sourceRowIndex].cells.length) {
+            var cell = matrixTable.rows[sourceRowIndex].cells[targetColIndex];
+            var input = cell.getElementsByTagName('input')[0];
+            if (input && !input.disabled) {
+                input.value = strength;
+                console.log("Set matrix cell [", sourceRowIndex, ",", targetColIndex, "] = ", strength);
+            }
+        }
+    });
+}
+
+// Update de bestaande updateMatrixFromVisualization functie om betere logging te hebben
+function updateMatrixFromVisualization() {
+    // Only update if matrix exists
+    var matrixTable = document.getElementById('myTable2d');
+    if (!matrixTable || matrixTable.rows.length <= 1) {
+        console.log("Matrix not available for update");
+        return;
+    }
+    
+    console.log("Updating matrix from visualization...");
+    
+    // Clear all matrix values first
+    for (var r = 1; r < matrixTable.rows.length; r++) {
+        var row = matrixTable.rows[r];
+        for (var c = 2; c < row.cells.length; c++) {
+            var input = row.cells[c].getElementsByTagName('input')[0];
+            if (input && !input.disabled) {
+                input.value = '';
+            }
+        }
+    }
+    
+    // Fill matrix with current links
+    links_temp.forEach(function(link) {
+        var sourceId = link.source.id || link.source;
+        var targetId = link.target.id || link.target;
+        var strength = link.strength || 1;
+        
+        console.log("Processing link:", sourceId, "->", targetId, "strength:", strength);
+        
+        // Find the correct matrix cell
+        var sourceRowIndex = sourceId; // Row index in matrix (1-based)
+        var targetColIndex = targetId + 1; // Column index in matrix (2-based, +1 for ID and Name columns)
+        
+        if (sourceRowIndex < matrixTable.rows.length && targetColIndex < matrixTable.rows[sourceRowIndex].cells.length) {
+            var cell = matrixTable.rows[sourceRowIndex].cells[targetColIndex];
+            var input = cell.getElementsByTagName('input')[0];
+            if (input && !input.disabled) {
+                input.value = strength;
+                console.log("Updated matrix cell [", sourceRowIndex, ",", targetColIndex, "] = ", strength);
+            }
+        }
+    });
+    
+    console.log("Matrix update completed");
+}
+
+function verifyImportSuccess() {
+    var step1Table = document.getElementById('myTable1d');
+    var step2Table = document.getElementById('myTable2d');
+    
+    var step1HasData = false;
+    var step2HasData = false;
+    
+    // Check step 1 table
+    for (var i = 1; i < step1Table.rows.length; i++) {
+        var row = step1Table.rows[i];
+        if (row.cells[1] && row.cells[1].children[0] && row.cells[1].children[0].value.trim()) {
+            step1HasData = true;
+            break;
+        }
+    }
+    
+    // Check step 2 table
+    for (var j = 1; j < step2Table.rows.length; j++) {
+        var row = step2Table.rows[j];
+        if (row.cells[1] && row.cells[1].innerHTML.trim()) {
+            step2HasData = true;
+            break;
+        }
+    }
+    
+    console.log("Import verification - Step 1 has data:", step1HasData, "Step 2 has data:", step2HasData);
+    
+    return {
+        step1: step1HasData,
+        step2: step2HasData,
+        success: step1HasData && step2HasData
+    };
+}
+
+// Update de importSociogramData functie om verificatie toe te voegen
+var originalImportSociogramData = importSociogramData;
+importSociogramData = function(event) {
+    var file = event.target.files[0];
+    if (!file) return;
+    
+    // Call original function
+    originalImportSociogramData(event);
+    
+    // Verify import after a short delay
+    setTimeout(function() {
+        var verification = verifyImportSuccess();
+        if (verification.success) {
+            console.log("Import verification successful - all tables updated");
+        } else {
+            console.warn("Import verification warning - some tables may not have been updated properly");
+            console.log("Verification details:", verification);
+        }
+    }, 500);
+};
+
+// Debug functie om huidige staat van alle tabellen te tonen
+function debugAllTables() {
+    console.log("=== DEBUG: ALL TABLES STATE ===");
+    
+    // Step 1 table
+    console.log("Step 1 Table (myTable1d):");
+    var table1 = document.getElementById('myTable1d');
+    for (var i = 1; i < table1.rows.length; i++) {
+        var row = table1.rows[i];
+        var name = row.cells[1] ? row.cells[1].children[0].value : '';
+        var gender = row.cells[2] ? row.cells[2].children[0].value : '';
+        var fakeName = row.cells[3] ? row.cells[3].children[0].value : '';
+        console.log(`  Row ${i}: ${name} | ${gender} | ${fakeName}`);
+    }
+    
+    // Step 2 table
+    console.log("Step 2 Table (myTable2d):");
+    var table2 = document.getElementById('myTable2d');
+    for (var j = 1; j < table2.rows.length; j++) {
+        var row = table2.rows[j];
+        var id = row.cells[0] ? row.cells[0].innerHTML : '';
+        var name = row.cells[1] ? row.cells[1].innerHTML : '';
+        console.log(`  Row ${j}: ID=${id} | Name=${name}`);
+        
+        // Show connections
+        var connections = [];
+        for (var k = 2; k < row.cells.length; k++) {
+            var input = row.cells[k].getElementsByTagName('input')[0];
+            if (input && !input.disabled && input.value) {
+                connections.push(`${k-1}:${input.value}`);
+            }
+        }
+        if (connections.length > 0) {
+            console.log(`    Connections: ${connections.join(', ')}`);
+        }
+    }
+    
+    // Current data
+    console.log("Current nodes_data_temp:", nodes_data_temp);
+    console.log("Current links_temp:", links_temp);
+}
+
+
+// Helper functie om de huidige staat op te slaan voor undo functionaliteit (optioneel)
+function saveCurrentState() {
+    var currentState = {
+        nodes: nodes_data_temp.slice(), // Copy array
+        links: links_temp.slice()       // Copy array
+    };
+    
+    // Bewaar in localStorage voor sessie persistentie
+    try {
+        localStorage.setItem('sociogram_backup', JSON.stringify(currentState));
+    } catch (e) {
+        console.warn("Kon backup niet opslaan in localStorage:", e);
+    }
+    
+    return currentState;
+}
+
+// Helper functie om backup te herstellen
+function restoreFromBackup() {
+    try {
+        var backup = localStorage.getItem('sociogram_backup');
+        if (backup) {
+            var data = JSON.parse(backup);
+            if (confirm("Er is een backup gevonden. Wil je deze herstellen?")) {
+                nodes_data_temp = data.nodes || [];
+                links_temp = data.links || [];
+                updateVisualization();
+                return true;
+            }
+        }
+    } catch (e) {
+        console.warn("Kon backup niet herstellen:", e);
+    }
+    return false;
+}
+
+// Automatische backup bij belangrijke acties
+function autoBackup() {
+    if (nodes_data_temp && nodes_data_temp.length > 0) {
+        saveCurrentState();
+    }
+}
+
+// ============================================================
+// NETLIFY SESSIE-INTEGRATIE
+// ============================================================
+
+var geladen_sessie_data = null; // Bewaar API-response voor later gebruik
+
+async function laadVanuitSessie() {
+    var sessieId = document.getElementById('sessieIdInput').value.trim();
+    var token    = document.getElementById('sessieTokenInput').value.trim();
+    var status   = document.getElementById('sessieLoaderStatus');
+
+    if (!sessieId || !token) {
+        status.innerHTML = '<span style="color:#c0392b;">⚠ Vul zowel het sessie-ID als het beheertoken in.</span>';
+        return;
+    }
+
+    status.innerHTML = '⏳ Bezig met laden…';
+
+    try {
+        var resp = await fetch('/api/get-responses?sessie=' + encodeURIComponent(sessieId) + '&token=' + encodeURIComponent(token));
+        var data = await resp.json();
+
+        if (!data.succes) {
+            status.innerHTML = '<span style="color:#c0392b;">❌ ' + (data.fout || 'Onbekende fout') + '</span>';
+            return;
+        }
+
+        geladen_sessie_data = data;
+
+        // Vul vraag-dropdown
+        var select = document.getElementById('vraagSelectie');
+        select.innerHTML = '';
+        if (data.config && data.config.vragen) {
+            data.config.vragen.forEach(function(v) {
+                var opt = document.createElement('option');
+                opt.value = v.sleutel;
+                opt.textContent = v.titel;
+                select.appendChild(opt);
+            });
+        }
+
+        // Toon bouw-knop
+        document.getElementById('bouwBtn').style.display = 'inline-block';
+
+        var aantalIngevuld = data.aantalIngevuld || 0;
+        var aantalTotaal   = data.aantalTotaal   || 0;
+        status.innerHTML = '✅ Sessie "<strong>' + (data.sessieNaam || sessieId) + '</strong>" geladen — ' +
+            aantalIngevuld + ' van ' + aantalTotaal + ' leerlingen hebben ingevuld.';
+
+    } catch (err) {
+        status.innerHTML = '<span style="color:#c0392b;">❌ Netwerkfout: ' + err.message + '</span>';
+    }
+}
+
+function bouwSociogramVanSessie() {
+    if (!geladen_sessie_data) {
+        alert("Laad eerst een sessie.");
+        return;
+    }
+
+    var data        = geladen_sessie_data;
+    var vraagSleutel = document.getElementById('vraagSelectie').value;
+    var alleNamen   = data.alleNamen || [];   // [{naam, geslacht, fakeName}]
+    var antwoorden  = data.antwoorden || [];  // [{naam, antwoorden: {sleutel: [namen]}}]
+
+    if (alleNamen.length === 0) {
+        alert("Geen leerlingen gevonden in de sessie.");
+        return;
+    }
+
+    // Bouw nodes
+    nodes_data_temp = alleNamen.map(function(leerling, index) {
+        var naam = typeof leerling === 'string' ? leerling : leerling.naam;
+        var geslacht = (typeof leerling === 'object' && leerling.geslacht) ? leerling.geslacht.toUpperCase() : '';
+        var fakeName = (typeof leerling === 'object' && leerling.fakeName) ? leerling.fakeName : '';
+        // Zet geslacht naar M/V/X voor de visualisatie
+        if (geslacht === 'M' || geslacht === 'JONGEN' || geslacht === 'BOY') geslacht = 'M';
+        else if (geslacht === 'V' || geslacht === 'MEISJE' || geslacht === 'GIRL') geslacht = 'V';
+        else geslacht = 'X';
+        return new Node(index + 1, naam, geslacht, fakeName);
+    });
+
+    // Helper: naam → node-id
+    function naamNaarId(naam) {
+        var gevonden = nodes_data_temp.find(function(n) {
+            return n.label.toLowerCase().trim() === naam.toLowerCase().trim();
+        });
+        return gevonden ? gevonden.id : null;
+    }
+
+    // Bouw links vanuit de gekozen vraag
+    links_temp = [];
+    antwoorden.forEach(function(inzending) {
+        var bronNaam = inzending.naam;
+        var bronId   = naamNaarId(bronNaam);
+        if (!bronId) return;
+
+        var keuzes = (inzending.antwoorden && inzending.antwoorden[vraagSleutel]) || [];
+        keuzes.forEach(function(doelNaam) {
+            var doelId = naamNaarId(doelNaam);
+            if (doelId && doelId !== bronId) {
+                links_temp.push(new Link(bronId, doelId, 1));
+            }
+        });
+    });
+
+    // Herstel numOfRows input zodat de rest van de UI klopt
+    document.getElementById("numOfRows").value = nodes_data_temp.length;
+
+    // Toon alle UI-secties
+    document.getElementById('namesForm').style.display = 'block';
+    document.getElementById('SocioMatrixForm').style.display = 'block';
+    document.getElementById('SociogramControls').style.display = 'block';
+    document.getElementById('myTable1d').style.display = 'block';
+    document.getElementById('myTable2d').style.display = 'block';
+
+    // Vul tabellen in zodat export/import blijft werken
+    rebuildStep1Table(nodes_data_temp.length);
+    rebuildStep2Table(nodes_data_temp.map(function(n) {
+        return { id: n.id, name: n.label, gender: n.sex, fakeName: n.label_fake };
+    }));
+    rebuildStep3Matrix(
+        nodes_data_temp.map(function(n) { return { id: n.id, name: n.label }; }),
+        links_temp.map(function(l) { return { source: l.source, target: l.target, strength: l.strength }; })
+    );
+
+    // Sluit de sessielader in
+    document.getElementById('sessieLoader').style.display = 'none';
+
+    // Teken het sociogram
+    updateVisualization();
+
+    console.log("Sociogram gebouwd vanuit sessie:", nodes_data_temp.length, "leerlingen,", links_temp.length, "verbindingen");
+}
+
+// Auto-laad vanuit URL-parameters (?sessie=ID&token=TOKEN)
+(function() {
+    var params = new URLSearchParams(window.location.search);
+    var sessie = params.get('sessie');
+    var token  = params.get('token');
+    if (sessie && token) {
+        document.getElementById('sessieIdInput').value  = sessie;
+        document.getElementById('sessieTokenInput').value = token;
+        // Laad automatisch na korte vertraging zodat de DOM klaar is
+        setTimeout(laadVanuitSessie, 300);
+    }
+})();
+
+// ============================================================
+// EINDE NETLIFY SESSIE-INTEGRATIE
+// ============================================================
+
+// Roep autoBackup aan bij belangrijke wijzigingen
+var originalDeleteNode = deleteNode;
+deleteNode = function(nodeId) {
+    autoBackup();
+    return originalDeleteNode(nodeId);
+};
+
+var originalDeleteLink = deleteLink;
+deleteLink = function(sourceId, targetId) {
+    autoBackup();
+    return originalDeleteLink(sourceId, targetId);
+};
+
+
+$(document).ready(function() {
+    // Bestaande ready code...
+    
+    // Controleer op backup bij laden van de pagina
+    setTimeout(function() {
+        if (!nodes_data_temp || nodes_data_temp.length === 0) {
+            restoreFromBackup();
+        }
+    }, 1000);
+});
+
+
+function maakTabel1Leeg() {
+    var tabel = document.getElementById('myTable1d');
+    for (var i = 1; i < tabel.rows.length; i++) {
+        var rij = tabel.rows[i];
+        for (var j = 1; j < rij.cells.length; j++) {
+            var input = rij.cells[j].getElementsByTagName('input')[0];
+            if (input) input.value = '';
+        }
+    }
+}
+
+function maakTabel2Leeg() {
+    var tabel = document.getElementById('myTable2d');
+    for (var i = 1; i < tabel.rows.length; i++) {
+        var rij = tabel.rows[i];
+        for (var j = 2; j < rij.cells.length; j++) {
+            var input = rij.cells[j].getElementsByTagName('input')[0];
+            if (input && !input.disabled) input.value = '';
+        }
+    }
+}
+
+    </script>
+</body>
+</html>

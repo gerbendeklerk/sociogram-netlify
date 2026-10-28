@@ -436,6 +436,7 @@ Sofia Jansen
         <div class="download-rij">
           <button class="knop knop-secundair" onclick="downloadJson()">Download JSON</button>
           <button class="knop knop-secundair" onclick="downloadCsv()">Download CSV</button>
+          <button class="knop" onclick="openSociogram()" style="background:var(--paars);">📊 Sociogram visualiseren</button>
         </div>
       </div>
 
@@ -595,6 +596,18 @@ Sofia Jansen
 
     html += "</tbody></table>";
     container.innerHTML = html;
+  }
+
+  // ---- Sociogram visualisatie ----
+  function openSociogram() {
+    var params = new URLSearchParams(window.location.search);
+    var sessie = params.get('sessie');
+    var token  = params.get('token');
+    if (!sessie || !token) {
+      alert("Sessie-ID of token ontbreekt in de URL. Laad de beheerpagina via de beheerlink.");
+      return;
+    }
+    window.open('/sociogram.html?sessie=' + encodeURIComponent(sessie) + '&token=' + encodeURIComponent(token), '_blank');
   }
 
   // ---- Download ----
