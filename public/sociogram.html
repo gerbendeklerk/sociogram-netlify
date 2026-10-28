@@ -380,6 +380,7 @@ body {
 					<input type="checkbox" id="linkSizeCheck" checked> Lijndikte afhankelijk van gewicht<br>
 					<input type="checkbox" id="shadowCheck"> Schaduw-effect<br>
 					<input type="checkbox" id="numConnsInLabelCheck"> Aantal keer gekozen in label<br>
+					<input type="checkbox" id="wederzijdsOnlyCheck" onchange="updateVisualization()"> Toon alleen wederzijdse keuzes<br>
 					Jongens/meisjes:<br>
 					<input type="radio" id="boysgirlsBoth" name="selectionBoysGirls" value="boysgirlsBoth" checked onChange="updateVisualization()"> <label for="boysgirlsBoth">Jongens en meisjes</label><br>
 					<input type="radio" id="boysgirlsBoys" name="selectionBoysGirls" value="boysgirlsBoys" onChange="updateVisualization()"> <label for="boysgirlsBoys">Alleen de jongens</label><br>
@@ -771,6 +772,19 @@ function isGirlGirlLink(link) {
 	else {
 		var nodes_data = nodes_data_temp;
 		var links_data = links_temp;
+	}
+
+	// Filter: alleen wederzijdse keuzes tonen
+	if (document.getElementById("wederzijdsOnlyCheck") && document.getElementById("wederzijdsOnlyCheck").checked) {
+		links_data = links_data.filter(function(l) {
+			var srcId = l.source.id !== undefined ? l.source.id : l.source;
+			var tgtId = l.target.id !== undefined ? l.target.id : l.target;
+			return links_data.some(function(r) {
+				var rSrc = r.source.id !== undefined ? r.source.id : r.source;
+				var rTgt = r.target.id !== undefined ? r.target.id : r.target;
+				return rSrc === tgtId && rTgt === srcId;
+			});
+		});
 	}
 
 	console.log("Final nodes data: ")
@@ -1475,7 +1489,8 @@ function exportSociogramData() {
                     linkSize: document.getElementById("linkSizeCheck").checked,
                     shadow: document.getElementById("shadowCheck").checked,
                     connectionCount: document.getElementById("numConnsInLabelCheck").checked,
-		    boysGirlsSelection: document.querySelector('input[name="selectionBoysGirls"]:checked').value
+		    boysGirlsSelection: document.querySelector('input[name="selectionBoysGirls"]:checked').value,
+                    wederzijdsOnly: document.getElementById("wederzijdsOnlyCheck").checked
                 },
 				
 				advanced: {
@@ -1685,6 +1700,7 @@ function loadImportedData(importData) {
 		    var radio = document.querySelector('input[name="selectionBoysGirls"][value="' + settings.boysGirlsSelection + '"]');
 		    if (radio) radio.checked = true;
 	    }
+	    document.getElementById("wederzijdsOnlyCheck").checked = settings.wederzijdsOnly || false;
 	}
 		
         // Laad advanced settings indien beschikbaar
