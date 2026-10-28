@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sociogram – Beheer</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --paars:       #673ab7;
+      --paars-donker:#4527a0;
+      --paars-licht: #ede7f6;
+      --groen:       #137333;
+      --groen-licht: #e6f4ea;
+      --rood:        #d93025;
+      --rood-licht:  #fce8e6;
+      --grijs:       #5f6368;
+      --rand:        #dadce0;
+      --tekst:       #202124;
+      --bg:          #f5f0ff;
+      --wit:         #ffffff;
+    }
+
+    body {
+      font-family: "DM Sans", sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      color: var(--tekst);
+    }
+
+    header {
+      background: var(--paars);
+      color: white;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 2px 8px rgba(103,58,183,0.3);
+    }
+
+    header h1 {
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    header .subtitel {
+      font-size: 0.85rem;
+      opacity: 0.8;
+      font-weight: 400;
+    }
+
+    .main { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
+
+    .tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 2px solid var(--rand);
+      margin-bottom: 24px;
+    }
+
+    .tab {
+      padding: 10px 20px;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 0.9rem;
+      color: var(--grijs);
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: color 0.15s;
+    }
+
+    .tab:hover { color: var(--paars); }
+
+    .tab.actief {
+      color: var(--paars);
+      border-bottom-color: var(--paars);
+    }
+
+    .tab-inhoud { display: none; }
+    .tab-inhoud.actief { display: block; }
+
+    /* Kaarten */
+    .kaart {
+      background: var(--wit);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    .kaart h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--tekst);
+    }
+
+    label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--grijs);
+      margin-bottom: 4px;
+    }
+
+    input[type="text"], textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--rand);
+      border-radius: 6px;
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.9375rem;
+      color: var(--tekst);
+      outline: none;
+      transition: border-color 0.15s;
+      margin-bottom: 12px;
+    }
+
+    input[type="text"]:focus, textarea:focus {
+      border-color: var(--paars);
+      box-shadow: 0 0 0 3px rgba(103,58,183,0.12);
+    }
+
+    textarea { resize: vertical; min-height: 120px; }
+
+    .knop {
+      padding: 10px 20px;
+      border-radius: 6px;
+      border: none;
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.9375rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, box-shadow 0.15s;
+    }
+
+    .knop-primair {
+      background: var(--paars);
+      color: white;
+    }
+
+    .knop-primair:hover {
+      background: var(--paars-donker);
+      box-shadow: 0 2px 6px rgba(103,58,183,0.25);
+    }
+
+    .knop-secundair {
+      background: var(--paars-licht);
+      color: var(--paars);
+    }
+
+    .knop-secundair:hover {
+      background: #d1c4e9;
+    }
+
+    .knop:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Link-box */
+    .link-box {
+      display: none;
+      background: var(--groen-licht);
+      border: 1px solid #34a853;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .link-box .label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--groen);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+
+    .link-box .url {
+      font-family: "DM Mono", monospace;
+      font-size: 0.85rem;
+      color: var(--tekst);
+      word-break: break-all;
+      background: white;
+      padding: 8px 12px;
+      border-radius: 4px;
+      border: 1px solid var(--rand);
+      margin-bottom: 8px;
+    }
+
+    .kopieer-knop {
+      font-size: 0.8rem;
+      padding: 6px 12px;
+    }
+
+    /* Voortgang */
+    .voortgang-balk {
+      background: var(--rand);
+      border-radius: 4px;
+      height: 8px;
+      margin: 8px 0 4px;
+      overflow: hidden;
+    }
+
+    .voortgang-balk-vulling {
+      height: 100%;
+      background: var(--paars);
+      border-radius: 4px;
+      transition: width 0.3s;
+    }
+
+    .voortgang-tekst {
+      font-size: 0.85rem;
+      color: var(--grijs);
+      margin-bottom: 16px;
+    }
+
+    /* Namen-tabel */
+    .namen-lijst {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .naam-chip {
+      background: var(--paars-licht);
+      color: var(--paars-donker);
+      font-size: 0.8rem;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+
+    .naam-chip.ingevuld {
+      background: var(--groen-licht);
+      color: var(--groen);
+    }
+
+    /* Antwoorden-tabel */
+    .antwoorden-tabel {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+
+    .antwoorden-tabel th {
+      background: var(--paars-licht);
+      padding: 8px 12px;
+      text-align: left;
+      font-weight: 600;
+      color: var(--paars-donker);
+      border-bottom: 2px solid #d1c4e9;
+    }
+
+    .antwoorden-tabel td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--rand);
+      vertical-align: top;
+    }
+
+    .antwoorden-tabel tr:hover td { background: #faf8ff; }
+
+    .antwoorden-tabel .keuzes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .keuze-chip {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: 500;
+    }
+
+    .keuze-chip.positief { background: var(--groen-licht); color: var(--groen); }
+    .keuze-chip.negatief { background: var(--rood-licht); color: var(--rood); }
+
+    .tijdstip { font-size: 0.75rem; color: var(--grijs); }
+
+    /* Download knop */
+    .download-rij {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    /* Laden */
+    .laden-tekst {
+      text-align: center;
+      padding: 32px;
+      color: var(--grijs);
+    }
+
+    .spinner {
+      width: 28px; height: 28px;
+      border: 3px solid var(--rand);
+      border-top-color: var(--paars);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 12px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .melding {
+      padding: 12px 16px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      margin-top: 12px;
+      display: none;
+    }
+
+    .melding.succes { background: var(--groen-licht); color: var(--groen); }
+    .melding.fout   { background: var(--rood-licht);  color: var(--rood);  }
+
+    .invoer-hint {
+      font-size: 0.8rem;
+      color: var(--grijs);
+      margin-top: -8px;
+      margin-bottom: 12px;
+    }
+
+    @media (max-width: 600px) {
+      .antwoorden-tabel { font-size: 0.8rem; }
+      .main { padding: 16px 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div style="font-size:1.4rem;">📊</div>
+  </div>
+  <div>
+    <h1>Sociogram Beheer</h1>
+    <div class="subtitel" id="header-subtitel">Formuliermodule</div>
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab actief" onclick="toonTab('maak')">Nieuwe sessie</div>
+    <div class="tab" onclick="toonTab('bekijk')">Reacties bekijken</div>
+  </div>
+
+  <!-- Tab: Nieuwe sessie maken -->
+  <div class="tab-inhoud actief" id="tab-maak">
+
+    <div class="kaart">
+      <h2>Nieuwe vragenlijst aanmaken</h2>
+
+      <label for="sessie-naam">Naam van de sessie (bijv. "Groep 7B – januari")</label>
+      <input type="text" id="sessie-naam" placeholder="Klas of groepsnaam…">
+
+      <label for="namen-invoer">Leerlingnamen</label>
+      <textarea id="namen-invoer" placeholder="Één naam per regel:
+Emma de Vries
+Liam Bakker
+Sofia Jansen
+…"></textarea>
+      <p class="invoer-hint">Voer één naam per regel in. Minimaal 2 leerlingen.</p>
+
+      <button class="knop knop-primair" onclick="maakSessie()">Sessie aanmaken</button>
+      <div class="melding" id="maak-melding"></div>
+    </div>
+
+    <div class="link-box" id="link-box">
+      <div class="label">✓ Sessie aangemaakt</div>
+      <p style="font-size:0.875rem; margin-bottom:10px; color: var(--groen);">
+        Deel de onderstaande link met je leerlingen. Ze kunnen het formulier invullen zonder Google-account.
+      </p>
+      <div class="label" style="margin-top:8px;">Leerlingenlink</div>
+      <div class="url" id="formulier-link-url"></div>
+      <button class="knop knop-secundair kopieer-knop" onclick="kopieer('formulier-link-url')">Kopieer link</button>
+
+      <div class="label" style="margin-top:16px;">Beheerpagina (bewaar dit voor jezelf!)</div>
+      <div class="url" id="beheer-link-url"></div>
+      <button class="knop knop-secundair kopieer-knop" onclick="kopieer('beheer-link-url')">Kopieer link</button>
+
+      <p style="font-size:0.8rem; color:var(--grijs); margin-top:12px;">
+        ⚠️ Sla de beheerpaginalink op. Via deze link kun je de reacties later bekijken.
+      </p>
+    </div>
+
+  </div>
+
+  <!-- Tab: Reacties bekijken -->
+  <div class="tab-inhoud" id="tab-bekijk">
+
+    <div class="kaart">
+      <h2>Sessie laden</h2>
+      <p style="font-size:0.875rem; color:var(--grijs); margin-bottom:12px;">
+        Als je via de beheerpaginalink bent gekomen, wordt de sessie automatisch geladen.
+        Anders kun je de sessie-ID en het beheertoken hieronder invoeren.
+      </p>
+
+      <label for="bekijk-sessie-id">Sessie-ID</label>
+      <input type="text" id="bekijk-sessie-id" placeholder="bijv. a3f2c81e9d042b7f">
+
+      <label for="bekijk-token">Beheertoken</label>
+      <input type="text" id="bekijk-token" placeholder="bijv. 4a8c2b1e…">
+
+      <button class="knop knop-primair" onclick="laadReacties()">Reacties laden</button>
+      <div class="melding" id="bekijk-melding"></div>
+    </div>
+
+    <div id="reacties-wrap" style="display:none;">
+
+      <div class="kaart">
+        <h2 id="reacties-titel">Voortgang</h2>
+        <div class="voortgang-balk">
+          <div class="voortgang-balk-vulling" id="voortgang-vulling" style="width:0%"></div>
+        </div>
+        <div class="voortgang-tekst" id="voortgang-tekst">0 van 0 leerlingen hebben ingevuld</div>
+
+        <div class="namen-lijst" id="namen-chips"></div>
+      </div>
+
+      <div class="kaart">
+        <h2>Antwoorden</h2>
+        <div id="antwoorden-container">
+          <div class="laden-tekst">
+            <div class="spinner"></div>
+            <p>Laden…</p>
+          </div>
+        </div>
+        <div class="download-rij">
+          <button class="knop knop-secundair" onclick="downloadJson()">Download JSON</button>
+          <button class="knop knop-secundair" onclick="downloadCsv()">Download CSV</button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+  // ---- Tab-navigatie ----
+  function toonTab(naam) {
+    document.querySelectorAll(".tab").forEach(function(t, i) {
+      var namen = ["maak", "bekijk"];
+      t.classList.toggle("actief", namen[i] === naam);
+    });
+    document.querySelectorAll(".tab-inhoud").forEach(function(el) {
+      el.classList.remove("actief");
+    });
+    document.getElementById("tab-" + naam).classList.add("actief");
+  }
+
+  // ---- Sessie aanmaken ----
+  async function maakSessie() {
+    var naam  = document.getElementById("sessie-naam").value.trim();
+    var input = document.getElementById("namen-invoer").value.trim();
+    var melding = document.getElementById("maak-melding");
+    melding.style.display = "none";
+
+    if (!naam) {
+      toonMelding("maak-melding", "Voer een naam in voor de sessie.", "fout");
+      return;
+    }
+
+    var namen = input.split("\n")
+      .map(function(n) { return n.trim(); })
+      .filter(function(n) { return n.length > 0; });
+
+    if (namen.length < 2) {
+      toonMelding("maak-melding", "Voer minimaal 2 leerlingnamen in.", "fout");
+      return;
+    }
+
+    try {
+      var res = await fetch("/api/create-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ naam: naam, namen: namen }),
+      });
+      var data = await res.json();
+
+      if (!data.succes) {
+        toonMelding("maak-melding", "Fout: " + (data.fout || "Onbekende fout."), "fout");
+        return;
+      }
+
+      var basis = window.location.origin;
+      document.getElementById("formulier-link-url").textContent = basis + data.formulierLink;
+      document.getElementById("beheer-link-url").textContent    = basis + data.beheerLink;
+      document.getElementById("link-box").style.display = "block";
+
+    } catch (err) {
+      toonMelding("maak-melding", "Verbindingsfout: " + err.message, "fout");
+    }
+  }
+
+  // ---- Reacties laden ----
+  var huidigeReacties = null;
+
+  async function laadReacties() {
+    var sessieId = document.getElementById("bekijk-sessie-id").value.trim();
+    var token    = document.getElementById("bekijk-token").value.trim();
+
+    if (!sessieId) {
+      toonMelding("bekijk-melding", "Voer een sessie-ID in.", "fout");
+      return;
+    }
+
+    try {
+      var url = "/api/get-responses?sessie=" + encodeURIComponent(sessieId);
+      if (token) url += "&token=" + encodeURIComponent(token);
+
+      var res  = await fetch(url);
+      var data = await res.json();
+
+      if (!data.succes) {
+        toonMelding("bekijk-melding", data.fout || "Sessie niet gevonden.", "fout");
+        return;
+      }
+
+      huidigeReacties = data;
+      toonReacties(data);
+      document.getElementById("reacties-wrap").style.display = "block";
+      document.getElementById("bekijk-melding").style.display = "none";
+      document.getElementById("header-subtitel").textContent = data.sessieNaam;
+
+    } catch (err) {
+      toonMelding("bekijk-melding", "Verbindingsfout: " + err.message, "fout");
+    }
+  }
+
+  function toonReacties(data) {
+    // Voortgang
+    var pct = data.aantalTotaal > 0
+      ? Math.round((data.aantalIngevuld / data.aantalTotaal) * 100)
+      : 0;
+    document.getElementById("voortgang-vulling").style.width = pct + "%";
+    document.getElementById("voortgang-tekst").textContent =
+      data.aantalIngevuld + " van " + data.aantalTotaal + " leerlingen hebben ingevuld (" + pct + "%)";
+    document.getElementById("reacties-titel").textContent = data.sessieNaam + " – voortgang";
+
+    // Namen-chips
+    var ingevuldNamen = data.antwoorden.map(function(a) { return a.naam; });
+    var chipsEl = document.getElementById("namen-chips");
+    chipsEl.innerHTML = "";
+    data.alleNamen.forEach(function(item) {
+      var naam = item.naam || item;
+      var chip = document.createElement("span");
+      chip.className = "naam-chip" + (ingevuldNamen.includes(naam) ? " ingevuld" : "");
+      chip.textContent = naam + (ingevuldNamen.includes(naam) ? " ✓" : "");
+      chipsEl.appendChild(chip);
+    });
+
+    // Antwoorden tabel
+    var container = document.getElementById("antwoorden-container");
+
+    if (data.antwoorden.length === 0) {
+      container.innerHTML = "<p style='color:var(--grijs); font-size:0.875rem; padding:12px 0;'>Nog geen antwoorden ontvangen.</p>";
+      return;
+    }
+
+    var vragen   = data.config.vragen || [];
+    var html = "<table class='antwoorden-tabel'><thead><tr><th>Naam</th>";
+
+    vragen.forEach(function(v) {
+      html += "<th>" + escapeHtml(v.titel) + "</th>";
+    });
+    html += "<th>Tijdstip</th></tr></thead><tbody>";
+
+    data.antwoorden.forEach(function(antwoord) {
+      html += "<tr><td><strong>" + escapeHtml(antwoord.naam) + "</strong></td>";
+      vragen.forEach(function(v) {
+        var keuzes = antwoord.antwoorden[v.sleutel] || [];
+        var chipType = v.type === "positieve" ? "positief" : "negatief";
+        html += "<td><div class='keuzes'>";
+        keuzes.forEach(function(k) {
+          html += "<span class='keuze-chip " + chipType + "'>" + escapeHtml(k) + "</span>";
+        });
+        if (keuzes.length === 0) html += "<span style='color:var(--grijs);font-size:0.75rem;'>–</span>";
+        html += "</div></td>";
+      });
+      var tijdstip = antwoord.tijdstip
+        ? new Date(antwoord.tijdstip).toLocaleString("nl-NL")
+        : "–";
+      html += "<td class='tijdstip'>" + tijdstip + "</td></tr>";
+    });
+
+    html += "</tbody></table>";
+    container.innerHTML = html;
+  }
+
+  // ---- Download ----
+  function downloadJson() {
+    if (!huidigeReacties) return;
+    var blob = new Blob([JSON.stringify(huidigeReacties, null, 2)], { type: "application/json" });
+    var a    = document.createElement("a");
+    a.href   = URL.createObjectURL(blob);
+    a.download = (huidigeReacties.sessieNaam || "reacties") + ".json";
+    a.click();
+  }
+
+  function downloadCsv() {
+    if (!huidigeReacties) return;
+    var vragen = huidigeReacties.config.vragen || [];
+    var rijen  = [["Naam"].concat(vragen.map(function(v) { return v.titel; })).concat(["Tijdstip"])];
+
+    huidigeReacties.antwoorden.forEach(function(a) {
+      var rij = [a.naam];
+      vragen.forEach(function(v) {
+        var keuzes = a.antwoorden[v.sleutel] || [];
+        rij.push(keuzes.join("; "));
+      });
+      rij.push(a.tijdstip || "");
+      rijen.push(rij);
+    });
+
+    var csv  = rijen.map(function(r) {
+      return r.map(function(cel) {
+        return '"' + String(cel).replace(/"/g, '""') + '"';
+      }).join(",");
+    }).join("\n");
+
+    var blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+    var a    = document.createElement("a");
+    a.href   = URL.createObjectURL(blob);
+    a.download = (huidigeReacties.sessieNaam || "reacties") + ".csv";
+    a.click();
+  }
+
+  // ---- Hulpfuncties ----
+  function toonMelding(id, tekst, type) {
+    var el = document.getElementById(id);
+    el.textContent = tekst;
+    el.className   = "melding " + type;
+    el.style.display = "block";
+  }
+
+  function kopieer(elementId) {
+    var tekst = document.getElementById(elementId).textContent;
+    navigator.clipboard.writeText(tekst).then(function() {
+      alert("Link gekopieerd!");
+    }).catch(function() {
+      // Fallback voor oudere browsers
+      var el = document.createElement("textarea");
+      el.value = tekst;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand("copy");
+      document.body.removeChild(el);
+      alert("Link gekopieerd!");
+    });
+  }
+
+  function escapeHtml(str) {
+    return String(str || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  // ---- Auto-laden via URL-parameters ----
+  (function() {
+    var params   = new URLSearchParams(window.location.search);
+    var sessieId = params.get("sessie");
+    var token    = params.get("token");
+
+    if (sessieId) {
+      document.getElementById("bekijk-sessie-id").value = sessieId;
+      if (token) document.getElementById("bekijk-token").value = token;
+      toonTab("bekijk");
+      laadReacties();
+    }
+  })();
+</script>
+
+</body>
+</html>
