@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Vragenlijst</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&family=Google+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: #f0ebf8;
+      min-height: 100vh;
+      padding: 16px 12px 60px;
+      font-size: 16px;
+    }
+
+    .container { max-width: 640px; margin: 0 auto; }
+
+    .header-card {
+      background: #fff;
+      border-radius: 8px;
+      border-top: 10px solid #673ab7;
+      box-shadow: 0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px rgba(0,0,0,.14), 0 1px 3px rgba(0,0,0,.12);
+      padding: 24px;
+      margin-bottom: 12px;
+    }
+
+    .header-card h1 {
+      font-family: 'Google Sans', 'Roboto', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 400;
+      color: #202124;
+      margin-bottom: 8px;
+    }
+
+    @media (min-width: 480px) {
+      .header-card h1 { font-size: 1.75rem; }
+    }
+
+    .header-card p { font-size: 1rem; color: #202124; line-height: 1.6; }
+
+    .card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px rgba(0,0,0,.14), 0 1px 3px rgba(0,0,0,.12);
+      padding: 20px 16px;
+      margin-bottom: 12px;
+      border-left: 6px solid transparent;
+    }
+
+    .card:focus-within { border-left-color: #673ab7; }
+
+    .vraag-titel { font-size: 1.05rem; font-weight: 500; color: #202124; margin-bottom: 6px; }
+    .vereist { color: #d93025; margin-left: 2px; }
+    .hint { font-size: 0.95rem; color: #5f6368; margin-bottom: 16px; line-height: 1.5; }
+
+    .select-wrap { position: relative; border-bottom: 1px solid #dadce0; margin-top: 8px; }
+    .select-wrap:focus-within { border-bottom: 2px solid #673ab7; }
+
+    select {
+      width: 100%;
+      padding: 8px 0 8px 8px;
+      border: none;
+      outline: none;
+      font-family: 'Roboto', sans-serif;
+      font-size: 1rem;
+      -webkit-text-size-adjust: 100%;
+      color: #202124;
+      background: transparent;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235f6368'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 4px center;
+    }
+
+    .checkbox-lijst { display: flex; flex-direction: column; gap: 2px; margin-top: 8px; }
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.1s;
+      min-height: 48px;
+    }
+
+    .checkbox-item:hover { background: #f8f9fa; }
+
+    .checkbox-item input[type="checkbox"] {
+      width: 22px; height: 22px;
+      cursor: pointer;
+      accent-color: #673ab7;
+      flex-shrink: 0;
+    }
+
+    .checkbox-item span { font-size: 1.05rem; color: #202124; }
+
+    .teller { font-size: 0.95rem; color: #5f6368; margin-bottom: 8px; margin-top: 4px; }
+
+    .laden {
+      text-align: center;
+      padding: 60px 20px;
+      color: #5f6368;
+      font-size: 0.875rem;
+    }
+
+    .laden .spinner {
+      width: 32px; height: 32px;
+      border: 3px solid #e8eaed;
+      border-top-color: #673ab7;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .submit-wrap {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    button.submit {
+      background: #673ab7;
+      color: #fff;
+      border: none;
+      padding: 14px 32px;
+      border-radius: 4px;
+      min-height: 48px;
+      font-family: 'Google Sans', 'Roboto', sans-serif;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, box-shadow 0.15s;
+    }
+
+    button.submit:hover { background: #5e35b1; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+
+    button.submit:disabled {
+      background: #dadce0;
+      color: #5f6368;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .wis-link { font-size: 0.875rem; color: #673ab7; cursor: pointer; text-decoration: none; }
+    .wis-link:hover { text-decoration: underline; }
+
+    .fout-melding { display: none; font-size: 0.75rem; color: #d93025; margin-top: 12px; }
+
+    .verborgen { opacity: 0.5; pointer-events: none; }
+
+    .succes-scherm, .fout-scherm, .al-ingevuld-scherm {
+      display: none;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px rgba(0,0,0,.14), 0 1px 3px rgba(0,0,0,.12);
+      padding: 48px 24px;
+      text-align: center;
+    }
+
+    .succes-scherm h2, .al-ingevuld-scherm h2 {
+      font-family: 'Google Sans', 'Roboto', sans-serif;
+      font-size: 1.375rem;
+      font-weight: 400;
+      color: #202124;
+      margin-bottom: 8px;
+    }
+
+    .succes-scherm p, .al-ingevuld-scherm p { font-size: 0.875rem; color: #5f6368; }
+
+    .succes-scherm .vinkje {
+      width: 64px; height: 64px;
+      background: #e6f4ea;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 2rem;
+    }
+
+    .fout-scherm h2 { font-size: 1.375rem; color: #d93025; margin-bottom: 8px; }
+    .fout-scherm p { font-size: 0.875rem; color: #5f6368; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="laden" id="laden">
+    <div class="spinner"></div>
+    <p>Formulier laden…</p>
+  </div>
+
+  <div id="formulier-wrap" style="display:none;">
+
+    <div class="header-card">
+      <h1 id="txt-titel"></h1>
+      <p id="txt-beschrijving"></p>
+    </div>
+
+    <div class="card">
+      <div class="vraag-titel" id="txt-naam-titel">Wat is jouw naam?</div>
+      <p class="hint" id="txt-naam-hint">Selecteer je eigen naam. De lijst past zich daarna automatisch aan.</p>
+      <div class="select-wrap">
+        <select id="eigen-naam">
+          <option value="">Kies je naam</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="vragen-container"></div>
+    <div id="extra-vragen-container"></div>
+
+    <div class="card verborgen" id="submit-kaart">
+      <div class="submit-wrap">
+        <button class="submit" id="btn-submit" disabled onclick="verstuur()">Verzenden</button>
+        <a class="wis-link" onclick="wisFormulier()">Formulier wissen</a>
+      </div>
+      <div class="fout-melding" id="fout-melding">Er is iets misgegaan. Probeer het opnieuw.</div>
+    </div>
+
+  </div>
+
+  <div class="al-ingevuld-scherm" id="al-ingevuld-scherm">
+    <div class="vinkje">📋</div>
+    <h2>Je hebt al ingevuld.</h2>
+    <p>Je antwoorden zijn al eerder opgeslagen. Neem contact op met je docent als je dit wilt wijzigen.</p>
+  </div>
+
+  <div class="succes-scherm" id="succes-scherm">
+    <div class="vinkje">✓</div>
+    <h2>Je antwoord is opgeslagen.</h2>
+    <p>Bedankt voor het invullen.</p>
+  </div>
+
+  <div class="fout-scherm" id="fout-scherm">
+    <h2>Ongeldige link</h2>
+    <p id="fout-tekst">Er ontbreekt een sessie-ID in de URL. Controleer of je de juiste link gebruikt.</p>
+  </div>
+
+</div>
+
+<script>
+  // Haal sessie-ID op uit URL
+  var params   = new URLSearchParams(window.location.search);
+  var sessieId = params.get("sessie");
+
+  var alleNamen  = [];
+  var alleVragen = [];
+  var eigenNaam  = "";
+
+  if (!sessieId) {
+    document.getElementById("laden").style.display = "none";
+    document.getElementById("fout-scherm").style.display = "block";
+  } else {
+    laadFormulier();
+  }
+
+  async function laadFormulier() {
+    try {
+      var res  = await fetch("/api/get-config?sessie=" + encodeURIComponent(sessieId));
+      var data = await res.json();
+
+      if (!data.succes) {
+        toonFoutScherm(data.fout || "Sessie niet gevonden.");
+        return;
+      }
+
+      var config = data.config;
+      alleVragen = config.vragen || [];
+      alleVragen.extraVragen = config.extraVragen || [];
+
+      document.getElementById("txt-titel").textContent       = config.formulier_titel       || "Vragenlijst";
+      document.getElementById("txt-beschrijving").textContent = config.formulier_beschrijving || "";
+      document.getElementById("txt-naam-titel").textContent  = config.naam_vraag_titel      || "Wat is jouw naam?";
+      document.getElementById("txt-naam-hint").textContent   = config.naam_vraag_hint       || "";
+
+      // Vul namenlijst
+      alleNamen = data.namen.map(function(n) { return n.naam; });
+      var select = document.getElementById("eigen-naam");
+      alleNamen.forEach(function(naam) {
+        var opt = document.createElement("option");
+        opt.value = naam;
+        opt.textContent = naam;
+        select.appendChild(opt);
+      });
+
+      document.getElementById("laden").style.display = "none";
+      document.getElementById("formulier-wrap").style.display = "block";
+
+    } catch (err) {
+      toonFoutScherm("Kan het formulier niet laden. Controleer je internetverbinding.");
+    }
+  }
+
+  document.getElementById("eigen-naam").addEventListener("change", async function() {
+    eigenNaam = this.value;
+    if (!eigenNaam) return;
+
+    // Reset
+    document.getElementById("vragen-container").innerHTML = "";
+    document.getElementById("extra-vragen-container").innerHTML = "";
+    document.getElementById("submit-kaart").classList.add("verborgen");
+    document.getElementById("al-ingevuld-scherm").style.display = "none";
+    document.getElementById("formulier-wrap").style.display = "block";
+
+    // Controleer of al ingevuld (via poging om te laden)
+    try {
+      var checkRes = await fetch("/api/check-ingevuld?sessie=" + encodeURIComponent(sessieId) + "&naam=" + encodeURIComponent(eigenNaam));
+      var checkData = await checkRes.json();
+      if (checkData.alIngevuld) {
+        document.getElementById("formulier-wrap").style.display = "none";
+        document.getElementById("al-ingevuld-scherm").style.display = "block";
+        return;
+      }
+    } catch (e) {
+      // Verbindingsfout: formulier toch tonen, server doet de echte check bij submit
+    }
+
+    bouwVragen();
+  });
+
+  function bouwVragen() {
+    var anderen   = alleNamen.filter(function(n) { return n !== eigenNaam; });
+    var container = document.getElementById("vragen-container");
+    container.innerHTML = "";
+
+    alleVragen.forEach(function(vraag) {
+      var kaart = document.createElement("div");
+      kaart.className = "card";
+      kaart.id = "kaart-" + vraag.sleutel;
+      var maxKeuzes = vraag.max || 3;
+      kaart.dataset.max = maxKeuzes;
+      kaart.innerHTML =
+        '<div class="vraag-titel">' + escapeHtml(vraag.titel) + '</div>' +
+        '<p class="hint">' + escapeHtml(vraag.hint || "") + '</p>' +
+        '<div class="teller">Geselecteerd: <span id="tel-' + vraag.sleutel + '">0</span> / ' + maxKeuzes + '</div>' +
+        '<div class="checkbox-lijst" id="grid-' + vraag.sleutel + '" data-max="' + maxKeuzes + '"></div>';
+      container.appendChild(kaart);
+      bouwLijst("grid-" + vraag.sleutel, anderen, vraag.sleutel);
+    });
+
+    bouwExtraVragen();
+
+    document.getElementById("submit-kaart").classList.remove("verborgen");
+    document.getElementById("btn-submit").disabled = false;
+  }
+
+  function bouwExtraVragen() {
+    var extraContainer = document.getElementById("extra-vragen-container");
+    extraContainer.innerHTML = "";
+    if (!alleVragen.extraVragen || alleVragen.extraVragen.length === 0) return;
+
+    alleVragen.extraVragen.forEach(function(vraag, idx) {
+      var kaart = document.createElement("div");
+      kaart.className = "card";
+
+      var invoerHtml = "";
+
+      if (vraag.type === "open") {
+        invoerHtml =
+          '<textarea id="extra-' + idx + '" rows="3" ' +
+          'style="width:100%; padding:10px 12px; border:1px solid #dadce0; border-radius:4px; ' +
+          'font-family:Roboto,sans-serif; font-size:1rem; resize:vertical; margin-top:8px;" ' +
+          'placeholder="Jouw antwoord…"></textarea>';
+
+      } else if (vraag.type === "likert") {
+        var schaalHtml = '<div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-top:12px;">';
+        if (vraag.schaalMinLabel) {
+          schaalHtml += '<span style="font-size:0.85rem; color:#5f6368;">' + escapeHtml(vraag.schaalMinLabel) + '</span>';
+        }
+        for (var s = vraag.schaalMin; s <= vraag.schaalMax; s++) {
+          schaalHtml +=
+            '<label style="display:flex; flex-direction:column; align-items:center; gap:4px; font-size:0.9rem; cursor:pointer;">' +
+            '<input type="radio" name="extra-' + idx + '" value="' + s + '" style="accent-color:#673ab7; width:18px; height:18px;">' +
+            s + '</label>';
+        }
+        if (vraag.schaalMaxLabel) {
+          schaalHtml += '<span style="font-size:0.85rem; color:#5f6368;">' + escapeHtml(vraag.schaalMaxLabel) + '</span>';
+        }
+        schaalHtml += '</div>';
+        invoerHtml = schaalHtml;
+
+      } else if (vraag.type === "meerkeuze") {
+        var checkHtml = '<div style="display:flex; flex-direction:column; gap:6px; margin-top:8px;">';
+        (vraag.opties || []).forEach(function(optie) {
+          checkHtml +=
+            '<label style="display:flex; align-items:center; gap:10px; padding:10px; ' +
+            'border:1px solid #dadce0; border-radius:4px; cursor:pointer;">' +
+            '<input type="checkbox" name="extra-' + idx + '" value="' + escapeHtml(optie) + '" ' +
+            'style="accent-color:#673ab7; width:18px; height:18px;">' +
+            '<span style="font-size:0.9375rem;">' + escapeHtml(optie) + '</span>' +
+            '</label>';
+        });
+        checkHtml += '</div>';
+        invoerHtml = checkHtml;
+      }
+
+      kaart.innerHTML =
+        '<div class="vraag-titel">' + escapeHtml(vraag.titel) + '</div>' +
+        (vraag.hint ? '<p class="hint">' + escapeHtml(vraag.hint) + '</p>' : '') +
+        invoerHtml;
+
+      extraContainer.appendChild(kaart);
+    });
+  }
+
+  function bouwLijst(gridId, namen, sleutel) {
+    var grid = document.getElementById(gridId);
+    grid.innerHTML = "";
+    namen.forEach(function(naam) {
+      var label = document.createElement("label");
+      label.className = "checkbox-item";
+      label.innerHTML =
+        '<input type="checkbox" value="' + escapeHtml(naam) + '" onchange="updateTeller(\'' + sleutel + '\')">' +
+        '<span>' + escapeHtml(naam) + '</span>';
+      grid.appendChild(label);
+    });
+  }
+
+  function updateTeller(sleutel) {
+    var grid  = document.getElementById("grid-" + sleutel);
+    var teller = document.getElementById("tel-" + sleutel);
+    var boxes = grid.querySelectorAll('input[type="checkbox"]');
+    var max   = parseInt(grid.dataset.max) || 3;
+    var aantal = 0;
+    boxes.forEach(function(box) { if (box.checked) aantal++; });
+    teller.textContent = aantal;
+    if (aantal >= max) {
+      boxes.forEach(function(box) { if (!box.checked) box.disabled = true; });
+    } else {
+      boxes.forEach(function(box) { box.disabled = false; });
+    }
+  }
+
+  function getGeselecteerd(sleutel) {
+    var resultaat = [];
+    document.getElementById("grid-" + sleutel)
+      .querySelectorAll('input[type="checkbox"]:checked')
+      .forEach(function(box) { resultaat.push(box.value); });
+    return resultaat;
+  }
+
+  function wisFormulier() {
+    document.getElementById("eigen-naam").value = "";
+    document.getElementById("vragen-container").innerHTML = "";
+    document.getElementById("extra-vragen-container").innerHTML = "";
+    document.getElementById("submit-kaart").classList.add("verborgen");
+    document.getElementById("btn-submit").disabled = true;
+    eigenNaam = "";
+  }
+
+  async function verstuur() {
+    var btn = document.getElementById("btn-submit");
+    btn.disabled = true;
+    btn.textContent = "Bezig met verzenden…";
+    document.getElementById("fout-melding").style.display = "none";
+
+    var antwoorden = {};
+    alleVragen.forEach(function(vraag) {
+      antwoorden[vraag.sleutel] = getGeselecteerd(vraag.sleutel);
+    });
+
+    var extraAntwoorden = {};
+    if (alleVragen.extraVragen) {
+      alleVragen.extraVragen.forEach(function(vraag, idx) {
+        var sleutel = "extra_vraag_" + (idx + 1);
+        if (vraag.type === "open") {
+          var el = document.getElementById("extra-" + idx);
+          extraAntwoorden[sleutel] = el ? el.value.trim() : "";
+        } else if (vraag.type === "likert") {
+          var checked = document.querySelector('input[name="extra-' + idx + '"]:checked');
+          extraAntwoorden[sleutel] = checked ? checked.value : "";
+        } else if (vraag.type === "meerkeuze") {
+          extraAntwoorden[sleutel] = Array.from(
+            document.querySelectorAll('input[name="extra-' + idx + '"]:checked')
+          ).map(function(cb) { return cb.value; });
+        }
+      });
+    }
+
+    try {
+      var res = await fetch("/api/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessieId:       sessieId,
+          naam:           eigenNaam,
+          antwoorden:     antwoorden,
+          extraAntwoorden: extraAntwoorden,
+        }),
+      });
+
+      var result = await res.json();
+
+      if (result.succes) {
+        document.getElementById("formulier-wrap").style.display = "none";
+        document.getElementById("succes-scherm").style.display  = "block";
+      } else if (result.alIngevuld) {
+        document.getElementById("formulier-wrap").style.display = "none";
+        document.getElementById("al-ingevuld-scherm").style.display = "block";
+      } else {
+        toonFout(result.fout || "");
+      }
+    } catch (err) {
+      toonFout("Geen verbinding. Controleer je internet en probeer opnieuw.");
+    }
+  }
+
+  function toonFout(tekst) {
+    var btn = document.getElementById("btn-submit");
+    btn.disabled = false;
+    btn.textContent = "Verzenden";
+    var el = document.getElementById("fout-melding");
+    el.textContent = tekst || "Er is iets misgegaan. Probeer het opnieuw.";
+    el.style.display = "block";
+  }
+
+  function toonFoutScherm(tekst) {
+    document.getElementById("laden").style.display = "none";
+    document.getElementById("fout-tekst").textContent = tekst || "Er is iets misgegaan.";
+    document.getElementById("fout-scherm").style.display = "block";
+  }
+
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+</script>
+
+</body>
+</html>
