@@ -1,0 +1,3197 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Klassenplattegrond</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --paars:       #673ab7;
+      --paars-donker:#4527a0;
+      --paars-licht: #ede7f6;
+      --groen:       #137333;
+      --groen-licht: #e6f4ea;
+      --rood:        #d93025;
+      --rood-licht:  #fce8e6;
+      --oranje:      #e37400;
+      --grijs:       #5f6368;
+      --rand:        #dadce0;
+      --tekst:       #202124;
+      --bg:          #f5f0ff;
+      --wit:         #ffffff;
+    }
+
+    body {
+      font-family: "DM Sans", sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      color: var(--tekst);
+      padding-bottom: 60px;
+    }
+
+    header {
+      background: var(--paars);
+      color: white;
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 2px 8px rgba(103,58,183,0.3);
+      position: relative;
+    }
+
+    header h1 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    header a.terug {
+      position: absolute;
+      right: 20px;
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
+      font-size: 0.85rem;
+    }
+
+    .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+
+    .card {
+      background: var(--wit);
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08), 0 2px 12px rgba(103,58,183,0.06);
+      padding: 22px 24px;
+      margin-bottom: 16px;
+    }
+
+    .card h2 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--tekst);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stap {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--paars);
+      color: white;
+      border-radius: 50%;
+      width: 22px; height: 22px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .upload-zone {
+      border: 2px dashed var(--rand);
+      border-radius: 8px;
+      padding: 28px;
+      text-align: center;
+      cursor: pointer;
+      color: var(--grijs);
+      font-size: 0.9rem;
+      transition: all 0.15s;
+    }
+    .upload-zone:hover { border-color: var(--paars); background: var(--paars-licht); }
+    .upload-zone.geladen { border-color: var(--groen); background: var(--groen-licht); color: var(--groen); border-style: solid; }
+    .upload-zone .icoon { font-size: 1.8rem; margin-bottom: 6px; }
+
+    .instelling-rij {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .instelling-rij label { font-size: 0.875rem; color: var(--tekst); }
+
+    input[type="number"] {
+      width: 72px;
+      padding: 7px 10px;
+      border: 1px solid var(--rand);
+      border-radius: 6px;
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.875rem;
+      outline: none;
+    }
+    input[type="number"]:focus { border-color: var(--paars); }
+
+    input[type="checkbox"] { accent-color: var(--paars); width: 16px; height: 16px; cursor: pointer; }
+    input[type="range"]    { accent-color: var(--paars); width: 160px; }
+
+    select {
+      padding: 7px 10px;
+      border: 1px solid var(--rand);
+      border-radius: 6px;
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.875rem;
+      outline: none;
+      background: white;
+    }
+    select:focus { border-color: var(--paars); }
+
+    button.primair {
+      background: var(--paars); color: white; border: none;
+      padding: 9px 22px; border-radius: 6px;
+      font-family: "DM Sans", sans-serif; font-size: 0.875rem; font-weight: 600;
+      cursor: pointer; transition: background 0.15s;
+    }
+    button.primair:hover { background: var(--paars-donker); }
+    button.primair:disabled { background: var(--rand); color: var(--grijs); cursor: not-allowed; }
+
+    button.secundair {
+      background: white; color: var(--paars); border: 1px solid var(--paars);
+      padding: 7px 16px; border-radius: 6px;
+      font-family: "DM Sans", sans-serif; font-size: 0.875rem; font-weight: 500;
+      cursor: pointer; transition: background 0.15s;
+    }
+    button.secundair:hover { background: var(--paars-licht); }
+
+    .knop-rij { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .status { font-size: 0.8rem; color: var(--grijs); margin-top: 8px; }
+    .status.fout { color: var(--rood); }
+    .status.ok   { color: var(--groen); }
+
+    .voortgang-wrap { display: none; margin-top: 14px; }
+    .voortgang-balk-wrap { background: #f1f3f4; border-radius: 99px; height: 6px; overflow: hidden; margin-bottom: 6px; }
+    .voortgang-balk { background: var(--paars); height: 100%; border-radius: 99px; transition: width 0.1s; }
+    .voortgang-tekst { font-size: 0.78rem; color: var(--grijs); }
+
+    #plattegrond-wrap { margin-top: 8px; overflow-x: auto; }
+    #plattegrond-wrap-docent { margin-top: 8px; overflow-x: auto; }
+
+    .lokaal {
+      display: inline-block;
+      background: #f8f6ff;
+      border: 2px solid #d1c4e9;
+      border-radius: 10px;
+      padding: 24px 20px;
+      position: relative;
+    }
+
+    .lokaal.vrij-canvas { overflow: auto; }
+
+    .bord {
+      background: #2e7d32;
+      color: white;
+      text-align: center;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      padding: 6px 20px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      display: table;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .rijen-wrap { display: flex; flex-direction: column; gap: var(--rij-afstand, 10px); }
+    .rij { display: flex; gap: 0; align-items: center; }
+    .paar { display: flex; gap: var(--afstand-paar, 4px); }
+    .gangpad { width: var(--gangpad-breedte, 24px); flex-shrink: 0; }
+
+    .stoel {
+      width: var(--tafel-breedte, 70px);
+      height: var(--tafel-hoogte, 56px);
+      border-radius: 5px;
+      border: 2px solid var(--rand);
+      background: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--letter-grootte, 11px);
+      font-weight: 500;
+      color: var(--tekst);
+      cursor: default;
+      transition: all 0.15s;
+      text-align: center;
+      padding: 2px;
+      line-height: 1.2;
+      position: relative;
+    }
+
+    .stoel.jongen { background: #e3f2fd; border-color: #90caf9; }
+    .stoel.meisje { background: #fce4ec; border-color: #f48fb1; }
+    .stoel.overig { background: #f3e5f5; border-color: #ce93d8; }
+    .stoel.leeg   { background: #f8f9fa; border-color: #e8eaed; color: #bdc1c6; }
+    .stoel.kaal   { background: #e0e0e0 !important; border-color: #999999 !important; color: #222222 !important; }
+    .stoel.kaal .score-dot { display: none; }
+
+    .stoel[draggable="true"] { cursor: grab; }
+    .stoel[draggable="true"]:hover { border-style: dashed; border-color: var(--paars); box-shadow: 0 0 0 2px rgba(103,58,183,0.12); }
+    .stoel[draggable="true"]:active { cursor: grabbing; }
+    .stoel.sleep-over { outline: 2.5px dashed var(--paars); outline-offset: 2px; background: var(--paars-licht) !important; border-style: solid !important; }
+    .stoel.sleep-bron { opacity: 0.4; }
+
+    .stoel.tafel-ontwerp {
+      background: #ececec !important;
+      border: 2px dashed #9e9e9e !important;
+      cursor: move;
+      user-select: none;
+    }
+    .stoel.tafel-ontwerp:hover { border-color: var(--paars) !important; }
+    .stoel.tafel-ontwerp.geselecteerd {
+      border-color: var(--paars) !important;
+      background: var(--paars-licht) !important;
+      box-shadow: 0 0 0 3px rgba(103,58,183,0.2) !important;
+    }
+
+    .tafel-knop {
+      position: absolute;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--paars);
+      color: white;
+      font-size: 11px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 5;
+      user-select: none;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+    }
+    .tafel-knop.verwijder { top: -8px; left: -8px; background: var(--rood); }
+
+    .tafel-handle {
+      position: absolute;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--paars);
+      border: 2px solid white;
+      cursor: grab;
+      z-index: 6;
+      top: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+      user-select: none;
+    }
+    .tafel-handle:hover { background: var(--paars-donker); }
+    .tafel-handle:active { cursor: grabbing; }
+    .tafel-handle::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      bottom: -6px;
+      width: 2px; height: 6px;
+      background: var(--paars);
+      transform: translateX(-50%);
+    }
+
+    .selectie-vak {
+      position: absolute;
+      border: 2px dashed var(--paars);
+      background: rgba(103,58,183,0.08);
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    .score-dot {
+      position: absolute;
+      top: 3px; right: 3px;
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,0.7);
+      z-index: 2;
+    }
+
+    /* Parking lot */
+    .plattegrond-layout {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+    }
+
+    .parking-lot {
+      min-width: 320px;
+      width: 320px;
+      min-height: 220px;
+      background: #f8f6ff;
+      border: 2px dashed #d1c4e9;
+      border-radius: 10px;
+      padding: 12px;
+      flex-shrink: 0;
+    }
+
+    .parking-lot-titel {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--grijs);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .parking-lot-stoelen {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      min-height: 60px;
+    }
+
+    .parking-lot.sleep-doel {
+      border-color: var(--paars);
+      background: var(--paars-licht);
+    }
+
+    /* Info card */
+    #info-card {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      pointer-events: none;
+      background: white;
+      border: 1.5px solid #d1c4e9;
+      border-radius: 10px;
+      padding: 14px 16px;
+      min-width: 200px;
+      max-width: 280px;
+      box-shadow: 0 4px 20px rgba(103,58,183,0.18), 0 1px 4px rgba(0,0,0,0.08);
+      font-family: "DM Sans", sans-serif;
+    }
+    #info-card .tip-naam { font-weight: 700; font-size: 0.95rem; color: #202124; margin-bottom: 4px; }
+    #info-card .tip-score { font-size: 0.78rem; font-weight: 500; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #ede7f6; }
+    #info-card .tip-rij { display: flex; gap: 8px; align-items: baseline; margin-bottom: 5px; font-size: 0.82rem; color: #202124; }
+    #info-card .tip-label { flex-shrink: 0; font-size: 0.75rem; color: #5f6368; min-width: 70px; }
+    #info-card .tip-namen { color: #202124; line-height: 1.4; }
+    #info-card .tip-geen { font-size: 0.8rem; color: #9e9e9e; font-style: italic; }
+
+    .btn-perspectief-actief { background: #673ab7 !important; color: white !important; border-color: #673ab7 !important; }
+
+    .legenda { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 16px; font-size: 0.78rem; color: var(--grijs); align-items: center; }
+    .legenda-item { display: flex; align-items: center; gap: 5px; }
+    .legenda-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+    .score-sectie {
+      background: var(--paars-licht);
+      border: 1px solid #d1c4e9;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-top: 16px;
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .score-item { text-align: center; }
+    .score-getal { font-size: 1.5rem; font-weight: 600; color: var(--paars); font-family: "DM Mono", monospace; }
+    .score-label { font-size: 0.72rem; color: var(--grijs); margin-top: 2px; }
+
+    .opl-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+    .opl-tab { padding: 5px 14px; border-radius: 99px; border: 1px solid var(--rand); background: white; font-size: 0.8rem; cursor: pointer; transition: all 0.15s; }
+    .opl-tab.actief { background: var(--paars); color: white; border-color: var(--paars); }
+    .opl-tab:hover:not(.actief) { background: var(--paars-licht); border-color: var(--paars); }
+
+    #sessie-lader { display: none; background: #f8f5ff; border: 1px solid #d1c4e9; border-radius: 8px; padding: 16px; margin-bottom: 16px; text-align: left; }
+    .sheet-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #f1f3f4; font-size: 0.875rem; }
+    .sheet-item:hover { background: var(--paars-licht); }
+    .sheet-item.geselecteerd { background: var(--paars-licht); font-weight: 600; }
+    .laden-lijst { padding: 20px; text-align: center; color: var(--grijs); font-size: 0.875rem; }
+    .spinner { width: 22px; height: 22px; border: 2.5px solid var(--rand); border-top-color: var(--paars); border-radius: 50%; animation: draaien 0.8s linear infinite; margin: 0 auto 8px; }
+    @keyframes draaien { to { transform: rotate(360deg); } }
+
+    .warn { font-size: 0.82rem; color: var(--oranje); margin-top: 8px; display: none; }
+    .info-tekst { font-size: 0.85rem; color: var(--grijs); margin-bottom: 14px; line-height: 1.5; }
+  </style>
+</head>
+<body>
+
+<header>
+  <svg width="28" height="28" viewBox="0 0 100 100">
+    <line x1="48" y1="20" x2="82" y2="32" stroke="#fff" stroke-width="3"/>
+    <line x1="48" y1="20" x2="65" y2="65" stroke="#fff" stroke-width="3"/>
+    <line x1="48" y1="20" x2="15" y2="48" stroke="#fff" stroke-width="3"/>
+    <line x1="82" y1="32" x2="65" y2="65" stroke="#fff" stroke-width="3"/>
+    <line x1="15" y1="48" x2="25" y2="85" stroke="#fff" stroke-width="3"/>
+    <line x1="15" y1="48" x2="65" y2="65" stroke="#fff" stroke-width="3"/>
+    <circle cx="48" cy="20" r="14" fill="#ffaaaa" stroke="white" stroke-width="2.5"/>
+    <circle cx="82" cy="32" r="8"  fill="#aaddff" stroke="white" stroke-width="2.5"/>
+    <circle cx="65" cy="65" r="11" fill="#ffaaaa" stroke="white" stroke-width="2.5"/>
+    <circle cx="15" cy="48" r="12" fill="#aaddff" stroke="white" stroke-width="2.5"/>
+    <circle cx="25" cy="85" r="7"  fill="#ffaaaa" stroke="white" stroke-width="2.5"/>
+  </svg>
+  <h1>Klassenplattegrond</h1>
+  <a class="terug" href="/"><h1>Klassenplattegrond</h1>#8592; Overzicht</a>
+</header>
+
+<div id="info-card"></div>
+
+<div class="container">
+
+  <div class="card">
+    <h2><span class="stap">1</span>Laad sociogram-data</h2>
+    <p class="info-tekst">Laad een positieve vraag en optioneel een negatieve vraag.</p>
+
+    <div style="display:flex; gap:16px; flex-wrap:wrap;">
+      <div style="flex:1; min-width:200px;">
+        <div style="font-size:0.8rem; font-weight:600; color:var(--grijs); margin-bottom:6px;">Positieve vraag</div>
+        <div class="upload-zone" id="zone-pos" onclick="document.getElementById('input-pos').click()">
+          <div class="icoon">&#128193;</div>
+          <div>Klik om JSON te selecteren</div>
+        </div>
+        <input type="file" id="input-pos" accept=".json" style="display:none;" onchange="laadJson(event, false)">
+      </div>
+      <div style="flex:1; min-width:200px;" id="neg-upload-wrap">
+        <div style="font-size:0.8rem; font-weight:600; color:var(--grijs); margin-bottom:6px;">Negatieve vraag <span style="font-weight:400;">(optioneel)</span></div>
+        <div class="upload-zone" id="zone-neg" onclick="document.getElementById('input-neg').click()">
+          <div class="icoon">&#128193;</div>
+          <div>Klik om JSON te selecteren</div>
+        </div>
+        <input type="file" id="input-neg" accept=".json" style="display:none;" onchange="laadJson(event, true)">
+      </div>
+    </div>
+    <details style="margin-top:14px;">
+      <summary style="cursor:pointer; font-size:0.875rem; font-weight:600; color:var(--paars); padding:6px 0; user-select:none;">&#9998; Of plak een lijst met namen</summary>
+      <div style="margin-top:10px;">
+        <p class="info-tekst" style="margin-bottom:8px;">Plak namen hieronder, &eacute;&eacute;n per regel. Geslacht optioneel: M of V achter de naam, gescheiden door tab of komma.</p>
+        <textarea id="namen-invoer" rows="8" style="width:100%; padding:8px 10px; border:1.5px solid var(--rand); border-radius:6px; font-family:'DM Mono',monospace; font-size:0.82rem; resize:vertical; outline:none;" placeholder="Jan de Vries&#10;Emma Jansen, V&#10;Pieter Bakker, M"></textarea>
+        <div style="margin-top:8px;">
+          <button class="secundair" onclick="laadNamenLijst()">Laad namen</button>
+        </div>
+      </div>
+    </details>
+    <!-- Sessie-lader -->
+    <div id="sessie-lader" style="margin-top:14px;">
+      <div style="font-weight:600; font-size:0.9rem; margin-bottom:10px;" id="sessie-lader-titel">Laden uit sessie</div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+        <div style="flex:1; min-width:180px;">
+          <label style="font-size:0.8rem; font-weight:600; color:var(--grijs); display:block; margin-bottom:4px;">Sessie-ID</label>
+          <input type="text" id="sessie-id-invoer" placeholder="bijv. klas3b-wiskunde" style="width:100%; padding:7px 10px; border:1.5px solid var(--rand); border-radius:6px; font-size:0.875rem; box-sizing:border-box;">
+        </div>
+        <div style="flex:1; min-width:180px;">
+          <label style="font-size:0.8rem; font-weight:600; color:var(--grijs); display:block; margin-bottom:4px;">Beheertoken</label>
+          <input type="text" id="sessie-token-invoer" placeholder="beheertoken" style="width:100%; padding:7px 10px; border:1.5px solid var(--rand); border-radius:6px; font-size:0.875rem; box-sizing:border-box;">
+        </div>
+      </div>
+      <button class="primair" onclick="laadSessieVragen()">Vragen laden</button>
+      <button class="secundair" style="margin-left:8px;" onclick="document.getElementById('sessie-lader').style.display='none'">Annuleren</button>
+      <div id="sessie-lader-status" style="margin-top:10px; font-size:0.85rem;"></div>
+      <div id="sessie-vragen-lijst" style="margin-top:10px;"></div>
+    </div>
+
+    <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+      <button class="secundair" onclick="toonSessieLader(false)" style="font-size:0.82rem;">&#9729; Laden uit sessie (positief)</button>
+      <button class="secundair" onclick="toonSessieLader(true)" style="font-size:0.82rem;">&#9729; Laden uit sessie (negatief)</button>
+    </div>
+
+    <div id="data-info" style="display:none; margin-top:12px; font-size:0.85rem; color:var(--groen); padding:8px 12px; background:var(--groen-licht); border-radius:6px;"></div>
+  </div>
+
+  <div class="card">
+    <h2><span class="stap">2</span>Instellingen opstelling</h2>
+    <div class="instelling-rij">
+      <label>Opstelling:</label>
+      <select id="opstelling" onchange="updateOpstellingUI()">
+        <option value="bus">Busopstelling</option>
+        <option value="u">Dubbele U-opstelling</option>
+        <option value="maatwerk">Maatwerk-opstelling (zelf tafels plaatsen)</option>
+      </select>
+    </div>
+    <div id="bus-instellingen">
+      <div class="instelling-rij">
+        <label>Rijen:</label>
+        <input type="number" id="rijen" min="1" max="10" value="5">
+        <label>Paren per rij:</label>
+        <input type="number" id="paren" min="1" max="8" value="3">
+      </div>
+    </div>
+    <div id="u-instellingen" style="display:none;">
+      <div class="info-tekst" style="margin-bottom:8px;">Dubbele U: buitenste en binnenste U-vorm. Bord staat aan de open kant.</div>
+      <div class="instelling-rij" style="flex-wrap:wrap; gap:10px;">
+        <label>Buiten breed:</label>
+        <input type="number" id="u-buiten-breed" min="2" max="10" value="6" style="width:60px;">
+        <label>Buiten diep:</label>
+        <input type="number" id="u-buiten-diep" min="2" max="10" value="6" style="width:60px;">
+        <label>Binnen breed:</label>
+        <input type="number" id="u-binnen-breed" min="1" max="10" value="4" style="width:60px;">
+        <label>Binnen diep:</label>
+        <input type="number" id="u-binnen-diep" min="1" max="10" value="4" style="width:60px;">
+      </div>
+      <div id="u-telling" style="font-size:0.82rem; color:var(--grijs); margin-top:4px;"></div>
+    </div>
+    <div id="maatwerk-instellingen" style="display:none;">
+      <p class="info-tekst">Voeg tafels toe, versleep ze naar de gewenste plek en draai ze aan de handgreep boven elke tafel. Klik daarna op <strong>"Vergrendel tafels"</strong> om leerlingen te kunnen toewijzen. Je kunt de opstelling later altijd weer ontgrendelen om tafels te verplaatsen.</p>
+      <p class="info-tekst" style="margin-top:6px; font-size:0.8rem; color:var(--paars);">Tip: Sleep een kader over meerdere tafels om ze tegelijk te selecteren en te verplaatsen. Shift+klik om tafels aan/uit de selectie toe te voegen.</p>
+      <input type="file" id="maatwerk-file-input" accept=".json" style="display:none;" onchange="importeerMaatwerkLayout(event)">
+      <div class="knop-rij" id="maatwerk-knoppen-ontwerp">
+        <button class="secundair" onclick="voegVrijeTafelToe()">+ Tafel toevoegen</button>
+        <button class="secundair" onclick="document.getElementById('maatwerk-file-input').click()">&#128193; Layout laden (.json)</button>
+        <button class="primair" onclick="vergrendelMaatwerk()">&#128274; Vergrendel tafels</button>
+      </div>
+      <div class="knop-rij" id="maatwerk-knoppen-vergrendeld" style="display:none;">
+        <button class="secundair" onclick="ontgrendelMaatwerk()">&#128275; Ontgrendel &amp; tafels bewerken</button>
+        <button class="secundair" onclick="exporteerMaatwerkLayout()">&#8595; Exporteer layout (.json)</button>
+      </div>
+      <div class="status" id="maatwerk-status"></div>
+    </div>
+    <div class="instelling-rij">
+      <label class="toggle-wrap" style="display:flex; align-items:center; gap:8px;">
+        <input type="checkbox" id="weeg-negatief" checked>
+        Negatieve relaties meewegen
+      </label>
+    </div>
+    <div class="instelling-rij">
+      <label>Gewicht negatief:</label>
+      <select id="gewicht-neg">
+        <option value="1" selected>1&times;</option>
+        <option value="2">2&times;</option>
+        <option value="3">3&times;</option>
+      </select>
+    </div>
+    <div class="instelling-rij">
+      <label class="toggle-wrap" style="display:flex; align-items:center; gap:8px;">
+        <input type="checkbox" id="weeg-mix" checked>
+        Jongens en meisjes mixen (buren)
+      </label>
+    </div>
+    <div class="instelling-rij" id="mix-gewicht-rij">
+      <label>Mixgewicht:</label>
+      <input type="range" id="mix-gewicht" min="0" max="3" step="0.1" value="1">
+      <span id="mix-gewicht-waarde" style="font-family:'DM Mono',monospace; font-size:0.85rem; min-width:30px;">1.0</span>
+    </div>
+    <div class="instelling-rij">
+      <label>Kwaliteit:</label>
+      <select id="kwaliteit">
+        <option value="snel" selected>Snel (100k iteraties)</option>
+        <option value="normaal">Normaal (1M iteraties)</option>
+        <option value="grondig">Grondig (5M iteraties)</option>
+      </select>
+    </div>
+    <div class="instelling-rij">
+      <label>Aantal oplossingen:</label>
+      <select id="aantal-opl">
+        <option value="1" selected>1</option>
+        <option value="3">3</option>
+        <option value="5">5</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="stap">3</span>Bereken plattegrond</h2>
+    <div class="knop-rij">
+      <button class="primair" id="btn-bereken" onclick="berekenPlattegrond()" disabled>Bereken plattegrond</button>
+      <button class="secundair" id="btn-reset" onclick="resetResultaten()" style="display:none;">&#8634; Opnieuw</button>
+      <button class="secundair" id="btn-opbreken" onclick="opbrekenOpstelling()" style="display:none;">&#128275; Opstelling openbreken (vrij bewerken)</button>
+    </div>
+    <div class="voortgang-wrap" id="voortgang-wrap">
+      <div class="voortgang-balk-wrap"><div class="voortgang-balk" id="voortgang-balk" style="width:0%"></div></div>
+      <div class="voortgang-tekst" id="voortgang-tekst">Bezig...</div>
+    </div>
+    <div class="status" id="status-bereken"></div>
+  </div>
+
+  <div class="card" id="resultaten-kaart" style="display:none; overflow-x:auto;">
+    <h2>Beste plattegronden</h2>
+    <div class="opl-tabs" id="opl-tabs"></div>
+    <div style="display:flex; gap:0; margin-bottom:16px; border-bottom:2px solid #dadce0;">
+      <button id="tab-klas" onclick="setPerspectief('klas')"
+        style="padding:7px 18px; border:none; border-bottom:3px solid #673ab7; margin-bottom:-2px; background:none; font-family:'DM Sans',sans-serif; font-size:0.85rem; font-weight:600; color:#673ab7; cursor:pointer;">
+        Vanuit de klas
+      </button>
+      <button id="tab-docent" onclick="setPerspectief('docent')"
+        style="padding:7px 18px; border:none; border-bottom:3px solid transparent; margin-bottom:-2px; background:none; font-family:'DM Sans',sans-serif; font-size:0.85rem; font-weight:500; color:#5f6368; cursor:pointer;">
+        Vanuit de docent
+      </button>
+    </div>
+    <details style="margin-bottom:14px;">
+      <summary style="cursor:pointer; font-size:0.875rem; font-weight:600; color:var(--paars); padding:8px 0; user-select:none;">Vormgeving aanpassen</summary>
+      <div style="margin-top:12px; display:flex; flex-direction:column; gap:10px;">
+        <div class="instelling-rij">
+          <label>Tafelbreedte:</label>
+          <input type="range" id="tafel-breedte" min="40" max="120" step="5" value="70">
+          <span id="tafel-breedte-waarde" style="font-family:monospace; font-size:0.85rem; min-width:36px;">70px</span>
+        </div>
+        <div class="instelling-rij">
+          <label>Tafeldiepte:</label>
+          <input type="range" id="tafel-hoogte" min="30" max="100" step="5" value="56">
+          <span id="tafel-hoogte-waarde" style="font-family:monospace; font-size:0.85rem; min-width:36px;">56px</span>
+        </div>
+        <div class="instelling-rij">
+          <label>Lettergrootte:</label>
+          <input type="range" id="letter-grootte" min="8" max="18" step="1" value="11">
+          <span id="letter-grootte-waarde" style="font-family:monospace; font-size:0.85rem; min-width:36px;">11px</span>
+        </div>
+        <div class="instelling-rij">
+          <label>Afstand binnen paar:</label>
+          <input type="range" id="afstand-paar" min="2" max="30" step="2" value="4">
+          <span id="afstand-paar-waarde" style="font-family:monospace; font-size:0.85rem; min-width:36px;">4px</span>
+        </div>
+        <div class="instelling-rij">
+          <label>Gangpadbreedte:</label>
+          <input type="range" id="gangpad-breedte" min="10" max="80" step="5" value="24">
+          <span id="gangpad-breedte-waarde" style="font-family:monospace; font-size:0.85rem; min-width:36px;">24px</span>
+        </div>
+        <div class="instelling-rij" id="rij-afstand-rij">
+          <label>Rij-afstand:</label>
+          <input type="range" id="rij-afstand" min="4" max="40" step="2" value="10">
+          <span id="rij-afstand-waarde" style="font-family:monospace; font-size:0.85rem; min-width:36px;">10px</span>
+        </div>
+        <div class="instelling-rij" id="u-naast-rij" style="display:none;">
+          <label>Naast-afstand:</label>
+          <input type="range" id="u-afstand-naast" min="0" max="40" step="1" value="6">
+          <span id="u-afstand-naast-waarde" style="font-family:monospace; font-size:0.85rem; min-width:36px;">6px</span>
+        </div>
+        <div class="instelling-rij" id="u-achter-rij" style="display:none;">
+          <label>Voor/achter-afstand:</label>
+          <input type="range" id="u-afstand-achter" min="0" max="40" step="1" value="10">
+          <span id="u-afstand-achter-waarde" style="font-family:monospace; font-size:0.85rem; min-width:36px;">10px</span>
+        </div>
+        <div class="instelling-rij">
+          <label class="toggle-wrap" style="display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" id="kale-weergave">
+            Kale weergave (geen kleur, geen dots)
+          </label>
+        </div>
+      </div>
+    </details>
+
+    <div class="plattegrond-layout">
+      <div style="flex:1; min-width:0; overflow-x:auto;">
+        <div id="plattegrond-wrap" style="display:block;"></div>
+        <div id="plattegrond-wrap-docent" style="display:none;"></div>
+      </div>
+      <div class="parking-lot" id="parking-lot"
+           ondragover="parkingDragOver(event)"
+           ondragleave="parkingDragLeave(event)"
+           ondrop="parkingDrop(event)">
+        <div class="parking-lot-titel">&#128663; Parking lot</div>
+        <div style="text-align:center; margin-bottom:8px;">
+          <button class="secundair" style="font-size:0.75rem; padding:4px 10px;" onclick="allesNaarParking()">Alles naar parking lot</button>
+        </div>
+        <div class="parking-lot-stoelen" id="parking-stoelen"></div>
+      </div>
+    </div>
+
+    <div id="score-sectie" class="score-sectie" style="display:none;"></div>
+    <div class="legenda">
+      <span class="legenda-item"><span class="legenda-dot" style="background:#4caf50;"></span>Hoge score (goede buur)</span>
+      <span class="legenda-item"><span class="legenda-dot" style="background:#ff9800;"></span>Neutrale score</span>
+      <span class="legenda-item"><span class="legenda-dot" style="background:#f44336;"></span>Lage score (slechte buur)</span>
+      <span class="legenda-item"><span class="legenda-dot" style="background:#e3f2fd; border:1px solid #90caf9;"></span>Jongen</span>
+      <span class="legenda-item"><span class="legenda-dot" style="background:#fce4ec; border:1px solid #f48fb1;"></span>Meisje</span>
+    </div>
+    <div style="margin-top:16px; display:flex; gap:8px; flex-wrap:wrap;" id="export-knoppen">
+      <button class="secundair" id="btn-kopieer-excel" onclick="kopieerNaarExcel()">&#9112; Kopieer voor Excel</button>
+      <button class="secundair" onclick="exporteerCSV()">&#8595; Exporteer als CSV</button>
+      <button class="secundair" id="btn-download-img" onclick="downloadAlsAfbeelding()">&#128247; Download als afbeelding</button>
+    </div>
+  </div>
+
+</div>
+<script>
+  var studenten       = [];
+  var positieveMatrix = {};
+  var negatiefMatrix  = {};
+  var heeftNegatief   = false;
+  
+  var sessieLaderActief    = false;
+  var sessieLaderIsNegatief = false;
+  var geldenUitSessie     = false;
+  var huidigeSessieData   = null;
+  
+  var alleOplossingen      = [];
+  var huidigeOpstelling    = "bus";
+  var actieveOplossing     = 0;
+  var huidigeToewijzing    = null;
+  var huidigeStoelen       = null;
+  var huidigeRijen         = 5;
+  var huidigeParen         = 3;
+  var huidigeNaamLookup    = {};
+  var huidigeGeslachtLookup = {};
+
+  // --- Maatwerk / vrije opstelling ---
+  var ontwerpModusActief   = false;   // tafels toevoegen/verplaatsen/draaien toegestaan
+  var ontwerpVergrendeld   = false;   // tafels vastgezet: alleen leerlingen slepen
+  var vrijeTafelTeller     = 0;
+
+  document.addEventListener("DOMContentLoaded", function() {
+    var card = document.getElementById("info-card");
+    card.setAttribute("style", "display:none; position:fixed !important; z-index:9999; pointer-events:none; background:rgba(255,252,180,0.82); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); border:1.5px solid rgba(200,190,80,0.3); border-radius:10px; padding:14px 16px; min-width:200px; max-width:280px; box-shadow:0 4px 20px rgba(103,58,183,0.15); font-family:DM Sans,sans-serif;");
+    var slider = document.getElementById("mix-gewicht");
+    var label  = document.getElementById("mix-gewicht-waarde");
+    if (slider) {
+      slider.addEventListener("input", function() { label.textContent = parseFloat(this.value).toFixed(1); });
+    }
+    document.getElementById("weeg-mix").addEventListener("change", function() {
+      document.getElementById("mix-gewicht-rij").style.display = this.checked ? "flex" : "none";
+    });
+    function koppelSlider(id, labelId, suffix, cssVar) {
+      var el = document.getElementById(id);
+      var lb = document.getElementById(labelId);
+      if (!el) return;
+      function update() {
+        lb.textContent = el.value + suffix;
+        document.documentElement.style.setProperty(cssVar, el.value + "px");
+        if (huidigeOpstelling === "u" || huidigeOpstelling === "vrij") { if (alleOplossingen.length) setPerspectief(huidigPerspectief); }
+      }
+      el.addEventListener("input", update);
+      update();
+    }
+    document.getElementById("kale-weergave").addEventListener("change", function() {
+      var kaal = this.checked;
+      document.querySelectorAll(".stoel:not(.leeg)").forEach(function(el) {
+        if (kaal) {
+          el.classList.add("kaal");
+        } else {
+          el.classList.remove("kaal");
+          var id = parseInt(el.dataset.studentId);
+          if (id && huidigeGeslachtLookup) {
+            var g = huidigeGeslachtLookup[id];
+            el.classList.remove("jongen", "meisje", "overig");
+            el.classList.add(g === "M" ? "jongen" : (g === "V" ? "meisje" : "overig"));
+          }
+        }
+      });
+    });
+    koppelSlider("tafel-breedte",     "tafel-breedte-waarde",     "px", "--tafel-breedte");
+    koppelSlider("tafel-hoogte",      "tafel-hoogte-waarde",      "px", "--tafel-hoogte");
+    koppelSlider("letter-grootte",    "letter-grootte-waarde",    "px", "--letter-grootte");
+    koppelSlider("afstand-paar",      "afstand-paar-waarde",      "px", "--afstand-paar");
+    koppelSlider("gangpad-breedte",   "gangpad-breedte-waarde",   "px", "--gangpad-breedte");
+    koppelSlider("rij-afstand",       "rij-afstand-waarde",       "px", "--rij-afstand");
+    koppelSlider("u-afstand-naast",   "u-afstand-naast-waarde",   "px", "--u-afstand-naast");
+    koppelSlider("u-afstand-achter",  "u-afstand-achter-waarde",  "px", "--u-afstand-achter");
+  });
+
+  document.addEventListener("DOMContentLoaded", function() {
+    ["u-buiten-breed","u-buiten-diep","u-binnen-breed","u-binnen-diep"].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener("input", updateUTelling);
+    });
+    updateUTelling();
+  });
+
+  function updateOpstellingUI() {
+    var opstelling = document.getElementById("opstelling").value;
+    document.getElementById("bus-instellingen").style.display = opstelling === "bus" ? "block" : "none";
+    document.getElementById("u-instellingen").style.display   = opstelling === "u"   ? "block" : "none";
+    document.getElementById("maatwerk-instellingen").style.display = opstelling === "maatwerk" ? "block" : "none";
+    var afstandPaarRij = document.getElementById("afstand-paar") ? document.getElementById("afstand-paar").closest(".instelling-rij") : null;
+    var gangpadRij     = document.getElementById("gangpad-breedte") ? document.getElementById("gangpad-breedte").closest(".instelling-rij") : null;
+    if (afstandPaarRij) afstandPaarRij.style.display = opstelling === "u" ? "none" : "flex";
+    if (gangpadRij)     gangpadRij.style.display      = opstelling === "u" ? "none" : "flex";
+    var rijAfstandRij = document.getElementById("rij-afstand-rij");
+    var uNaastRij     = document.getElementById("u-naast-rij");
+    var uAchterRij    = document.getElementById("u-achter-rij");
+    if (rijAfstandRij) rijAfstandRij.style.display = opstelling === "u" ? "none" : "flex";
+    if (uNaastRij)     uNaastRij.style.display     = opstelling === "u" ? "flex" : "none";
+    if (uAchterRij)    uAchterRij.style.display    = opstelling === "u" ? "flex" : "none";
+    if (opstelling === "u") updateUTelling();
+
+    document.getElementById("btn-opbreken").style.display = "none";
+
+    if (opstelling === "maatwerk") {
+      huidigeOpstelling = "vrij";
+      startMaatwerkModus();
+    } else {
+      huidigeOpstelling = opstelling;
+      ontwerpModusActief = false;
+      ontwerpVergrendeld = false;
+      alleOplossingen = [];
+      document.getElementById("resultaten-kaart").style.display = "none";
+      document.getElementById("btn-bereken").disabled = (studenten.length === 0);
+    }
+  }
+
+  function updateUTelling() {
+    var bb  = parseInt(document.getElementById("u-buiten-breed").value) || 6;
+    var bd  = parseInt(document.getElementById("u-buiten-diep").value)  || 4;
+    var ib  = parseInt(document.getElementById("u-binnen-breed").value) || 3;
+    var ibd = parseInt(document.getElementById("u-binnen-diep").value)  || 2;
+    var buiten = 2 * bd + bb;
+    var binnen = 2 * ibd + ib;
+    document.getElementById("u-telling").textContent =
+      "Totaal: " + (buiten + binnen) + " stoelen (buiten: " + buiten + ", binnen: " + binnen + ")";
+  }
+
+  function genereerStoelen(rijen, paren) {
+    var stoelen = [];
+    var idx = 0;
+    for (var r = 0; r < rijen; r++) {
+      for (var p = 0; p < paren; p++) {
+        stoelen.push({ idx: idx++, rij: r, kolom: p * 2.5, x: p * 2.5, y: r });
+        stoelen.push({ idx: idx++, rij: r, kolom: p * 2.5 + 1, x: p * 2.5 + 1, y: r });
+      }
+    }
+    return stoelen;
+  }
+
+  function genereerUStoelen(buitenBreed, buitenDiep, binnenBreed, binnenDiep) {
+    var stoelen = [];
+    var idx = 0;
+    function voeg(zijde, i, rot) {
+      stoelen.push({ idx: idx++, zijde: zijde, idxInZijde: i, rotatie: rot, x: 0, y: 0 });
+    }
+    for (var i = 0; i < binnenDiep;  i++) voeg('IL', i,  90);
+    for (var j = 0; j < binnenBreed; j++) voeg('IA', j,   0);
+    for (var i = 0; i < binnenDiep;  i++) voeg('IR', i, -90);
+    for (var j = 0; j < buitenBreed; j++) voeg('BA', j,   0);
+    for (var i = 0; i < buitenDiep;  i++) voeg('BL', i,  90);
+    for (var i = 0; i < buitenDiep;  i++) voeg('BR', i, -90);
+    return stoelen;
+  }
+
+  function leesUAfmetingen() {
+    var stijlen = getComputedStyle(document.documentElement);
+    var W = parseInt(stijlen.getPropertyValue("--tafel-breedte"))    || 70;
+    var H = parseInt(stijlen.getPropertyValue("--tafel-hoogte"))     || 56;
+    var _n = parseInt(stijlen.getPropertyValue("--u-afstand-naast"));
+    var _a = parseInt(stijlen.getPropertyValue("--u-afstand-achter"));
+    var N = isNaN(_n) ? 6  : _n;
+    var A = isNaN(_a) ? 10 : _a;
+    var bB = parseInt(document.getElementById("u-buiten-breed").value) || 6;
+    var bD = parseInt(document.getElementById("u-buiten-diep").value)  || 4;
+    var iB = parseInt(document.getElementById("u-binnen-breed").value) || 3;
+    var iD = parseInt(document.getElementById("u-binnen-diep").value)  || 2;
+    return { W: W, H: H, N: N, A: A, bB: bB, bD: bD, iB: iB, iD: iD };
+  }
+
+  function berekenUPxPos(s, bB, bD, iB, iD, W, H, N, A) {
+    var IL_height = (iD - 1) * (W + N) + W;
+    var BL_height = (bD - 1) * (W + N) + W;
+    var IA_breed  = (iB - 1) * (W + N) + W;
+    var BA_breed  = (bB - 1) * (W + N) + W;
+    var IA_top_rel = IL_height + N;
+    var BA_top_rel = IA_top_rel + H + A;
+    var BL_top_rel = BA_top_rel - N - BL_height;
+    var VY = Math.max(0, -BL_top_rel);
+    var VX_base = A + H;
+    var BA_left_at_VX = VX_base + IA_breed / 2 - BA_breed / 2;
+    var extra_x = Math.max(0, -BA_left_at_VX);
+    var VX = VX_base + extra_x;
+    var IL_left = VX;
+    var IA_left = VX;
+    var IR_left = VX + IA_breed - H;
+    var BA_left = VX + IA_breed / 2 - BA_breed / 2;
+    var BL_left = VX - A - H;
+    var BR_left = BA_left + BA_breed - H;
+    var left, top;
+    if (s.zijde === 'IL') {
+      left = IL_left; top = VY + s.idxInZijde * (W + N);
+    } else if (s.zijde === 'IA') {
+      left = IA_left + s.idxInZijde * (W + N); top = VY + IA_top_rel;
+    } else if (s.zijde === 'IR') {
+      left = IR_left; top = VY + s.idxInZijde * (W + N);
+    } else if (s.zijde === 'BA') {
+      left = BA_left + s.idxInZijde * (W + N); top = VY + BA_top_rel;
+    } else if (s.zijde === 'BL') {
+      left = Math.min(BL_left, BA_left); top = VY + BL_top_rel + s.idxInZijde * (W + N);
+    } else {
+      left = Math.max(BR_left, IA_left + IA_breed + A); top = VY + BL_top_rel + s.idxInZijde * (W + N);
+    }
+    var rotOffset = (s.rotatie !== 0) ? (W - H) / 2 : 0;
+    return { left: left - rotOffset, top: top + rotOffset };
+  }
+
+  function berekenBusPxPos(s, W, H, afstandPaar, gangpad, rijAfstand) {
+    var paarIdx = Math.floor(s.x / 2.5);
+    var lokaalX = s.x - paarIdx * 2.5;
+    var isRechts = lokaalX >= 1;
+    var left = paarIdx * (2 * W + afstandPaar + gangpad) + (isRechts ? (W + afstandPaar) : 0);
+    var top  = s.y * (H + rijAfstand);
+    return { left: left, top: top };
+  }
+
+  function toonUPlattegrond(opl, stoelen, naamLookup, geslachtLookup, wrapId, bordOnder) {
+    huidigeToewijzing = opl.toewijzing.slice();
+    var scores = berekenStoelScores(opl.toewijzing, stoelen);
+    var bezet  = scores.filter(function(s, i) { return huidigeToewijzing[i] !== null && huidigeToewijzing[i] !== undefined; });
+    var gem    = bezet.length > 0 ? bezet.reduce(function(a,b){return a+b;},0)/bezet.length : 0;
+    var spr    = bezet.length > 0 ? Math.sqrt(bezet.reduce(function(a,b){return a+(b-gem)*(b-gem);},0)/bezet.length) : 0.001;
+    var drempel = Math.max(spr * 0.5, 0.01);
+    function scoreKleur(sc) {
+      if (sc > gem + drempel) return "#4caf50";
+      if (sc < gem - drempel) return "#f44336";
+      return "#ff9800";
+    }
+    var afm = leesUAfmetingen();
+    var W = afm.W, H = afm.H, N = afm.N, A = afm.A, bB = afm.bB, bD = afm.bD, iB = afm.iB, iD = afm.iD;
+    var pxPos = stoelen.map(function(s) { return berekenUPxPos(s, bB, bD, iB, iD, W, H, N, A); });
+    var rotOff = (W - H) / 2;
+    var maxLeft = Math.max.apply(null, stoelen.map(function(s, i) {
+      return s.rotatie !== 0 ? pxPos[i].left + rotOff + H : pxPos[i].left + W;
+    }));
+    var maxTop = Math.max.apply(null, stoelen.map(function(s, i) {
+      return s.rotatie !== 0 ? pxPos[i].top - rotOff + W : pxPos[i].top + H;
+    }));
+    var marge = 20;
+    var bordH = 28;
+    var containerW = maxLeft + marge * 2;
+    var containerH = maxTop  + marge * 2 + bordH + 8;
+    var wrap = document.getElementById(wrapId);
+    wrap.innerHTML = "";
+    var lokaal = document.createElement("div");
+    lokaal.className = "lokaal";
+    lokaal.style.position = "relative";
+    lokaal.style.width    = containerW + "px";
+    lokaal.style.height   = containerH + "px";
+    var bordEl = document.createElement("div");
+    bordEl.className   = "bord";
+    bordEl.textContent = "BORD";
+    bordEl.style.position  = "absolute";
+    bordEl.style.left      = "50%";
+    bordEl.style.transform = "translateX(-50%)";
+    bordEl.style.whiteSpace = "nowrap";
+    bordEl.style.top = marge + "px";
+    lokaal.appendChild(bordEl);
+    var yOff = bordH + 8;
+    stoelen.forEach(function(s, si) {
+      var px  = pxPos[si];
+      var rot = s.rotatie || 0;
+      var el = maakStoelEl(si, opl.toewijzing, scores, naamLookup, geslachtLookup, scoreKleur, wrapId);
+      voegDragToe(el, si, stoelen, naamLookup, geslachtLookup);
+      el.style.position = "absolute";
+      el.style.width    = W + "px";
+      el.style.height   = H + "px";
+      el.style.left     = (marge + px.left) + "px";
+      el.style.top      = (marge + yOff + px.top) + "px";
+      if (rot !== 0) { el.style.transform = "rotate(" + rot + "deg)"; el.style.transformOrigin = "center center"; }
+      lokaal.appendChild(el);
+    });
+    if (bordOnder) {
+      lokaal.style.transform = "rotate(180deg)";
+      lokaal.style.transformOrigin = "center center";
+      bordEl.style.transform = "translateX(-50%) rotate(180deg)";
+    }
+    wrap.appendChild(lokaal);
+    schrijfScoreSectie(stoelen);
+  }
+
+  function euclidischeAfstand(s1, s2) {
+    var dx = s1.x - s2.x;
+    var dy = s1.y - s2.y;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  function isMixBuur(stoelA, stoelB) {
+    if (huidigeOpstelling === "vrij") {
+      var d = euclidischeAfstand(stoelA, stoelB);
+      return d > 0 && d < 1.3;
+    }
+    var dx = Math.abs(stoelA.x - stoelB.x);
+    var dy = Math.abs(stoelA.y - stoelB.y);
+    var inPaar = dy === 0 && dx === 1 && Math.floor(stoelA.x / 2.5) === Math.floor(stoelB.x / 2.5);
+    var inKolom = dx === 0 && dy === 1;
+    return inPaar || inKolom;
+  }
+
+  function berekenScore(toewijzing, stoelen) {
+    var score = 0;
+    var gewicht = parseInt(document.getElementById("gewicht-neg").value) || 1;
+    var weegNeg = document.getElementById("weeg-negatief").checked;
+    var weegMix = document.getElementById("weeg-mix").checked;
+    var mixGewicht = weegMix ? parseFloat(document.getElementById("mix-gewicht").value) : 0;
+    for (var i = 0; i < stoelen.length; i++) {
+      for (var j = 0; j < stoelen.length; j++) {
+        if (i === j) continue;
+        var idA = toewijzing[i]; var idB = toewijzing[j];
+        if (idA === null || idB === null) continue;
+        var afstand = euclidischeAfstand(stoelen[i], stoelen[j]);
+        if (afstand === 0) continue;
+        if (positieveMatrix[idA] && positieveMatrix[idA][idB]) score += 1 / afstand;
+        if (weegNeg && heeftNegatief && negatiefMatrix[idA] && negatiefMatrix[idA][idB]) score -= gewicht / afstand;
+        if (mixGewicht > 0 && isMixBuur(stoelen[i], stoelen[j])) {
+          var gA = studenten.find(function(s) { return s.id === idA; });
+          var gB = studenten.find(function(s) { return s.id === idB; });
+          if (gA && gB && gA.geslacht !== gB.geslacht && (gA.geslacht === "M" || gA.geslacht === "V") && (gB.geslacht === "M" || gB.geslacht === "V")) score += mixGewicht;
+        }
+      }
+    }
+    return score;
+  }
+
+  function berekenStoelScores(toewijzing, stoelen) {
+    var scores = new Array(stoelen.length).fill(0);
+    var gewicht = parseInt(document.getElementById("gewicht-neg").value) || 1;
+    var weegNeg = document.getElementById("weeg-negatief").checked;
+    var weegMix = document.getElementById("weeg-mix").checked;
+    var mixGewicht = weegMix ? parseFloat(document.getElementById("mix-gewicht").value) : 0;
+    for (var i = 0; i < stoelen.length; i++) {
+      var idA = toewijzing[i];
+      if (idA === null) continue;
+      for (var j = 0; j < stoelen.length; j++) {
+        if (i === j) continue;
+        var idB = toewijzing[j];
+        if (idB === null) continue;
+        var afstand = euclidischeAfstand(stoelen[i], stoelen[j]);
+        if (afstand === 0) continue;
+        if (positieveMatrix[idA] && positieveMatrix[idA][idB]) scores[i] += 1 / afstand;
+        if (weegNeg && heeftNegatief && negatiefMatrix[idA] && negatiefMatrix[idA][idB]) scores[i] -= gewicht / afstand;
+        if (mixGewicht > 0 && isMixBuur(stoelen[i], stoelen[j])) {
+          var gA = studenten.find(function(s) { return s.id === idA; });
+          var gB = studenten.find(function(s) { return s.id === idB; });
+          if (gA && gB && gA.geslacht !== gB.geslacht && (gA.geslacht === "M" || gA.geslacht === "V") && (gB.geslacht === "M" || gB.geslacht === "V")) scores[i] += mixGewicht;
+        }
+      }
+    }
+    return scores;
+  }
+
+  function wisselTwee(toewijzing) {
+    var kopie = toewijzing.slice();
+    var i = Math.floor(Math.random() * kopie.length);
+    var j = Math.floor(Math.random() * kopie.length);
+    while (j === i) j = Math.floor(Math.random() * kopie.length);
+    var tmp = kopie[i]; kopie[i] = kopie[j]; kopie[j] = tmp;
+    return kopie;
+  }
+
+  function simulatedAnnealing(stoelen, iteraties) {
+    var ids = studenten.map(function(s) { return s.id; });
+    var toewijzing = ids.slice();
+    while (toewijzing.length < stoelen.length) toewijzing.push(null);
+    toewijzing.sort(function() { return Math.random() - 0.5; });
+    var huidigeScore = berekenScore(toewijzing, stoelen);
+    var beste = toewijzing.slice();
+    var besteScore = huidigeScore;
+    var T = 5.0;
+    var afkoeling = Math.pow(0.001 / T, 1.0 / iteraties);
+    for (var i = 0; i < iteraties; i++) {
+      var kandidaat = wisselTwee(toewijzing);
+      var kandidaatScore = berekenScore(kandidaat, stoelen);
+      var delta = kandidaatScore - huidigeScore;
+      if (delta > 0 || Math.random() < Math.exp(delta / T)) { toewijzing = kandidaat; huidigeScore = kandidaatScore; }
+      if (huidigeScore > besteScore) { beste = toewijzing.slice(); besteScore = huidigeScore; }
+      T *= afkoeling;
+    }
+    return { toewijzing: beste, score: besteScore };
+  }
+
+  function berekenPlattegrond() {
+    if (studenten.length === 0) return;
+    var opstellingType = document.getElementById("opstelling").value;
+    if (opstellingType === "maatwerk") return;
+    var aantalOpl = parseInt(document.getElementById("aantal-opl").value) || 3;
+    var kwaliteit = document.getElementById("kwaliteit").value;
+    var iteraties = kwaliteit === "snel" ? 100000 : (kwaliteit === "grondig" ? 5000000 : 1000000);
+    var stoelen;
+    if (opstellingType === "u") {
+      var bb  = parseInt(document.getElementById("u-buiten-breed").value) || 10;
+      var bd  = parseInt(document.getElementById("u-buiten-diep").value)  || 4;
+      var ib  = parseInt(document.getElementById("u-binnen-breed").value) || 8;
+      var ibd = parseInt(document.getElementById("u-binnen-diep").value)  || 2;
+      stoelen = genereerUStoelen(bb, bd, ib, ibd);
+      var afm = leesUAfmetingen();
+      var _eenheid = (afm.W + afm.H) / 2;
+      stoelen.forEach(function(s) {
+        var px = berekenUPxPos(s, bb, bd, ib, ibd, afm.W, afm.H, afm.N, afm.A);
+        var rotOff = (s.rotatie !== 0) ? (afm.W - afm.H) / 2 : 0;
+        s.x = (px.left + rotOff + (s.rotatie !== 0 ? afm.H : afm.W) / 2) / _eenheid;
+        s.y = (px.top  - rotOff + (s.rotatie !== 0 ? afm.W : afm.H) / 2) / _eenheid;
+      });
+    } else {
+      var rijen = parseInt(document.getElementById("rijen").value) || 5;
+      var paren = parseInt(document.getElementById("paren").value) || 3;
+      stoelen = genereerStoelen(rijen, paren);
+    }
+    if (studenten.length > stoelen.length) {
+      document.getElementById("status-bereken").textContent = "Fout: " + studenten.length + " leerlingen maar slechts " + stoelen.length + " stoelen.";
+      document.getElementById("status-bereken").className = "status fout";
+      return;
+    }
+    document.getElementById("btn-bereken").disabled = true;
+    document.getElementById("btn-reset").style.display = "none";
+    document.getElementById("btn-opbreken").style.display = "none";
+    document.getElementById("voortgang-wrap").style.display = "block";
+    document.getElementById("resultaten-kaart").style.display = "none";
+    document.getElementById("status-bereken").textContent = "";
+    document.getElementById("status-bereken").className = "status";
+    alleOplossingen = [];
+    var huidig = 0;
+    function berekenVolgende() {
+      if (huidig >= aantalOpl) {
+        var gezien = {}; var uniek = [];
+        alleOplossingen.forEach(function(opl) {
+          var sleutel = opl.toewijzing.map(function(id) { return id === null ? "X" : id; }).join(",");
+          if (!gezien[sleutel]) { gezien[sleutel] = true; uniek.push(opl); }
+        });
+        alleOplossingen = uniek.sort(function(a, b) { return b.score - a.score; });
+        toonResultaten(stoelen, rijen, paren);
+        return;
+      }
+      var pct = Math.round((huidig / aantalOpl) * 100);
+      document.getElementById("voortgang-balk").style.width = pct + "%";
+      document.getElementById("voortgang-tekst").textContent = "Oplossing " + (huidig + 1) + " van " + aantalOpl + " berekenen...";
+      setTimeout(function() {
+        var resultaat = simulatedAnnealing(stoelen, iteraties);
+        resultaat.stoelen = stoelen;
+        alleOplossingen.push(resultaat);
+        huidig++;
+        berekenVolgende();
+      }, 10);
+    }
+    berekenVolgende();
+  }
+
+  function toonResultaten(stoelen, rijen, paren) {
+    document.getElementById("voortgang-balk").style.width = "100%";
+    document.getElementById("voortgang-tekst").textContent = "Klaar!";
+    document.getElementById("btn-bereken").disabled = false;
+    document.getElementById("btn-reset").style.display = "inline-block";
+    document.getElementById("btn-opbreken").style.display = (huidigeOpstelling === "bus" || huidigeOpstelling === "u") ? "inline-block" : "none";
+    document.getElementById("resultaten-kaart").style.display = "block";
+    document.getElementById("export-knoppen").style.display = "flex";
+    var naamLookup = {}; var geslachtLookup = {};
+    studenten.forEach(function(s) { naamLookup[s.id] = s.naam; geslachtLookup[s.id] = s.geslacht; });
+    huidigeNaamLookup = naamLookup; huidigeGeslachtLookup = geslachtLookup;
+    var tabs = document.getElementById("opl-tabs");
+    tabs.innerHTML = "";
+    alleOplossingen.forEach(function(opl, idx) {
+      var tab = document.createElement("button");
+      tab.className = "opl-tab" + (idx === 0 ? " actief" : "");
+      tab.textContent = "Oplossing " + (idx + 1) + (idx === 0 ? " (beste)" : "");
+      tab.onclick = function() {
+        document.querySelectorAll(".opl-tab").forEach(function(t) { t.classList.remove("actief"); });
+        tab.classList.add("actief");
+        actieveOplossing = idx;
+        setPerspectief(huidigPerspectief);
+      };
+      tabs.appendChild(tab);
+    });
+    actieveOplossing = 0;
+    huidigeStoelen  = stoelen;
+    huidigeRijen    = rijen || 0;
+    huidigeParen    = paren || 0;
+    huidigeOpstelling = document.getElementById("opstelling").value;
+    setPerspectief(huidigPerspectief);
+  }
+
+  var huidigPerspectief = 'klas';
+
+  function setPerspectief(perspectief) {
+    huidigPerspectief = perspectief;
+    var tabKlas = document.getElementById('tab-klas');
+    var tabDocent = document.getElementById('tab-docent');
+    if (tabKlas && tabDocent) {
+      if (perspectief === 'klas') {
+        tabKlas.style.borderBottomColor = '#673ab7'; tabKlas.style.color = '#673ab7'; tabKlas.style.fontWeight = '600';
+        tabDocent.style.borderBottomColor = 'transparent'; tabDocent.style.color = '#5f6368'; tabDocent.style.fontWeight = '500';
+      } else {
+        tabDocent.style.borderBottomColor = '#673ab7'; tabDocent.style.color = '#673ab7'; tabDocent.style.fontWeight = '600';
+        tabKlas.style.borderBottomColor = 'transparent'; tabKlas.style.color = '#5f6368'; tabKlas.style.fontWeight = '500';
+      }
+    }
+    document.getElementById('plattegrond-wrap').style.display       = perspectief === 'klas'   ? 'block' : 'none';
+    document.getElementById('plattegrond-wrap-docent').style.display = perspectief === 'docent' ? 'block' : 'none';
+    if (!alleOplossingen.length) return;
+    var opl = alleOplossingen[actieveOplossing];
+    var naamLookup = huidigeNaamLookup;
+    var geslachtLookup = huidigeGeslachtLookup;
+    var stoelen = huidigeStoelen;
+    var rijen = huidigeRijen;
+    var paren = huidigeParen;
+    if (huidigeOpstelling === "vrij") {
+      var bordOnderVrij = (perspectief === 'docent');
+      var wrapIdVrij = perspectief === 'docent' ? 'plattegrond-wrap-docent' : 'plattegrond-wrap';
+      toonVrijePlattegrond(opl, stoelen, naamLookup, geslachtLookup, wrapIdVrij, bordOnderVrij);
+    } else if (huidigeOpstelling === "u") {
+      var bordOnderU = (perspectief === 'docent');
+      var oplU = perspectief === 'docent' ? { toewijzing: spiegelToewijzing(opl.toewijzing, stoelen), score: opl.score } : opl;
+      var wrapIdU = perspectief === 'docent' ? 'plattegrond-wrap-docent' : 'plattegrond-wrap';
+      toonUPlattegrond(oplU, stoelen, naamLookup, geslachtLookup, wrapIdU, bordOnderU);
+    } else if (perspectief === 'klas') {
+      toonPlattegrond(opl, stoelen, rijen, paren, naamLookup, geslachtLookup);
+    } else {
+      var gespiegeld = spiegelToewijzing(opl.toewijzing, stoelen);
+      var gespOpl = { toewijzing: gespiegeld, score: opl.score };
+      toonPlattegrondIn(gespOpl, stoelen, rijen, paren, naamLookup, geslachtLookup, 'plattegrond-wrap-docent', true);
+    }
+  }
+
+  function spiegelToewijzing(toewijzing, stoelen) {
+    if ((huidigeOpstelling === "u" || huidigeOpstelling === "vrij") && stoelen && stoelen.length) return toewijzing.slice();
+    var rijen = huidigeRijen, paren = huidigeParen;
+    var gespiegeld = new Array(toewijzing.length).fill(null);
+    for (var r = 0; r < rijen; r++) {
+      for (var k = 0; k < paren * 2; k++) {
+        var doelIdx = r * paren * 2 + k;
+        var bronR = rijen - 1 - r;
+        var bronK = paren * 2 - 1 - k;
+        var bronIdx = bronR * paren * 2 + bronK;
+        gespiegeld[doelIdx] = toewijzing[bronIdx];
+      }
+    }
+    return gespiegeld;
+  }
+
+  function toonPlattegrond(opl, stoelen, rijen, paren, naamLookup, geslachtLookup) {
+    huidigeToewijzing = opl.toewijzing.slice();
+    toonPlattegrondIn(opl, stoelen, rijen, paren, naamLookup, geslachtLookup, 'plattegrond-wrap');
+  }
+
+  function toonPlattegrondIn(opl, stoelen, rijen, paren, naamLookup, geslachtLookup, wrapId, bordOnder) {
+    huidigeToewijzing = opl.toewijzing.slice();
+    var scores = berekenStoelScores(opl.toewijzing, stoelen);
+    var bezet = scores.filter(function(s, i) { return huidigeToewijzing[i] !== null && huidigeToewijzing[i] !== undefined; });
+    var gemiddelde = bezet.length > 0 ? bezet.reduce(function(a,b){return a+b;},0)/bezet.length : 0;
+    var spreiding  = bezet.length > 0 ? Math.sqrt(bezet.reduce(function(a,b){return a+(b-gemiddelde)*(b-gemiddelde);},0)/bezet.length) : 0.001;
+    var drempel = Math.max(spreiding * 0.5, 0.01);
+    function scoreKleur(score) {
+      if (score > gemiddelde + drempel) return "#4caf50";
+      if (score < gemiddelde - drempel) return "#f44336";
+      return "#ff9800";
+    }
+    var wrap = document.getElementById(wrapId);
+    wrap.innerHTML = "";
+    var lokaal = document.createElement("div");
+    lokaal.className = "lokaal";
+    var rijenWrap = document.createElement("div");
+    rijenWrap.className = "rijen-wrap";
+    for (var r = 0; r < rijen; r++) {
+      var rijEl = document.createElement("div");
+      rijEl.className = "rij";
+      for (var p = 0; p < paren; p++) {
+        if (p > 0) { var gp = document.createElement("div"); gp.className = "gangpad"; rijEl.appendChild(gp); }
+        var paarEl = document.createElement("div");
+        paarEl.className = "paar";
+        var stoelIdxL = r * paren * 2 + p * 2;
+        var elL = maakStoelEl(stoelIdxL, opl.toewijzing, scores, naamLookup, geslachtLookup, scoreKleur, wrapId);
+        voegDragToe(elL, stoelIdxL, stoelen, naamLookup, geslachtLookup);
+        paarEl.appendChild(elL);
+        var stoelIdxR = r * paren * 2 + p * 2 + 1;
+        var elR = maakStoelEl(stoelIdxR, opl.toewijzing, scores, naamLookup, geslachtLookup, scoreKleur, wrapId);
+        voegDragToe(elR, stoelIdxR, stoelen, naamLookup, geslachtLookup);
+        paarEl.appendChild(elR);
+        rijEl.appendChild(paarEl);
+      }
+      rijenWrap.appendChild(rijEl);
+    }
+    if (!bordOnder) { var bordBoven = document.createElement("div"); bordBoven.className = "bord"; bordBoven.textContent = "BORD"; lokaal.appendChild(bordBoven); }
+    lokaal.appendChild(rijenWrap);
+    if (bordOnder) { var bordOnderEl = document.createElement("div"); bordOnderEl.className = "bord"; bordOnderEl.textContent = "BORD"; bordOnderEl.style.marginTop = "20px"; lokaal.appendChild(bordOnderEl); }
+    wrap.appendChild(lokaal);
+    schrijfScoreSectie(stoelen);
+  }
+
+  function schrijfScoreSectie(stoelen) {
+    var masterToewijzing = alleOplossingen.length ? alleOplossingen[actieveOplossing].toewijzing : huidigeToewijzing;
+    var nieuwScore = berekenScore(masterToewijzing, stoelen);
+    var scoreSectie = document.getElementById("score-sectie");
+    scoreSectie.style.display = "flex";
+    scoreSectie.innerHTML =
+      "<div class='score-item'><div class='score-getal'>" + nieuwScore.toFixed(2) + "</div><div class='score-label'>Totale score</div></div>" +
+      "<div style='color:var(--rand)'>|</div>" +
+      "<div class='score-item'><div class='score-getal'>" + studenten.length + "</div><div class='score-label'>Leerlingen</div></div>" +
+      "<div style='color:var(--rand)'>|</div>" +
+      "<div class='score-item'><div class='score-getal'>" + (stoelen.length - studenten.length) + "</div><div class='score-label'>Lege stoelen</div></div>" +
+      "<div style='color:var(--rand)'>|</div>" +
+      "<div class='score-item' style='font-size:0.78rem; color:var(--grijs); max-width:160px;'>Sleep namen om de indeling handmatig aan te passen.</div>";
+  }
+
+  function maakStoelEl(stoelIdx, toewijzing, scores, naamLookup, geslachtLookup, scoreKleur, wrapId) {
+    var el = document.createElement("div");
+    el.className = "stoel";
+    var id = toewijzing[stoelIdx];
+    el.dataset.studentId = id !== null && id !== undefined ? id : "";
+    el.dataset.wrapId = wrapId || 'plattegrond-wrap';
+    if (id === null || id === undefined) {
+      el.classList.add("leeg");
+      el.textContent = "--";
+    } else {
+      var naam = naamLookup[id] || "?";
+      var g    = geslachtLookup[id];
+      var kaalCheck = document.getElementById("kale-weergave");
+      if (kaalCheck && kaalCheck.checked) { el.classList.add("kaal"); }
+      else { el.classList.add(g === "M" ? "jongen" : (g === "V" ? "meisje" : "overig")); }
+      var dot = document.createElement("div");
+      dot.className = "score-dot";
+      dot.style.background = scoreKleur(scores[stoelIdx]);
+      el.appendChild(dot);
+      var naamEl = document.createElement("div");
+      var delen = naam.split(" ");
+      if (delen.length > 1) {
+        naamEl.textContent = delen[0];
+        var achternaam = document.createElement("div");
+        achternaam.style.fontSize = "0.55rem";
+        achternaam.style.opacity = "0.7";
+        achternaam.textContent = delen.slice(1).join(" ");
+        el.appendChild(naamEl);
+        el.appendChild(achternaam);
+      } else { naamEl.textContent = naam; el.appendChild(naamEl); }
+      (function(capturedId, capturedStoelIdx, capturedToewijzing, capturedScores, capturedNaamLookup) {
+        (function(myWrapId) {
+          el.addEventListener("mouseenter", function(e) { toonInfoCard(capturedId, capturedStoelIdx, capturedToewijzing, capturedScores, capturedNaamLookup, e); highlightRelaties(capturedId, myWrapId); });
+          el.addEventListener("mousemove", function(e) { plaatsInfoCard(e); });
+          el.addEventListener("mouseleave", function() { document.getElementById("info-card").style.display = "none"; unhighlightRelaties(myWrapId); });
+        })(wrapId || 'plattegrond-wrap');
+      })(id, stoelIdx, toewijzing, scores, naamLookup);
+    }
+    return el;
+  }
+
+  function toonInfoCard(id, stoelIdx, toewijzing, scores, naamLookup, e) {
+    var card = document.getElementById("info-card");
+    var naam = naamLookup[id] || "?";
+    var score = scores[stoelIdx];
+    var buurIds = [];
+    if (huidigeStoelen) {
+      huidigeStoelen.forEach(function(s, i) {
+        if (i === stoelIdx) return;
+        if (toewijzing[i] === null || toewijzing[i] === undefined) return;
+        if (euclidischeAfstand(huidigeStoelen[stoelIdx], s) < 3) buurIds.push(toewijzing[i]);
+      });
+    }
+    var kieztPositief = buurIds.filter(function(bid) { return positieveMatrix[id] && positieveMatrix[id][bid]; }).map(function(bid) { return naamLookup[bid] || "?"; });
+    var gekozenDoor   = buurIds.filter(function(bid) { return positieveMatrix[bid] && positieveMatrix[bid][id]; }).map(function(bid) { return naamLookup[bid] || "?"; });
+    var negatiefMet   = [];
+    if (heeftNegatief) {
+      negatiefMet = buurIds.filter(function(bid) { return (negatiefMatrix[id] && negatiefMatrix[id][bid]) || (negatiefMatrix[bid] && negatiefMatrix[bid][id]); }).map(function(bid) { return naamLookup[bid] || "?"; });
+    }
+    var scoreKleur = score > 0.1 ? "#137333" : (score < -0.1 ? "#d93025" : "#e37400");
+    var html = "<div class='tip-naam'>" + naam + "</div>";
+    html += "<div class='tip-score' style='color:" + scoreKleur + ";'>Score: " + score.toFixed(2) + "</div>";
+    if (kieztPositief.length > 0) html += "<div class='tip-rij'><span class='tip-label'>&#9829; Kiest:</span><span class='tip-namen'>" + kieztPositief.join(", ") + "</span></div>";
+    if (gekozenDoor.length > 0)   html += "<div class='tip-rij'><span class='tip-label'>&#9829; Gekozen door:</span><span class='tip-namen'>" + gekozenDoor.join(", ") + "</span></div>";
+    if (negatiefMet.length > 0)   html += "<div class='tip-rij' style='color:#d93025;'><span class='tip-label'>&#9889; Conflict:</span><span class='tip-namen'>" + negatiefMet.join(", ") + "</span></div>";
+    if (kieztPositief.length === 0 && gekozenDoor.length === 0 && negatiefMet.length === 0) html += "<div class='tip-geen'>Geen relaties met nabije buren</div>";
+    card.innerHTML = html;
+    card.style.cssText = "display:none; position:fixed !important; z-index:9999; pointer-events:none; background:rgba(255,252,180,0.82); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); border:1.5px solid rgba(200,190,80,0.3); border-radius:10px; padding:14px 16px; min-width:200px; max-width:280px; box-shadow:0 4px 20px rgba(103,58,183,0.15); font-family:DM Sans,sans-serif; left:-9999px; top:-9999px;";
+    card.style.display = "block";
+    var x = e.clientX + 16; var y = e.clientY + 16;
+    var cardW = card.offsetWidth || 220; var cardH = card.offsetHeight || 150;
+    if (x + cardW > window.innerWidth - 10) x = e.clientX - cardW - 10;
+    if (y + cardH > window.innerHeight - 10) y = e.clientY - cardH - 10;
+    card.style.left = x + "px"; card.style.top = y + "px";
+  }
+
+  function highlightRelaties(id, wrapId) {
+    var wrap = document.getElementById(wrapId || 'plattegrond-wrap');
+    if (!wrap) return;
+    wrap.querySelectorAll(".stoel[data-student-id]").forEach(function(el) {
+      var bid = parseInt(el.dataset.studentId);
+      if (!bid) return;
+      if (positieveMatrix[id] && positieveMatrix[id][bid]) { el.style.outline = "3px solid #137333"; el.style.outlineOffset = "2px"; el.style.zIndex = "10"; }
+      else if (heeftNegatief && negatiefMatrix[id] && negatiefMatrix[id][bid]) { el.style.outline = "3px solid #d93025"; el.style.outlineOffset = "2px"; el.style.zIndex = "10"; }
+    });
+  }
+
+  function unhighlightRelaties(wrapId) {
+    var wrap = document.getElementById(wrapId || 'plattegrond-wrap');
+    if (!wrap) return;
+    wrap.querySelectorAll(".stoel[data-student-id]").forEach(function(el) { el.style.outline = ""; el.style.outlineOffset = ""; el.style.zIndex = ""; });
+  }
+
+  function plaatsInfoCard(e) {
+    var card = document.getElementById("info-card");
+    var x = e.clientX + 16; var y = e.clientY + 16;
+    var cardW = card.offsetWidth || 220; var cardH = card.offsetHeight || 150;
+    if (x + cardW > window.innerWidth - 10) x = e.clientX - cardW - 10;
+    if (y + cardH > window.innerHeight - 10) y = e.clientY - cardH - 10;
+    card.style.left = x + "px"; card.style.top = y + "px";
+  }
+
+  var sleepBron = null;
+  var sleepWrap = null;
+
+  function voegDragToe(el, stoelIdx, stoelen, naamLookup, geslachtLookup) {
+    el.setAttribute("draggable", "true");
+    el.dataset.stoelIdx = stoelIdx;
+    el.addEventListener("dragstart", function(e) {
+      sleepBron = stoelIdx;
+      sleepWrap = el.closest('[id^="plattegrond-wrap"]') ? el.closest('[id^="plattegrond-wrap"]').id : 'plattegrond-wrap';
+      el.classList.add("sleep-bron");
+      e.dataTransfer.effectAllowed = "move";
+    });
+    el.addEventListener("dragend", function() {
+      el.classList.remove("sleep-bron");
+      document.querySelectorAll(".stoel.sleep-over").forEach(function(s) { s.classList.remove("sleep-over"); });
+    });
+    el.addEventListener("dragover", function(e) {
+      e.preventDefault(); e.dataTransfer.dropEffect = "move";
+      if (stoelIdx !== sleepBron) el.classList.add("sleep-over");
+    });
+    el.addEventListener("dragleave", function() { el.classList.remove("sleep-over"); });
+    el.addEventListener("drop", function(e) {
+      e.preventDefault();
+      el.classList.remove("sleep-over");
+      if (sleepBron === -1) return;
+      if (sleepBron === null || sleepBron === stoelIdx) return;
+      var tmp = huidigeToewijzing[sleepBron];
+      huidigeToewijzing[sleepBron] = huidigeToewijzing[stoelIdx];
+      huidigeToewijzing[stoelIdx]  = tmp;
+      sleepBron = null;
+      var meesterToewijzing;
+      if (sleepWrap === 'plattegrond-wrap-docent') {
+        meesterToewijzing = spiegelToewijzing(huidigeToewijzing, huidigeStoelen);
+      } else {
+        meesterToewijzing = huidigeToewijzing.slice();
+      }
+      alleOplossingen[actieveOplossing].toewijzing = meesterToewijzing;
+      setPerspectief(huidigPerspectief);
+    });
+  }
+
+  function laadJson(event, isNegatief) {
+    var file = event.target.files[0];
+    if (!file) return;
+    event.target.value = "";
+    verwerkJson(file, isNegatief);
+  }
+
+  function laadNamenLijst() {
+    var tekst = document.getElementById("namen-invoer").value.trim();
+    if (!tekst) return;
+    var regels = tekst.split("\n").map(function(r) { return r.trim(); }).filter(Boolean);
+    if (regels.length === 0) return;
+    studenten = []; positieveMatrix = {}; negatiefMatrix = {}; heeftNegatief = false;
+    regels.forEach(function(regel, i) {
+      var naam, geslacht = "";
+      var delen = regel.split(/[\t,]/).map(function(d) { return d.trim(); });
+      naam = delen[0];
+      if (delen.length > 1) { var g = delen[delen.length - 1].toUpperCase(); if (g === "M" || g === "V") geslacht = g; }
+      if (!naam) return;
+      var id = i + 1;
+      studenten.push({ id: id, naam: naam, geslacht: geslacht });
+      positieveMatrix[id] = {}; negatiefMatrix[id] = {};
+    });
+    if (studenten.length === 0) return;
+    var jongens = studenten.filter(function(s) { return s.geslacht === "M"; }).length;
+    var meisjes = studenten.filter(function(s) { return s.geslacht === "V"; }).length;
+    var overig  = studenten.length - jongens - meisjes;
+    var info = document.getElementById("data-info");
+    info.style.display = "block";
+    info.innerHTML = "&#9989; <strong>" + studenten.length + "</strong> leerlingen geladen &mdash; " + jongens + " jongens, " + meisjes + " meisjes" + (overig > 0 ? ", " + overig + " overig" : "") + " <span style='color:var(--oranje);'>(geen relatie-data)</span>";
+    var paren = Math.min(Math.ceil(studenten.length / 10), 6);
+    var rijen = Math.ceil(studenten.length / (paren * 2));
+    document.getElementById("rijen").value = rijen;
+    document.getElementById("paren").value = paren;
+    document.getElementById("btn-bereken").disabled = (huidigeOpstelling === "vrij");
+    if (huidigeOpstelling === "vrij") { herstelParkingVoorMaatwerk(); }
+  }
+
+  function verwerkJson(file, isNegatief) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        var data = JSON.parse(e.target.result);
+        if (!data.students || !data.connections) { alert("Ongeldig JSON-bestand."); return; }
+        if (!isNegatief) {
+          studenten = data.students.map(function(s) { return { id: s.id, naam: s.name, geslacht: s.gender || "" }; });
+          positieveMatrix = {};
+          studenten.forEach(function(s) { positieveMatrix[s.id] = {}; });
+          data.connections.forEach(function(c) { positieveMatrix[c.source][c.target] = 1; });
+          if (!geldenUitSessie) {
+            var zone = document.getElementById("zone-pos");
+            zone.classList.add("geladen");
+            zone.innerHTML = "<div class='icoon'>&#9989;</div><div>" + file.name + "</div><div style='font-size:0.75rem;'>" + studenten.length + " leerlingen</div>";
+          }
+          var jongens = studenten.filter(function(s) { return s.geslacht === "M"; }).length;
+          var meisjes = studenten.filter(function(s) { return s.geslacht === "V"; }).length;
+          var overig  = studenten.length - jongens - meisjes;
+          var info = document.getElementById("data-info");
+          info.style.display = "block";
+          info.innerHTML = "&#9989; <strong>" + studenten.length + "</strong> leerlingen geladen &mdash; " + jongens + " jongens, " + meisjes + " meisjes" + (overig > 0 ? ", " + overig + " overig" : "");
+          var aantalStoelen = studenten.length;
+          var paren = Math.ceil(aantalStoelen / 10); paren = Math.min(paren, 6);
+          var rijen = Math.ceil(aantalStoelen / (paren * 2));
+          document.getElementById("rijen").value = rijen;
+          document.getElementById("paren").value = paren;
+          heeftNegatief = false; negatiefMatrix = {};
+          document.getElementById("btn-bereken").disabled = (huidigeOpstelling === "vrij");
+          if (huidigeOpstelling === "vrij") { herstelParkingVoorMaatwerk(); }
+        } else {
+          var naamNaarId = {};
+          studenten.forEach(function(s) { naamNaarId[s.naam] = s.id; });
+          var negIdNaarNaam = {};
+          data.students.forEach(function(s) { negIdNaarNaam[s.id] = s.name; });
+          negatiefMatrix = {};
+          studenten.forEach(function(s) { negatiefMatrix[s.id] = {}; });
+          data.connections.forEach(function(c) {
+            var bronId = naamNaarId[negIdNaarNaam[c.source]];
+            var doelId = naamNaarId[negIdNaarNaam[c.target]];
+            if (bronId && doelId) negatiefMatrix[bronId][doelId] = 1;
+          });
+          heeftNegatief = true;
+          if (!geldenUitSessie) {
+            var zone = document.getElementById("zone-neg");
+            zone.classList.add("geladen");
+            zone.innerHTML = "<div class='icoon'>&#9989;</div><div>" + file.name + "</div><div style='font-size:0.75rem;'>" + data.connections.length + " negatieve verbindingen</div>";
+          }
+        }
+      } catch(err) { alert("Fout: " + err.message); }
+    };
+    reader.readAsText(file);
+  }
+
+  function resetResultaten() {
+    document.getElementById("resultaten-kaart").style.display = "none";
+    document.getElementById("voortgang-wrap").style.display = "none";
+    document.getElementById("btn-reset").style.display = "none";
+    document.getElementById("btn-opbreken").style.display = "none";
+    document.getElementById("btn-bereken").disabled = false;
+    document.getElementById("status-bereken").textContent = "";
+  }
+
+  // ============================================================
+  //  NETLIFY SESSIE-LADER (vervangt toonSheetLader / laadDataUitSheet)
+  // ============================================================
+
+  function toonSessieLader(isNegatief) {
+    sessieLaderIsNegatief = isNegatief;
+    sessieLaderActief = true;
+    var lader = document.getElementById("sessie-lader");
+    lader.style.display = "block";
+    document.getElementById("sessie-lader-titel").textContent = isNegatief
+      ? "Laad negatieve vraag uit sessie:"
+      : "Laad positieve vraag uit sessie:";
+    document.getElementById("sessie-vragen-lijst").innerHTML = "";
+    document.getElementById("sessie-lader-status").textContent = "";
+  }
+
+  function laadSessieVragen() {
+    var sessieId = document.getElementById("sessie-id-invoer").value.trim();
+    var token    = document.getElementById("sessie-token-invoer").value.trim();
+    var statusEl = document.getElementById("sessie-lader-status");
+    if (!sessieId || !token) {
+      statusEl.textContent = "Vul sessie-ID en beheertoken in.";
+      return;
+    }
+    statusEl.textContent = "Laden...";
+    fetch("/api/get-responses?sessie=" + encodeURIComponent(sessieId) + "&token=" + encodeURIComponent(token))
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!data.succes) {
+          statusEl.textContent = "Fout: " + (data.fout || "onbekende fout");
+          return;
+        }
+        huidigeSessieData = data;
+        var vragen = (data.config && data.config.vragen) ? data.config.vragen : [];
+        var kiesVragen = vragen.filter(function(v) { return v.type === "kies"; });
+        if (kiesVragen.length === 0) {
+          statusEl.textContent = "Geen keuze-vragen gevonden in deze sessie.";
+          return;
+        }
+        var wrap = document.getElementById("sessie-vragen-lijst");
+        wrap.innerHTML = "<div style='font-size:0.82rem; font-weight:600; margin-bottom:6px;'>Kies een vraag:</div>";
+        kiesVragen.forEach(function(v) {
+          var knop = document.createElement("button");
+          knop.className = "secundair";
+          knop.style.cssText = "font-size:0.8rem; padding:5px 12px; margin:3px;";
+          knop.textContent = v.titel + " (" + v.sleutel + ")";
+          knop.onclick = function() { verwerkSessieData(data, v.sleutel, sessieLaderIsNegatief); };
+          wrap.appendChild(knop);
+        });
+        statusEl.textContent = "";
+      })
+      .catch(function(err) { statusEl.textContent = "Fout: " + err.message; });
+  }
+
+  function verwerkSessieData(sessieData, vraagSleutel, isNegatief) {
+    var studList = sessieData.alleNamen.map(function(n, i) {
+      return { id: i + 1, name: n.naam, gender: n.geslacht === "m" ? "M" : (n.geslacht === "v" ? "V" : "") };
+    });
+    var naamNaarId = {};
+    studList.forEach(function(s) { naamNaarId[s.name] = s.id; });
+    var connections = [];
+    sessieData.antwoorden.forEach(function(antw) {
+      var bronId = naamNaarId[antw.naam];
+      if (bronId === undefined) return;
+      var keuzes = antw.antwoorden[vraagSleutel] || [];
+      keuzes.forEach(function(doel) {
+        var doelId = naamNaarId[doel];
+        if (doelId !== undefined) connections.push({ source: bronId, target: doelId });
+      });
+    });
+    var jsonData = { students: studList, connections: connections };
+    var blobNaam = vraagSleutel + ".json";
+
+    // Laad als JSON-blob via verwerkJson
+    geldenUitSessie = true;
+    var fakeBlob = new Blob([JSON.stringify(jsonData)], { type: "application/json" });
+    fakeBlob.name = blobNaam;
+    verwerkJson(fakeBlob, isNegatief);
+    geldenUitSessie = false;
+
+    // Sluit lader
+    document.getElementById("sessie-lader").style.display = "none";
+    sessieLaderActief = false;
+    document.getElementById("sessie-lader-status").textContent = "";
+
+    // Update upload-zone visueel
+    if (!isNegatief) {
+      var zone = document.getElementById("zone-pos");
+      zone.classList.add("geladen");
+      zone.innerHTML = "<div class='icoon'>&#9989;</div><div>" + vraagSleutel + "</div><div style='font-size:0.75rem;'>" + studList.length + " leerlingen</div>";
+    } else {
+      var zone = document.getElementById("zone-neg");
+      zone.classList.add("geladen");
+      zone.innerHTML = "<div class='icoon'>&#9989;</div><div>" + vraagSleutel + "</div><div style='font-size:0.75rem;'>" + connections.length + " negatieve verbindingen</div>";
+    }
+  }
+
+
+  function exporteerCSV() {
+    if (alleOplossingen.length === 0) return;
+    var opl = alleOplossingen[actieveOplossing];
+    if (huidigeOpstelling === "vrij") {
+      var naamLookup1 = {}; var geslachtLookup1 = {};
+      studenten.forEach(function(s) { naamLookup1[s.id] = s.naam; geslachtLookup1[s.id] = s.geslacht; });
+      var csvRegels = ["Tafel;Naam;Geslacht\n"];
+      huidigeStoelen.forEach(function(s, i) {
+        var id = opl.toewijzing[i];
+        csvRegels.push((i + 1) + ";" + (id ? naamLookup1[id] : "") + ";" + (id ? (geslachtLookup1[id] || "") : "") + "\n");
+      });
+      var blobVrij = new Blob([csvRegels.join("")], { type: "text/csv;charset=utf-8;" });
+      var urlVrij = URL.createObjectURL(blobVrij);
+      var aVrij = document.createElement("a");
+      aVrij.href = urlVrij; aVrij.download = "Plattegrond_maatwerk.csv"; aVrij.click();
+      URL.revokeObjectURL(urlVrij);
+      return;
+    }
+    var rijen = parseInt(document.getElementById("rijen").value) || 5;
+    var paren = parseInt(document.getElementById("paren").value) || 3;
+    var naamLookup = {}; var geslachtLookup = {};
+    studenten.forEach(function(s) { naamLookup[s.id] = s.naam; geslachtLookup[s.id] = s.geslacht; });
+    var regels = ["Rij;Paar;Kant;Naam;Geslacht\n"];
+    for (var r = 0; r < rijen; r++) {
+      for (var p = 0; p < paren; p++) {
+        var idxL = r * paren * 2 + p * 2; var idxR = r * paren * 2 + p * 2 + 1;
+        var idL = opl.toewijzing[idxL]; var idR = opl.toewijzing[idxR];
+        regels.push((r+1) + ";" + (p+1) + ";L;" + (idL ? naamLookup[idL] : "") + ";" + (idL ? (geslachtLookup[idL] || "") : "") + "\n");
+        regels.push((r+1) + ";" + (p+1) + ";R;" + (idR ? naamLookup[idR] : "") + ";" + (idR ? (geslachtLookup[idR] || "") : "") + "\n");
+      }
+    }
+    var nu = new Date();
+    var datum = nu.getFullYear() + "-" + String(nu.getMonth()+1).padStart(2,"0") + "-" + String(nu.getDate()).padStart(2,"0");
+    var blob = new Blob([regels.join("")], { type: "text/csv;charset=utf-8;" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = "Plattegrond_" + datum + ".csv"; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function kopieerNaarExcel() {
+    if (!huidigeToewijzing || !huidigeStoelen) return;
+    var excelRegels = [];
+    function naam(idx) { var id = huidigeToewijzing[idx]; return id ? (huidigeNaamLookup[id] || "?") : ""; }
+    if (huidigeOpstelling === "vrij") {
+      huidigeStoelen.forEach(function(s, i) { excelRegels.push((i + 1) + "\t" + naam(i)); });
+      navigator.clipboard.writeText(excelRegels.join("\n")).then(function() {
+        var knop = document.getElementById("btn-kopieer-excel");
+        knop.innerHTML = "&#10003; Gekopieerd!";
+        setTimeout(function() { knop.innerHTML = "&#9112; Kopieer voor Excel"; }, 1500);
+      });
+      return;
+    }
+if (huidigeOpstelling === "u") {
+      var stoelen = huidigeStoelen;
+      var naamPerZijde = {};
+      ["BL","IL","BA","IA","IR","BR"].forEach(function(z) { naamPerZijde[z] = []; });
+      stoelen.forEach(function(s, si) { if (!naamPerZijde[s.zijde]) return; naamPerZijde[s.zijde][s.idxInZijde] = naam(si); });
+
+      var iD = naamPerZijde["IL"].length; var bD = naamPerZijde["BL"].length;
+      var iB = naamPerZijde["IA"].length; var bB = naamPerZijde["BA"].length;
+
+      var ilKol = 0; var irKol = ilKol + iB - 1;
+      var blKol = ilKol - 2; var brKol = irKol + 2;
+      var baKol = ilKol + Math.floor(iB / 2) - Math.floor(bB / 2);
+
+      blKol = Math.min(blKol, baKol); brKol = Math.max(brKol, baKol + bB - 1);
+      var minKol = Math.min(blKol, 0);
+
+      ilKol -= minKol; irKol -= minKol; baKol -= minKol; blKol -= minKol; brKol -= minKol;
+      var totaalKol = brKol + 1;
+
+      function legeRij() { return new Array(totaalKol).fill("").join("\t"); }
+      function maakRijArr() { return new Array(totaalKol).fill(""); }
+
+      var iaRijIndex = iD; 
+      var baRijIndex = bD;
+      if (baRijIndex < iaRijIndex + 2) {
+        baRijIndex = iaRijIndex + 2;
+      }
+
+      var buitenStartRij = baRijIndex - bD;
+      var maxRijen = baRijIndex + 1;
+
+      for (var r = 0; r < maxRijen; r++) {
+        var rij = maakRijArr();
+
+        if (r < iaRijIndex) {
+          rij[ilKol] = naamPerZijde["IL"][r] || "";
+          rij[irKol] = naamPerZijde["IR"][r] || "";
+        } else if (r === iaRijIndex) {
+          for (var k = 0; k < iB; k++) rij[ilKol + k] = naamPerZijde["IA"][k] || "";
+        }
+
+        if (r >= buitenStartRij && r < baRijIndex) {
+          var bIdx = r - buitenStartRij;
+          rij[blKol] = naamPerZijde["BL"][bIdx] || "";
+          rij[brKol] = naamPerZijde["BR"][bIdx] || "";
+        } else if (r === baRijIndex) {
+          for (var k = 0; k < bB; k++) rij[baKol + k] = naamPerZijde["BA"][k] || "";
+        }
+
+        excelRegels.push(rij.join("\t"));
+      }
+
+    } else {
+	var rijen = huidigeRijen; var paren = huidigeParen;
+      var header = [""];
+      for (var p = 0; p < paren; p++) { if (p > 0) header.push(""); header.push("Paar " + (p+1) + " links"); header.push("Paar " + (p+1) + " rechts"); }
+      excelRegels.push(header.join("\t"));
+      for (var r = 0; r < rijen; r++) {
+        if (r > 0) excelRegels.push(new Array(header.length).fill("").join("\t"));
+        var kolommen = ["Rij " + (r+1)];
+        for (var p = 0; p < paren; p++) {
+          if (p > 0) kolommen.push("");
+          kolommen.push(naam(r * paren * 2 + p * 2));
+          kolommen.push(naam(r * paren * 2 + p * 2 + 1));
+        }
+        excelRegels.push(kolommen.join("\t"));
+      }
+    }
+    navigator.clipboard.writeText(excelRegels.join("\n")).then(function() {
+      var knop = document.getElementById("btn-kopieer-excel");
+      knop.innerHTML = "&#10003; Gekopieerd!";
+      setTimeout(function() { knop.innerHTML = "&#9112; Kopieer voor Excel"; }, 1500);
+    });
+  }
+
+  function downloadAlsAfbeelding() {
+    var wrapId = huidigPerspectief === 'docent' ? 'plattegrond-wrap-docent' : 'plattegrond-wrap';
+    var wrap = document.getElementById(wrapId);
+    if (!wrap) return;
+    var lokaal = wrap.querySelector('.lokaal');
+    if (!lokaal) return;
+    var knop = document.getElementById('btn-download-img');
+    knop.textContent = 'Bezig...'; knop.disabled = true;
+    var nu = new Date();
+    var datum = nu.getFullYear() + "-" + String(nu.getMonth()+1).padStart(2,"0") + "-" + String(nu.getDate()).padStart(2,"0");
+    html2canvas(lokaal, { backgroundColor: '#f8f6ff', scale: 2, useCORS: true, logging: false }).then(function(canvas) {
+      var a = document.createElement('a');
+      a.download = 'Plattegrond_' + datum + '.png';
+      a.href = canvas.toDataURL('image/png');
+      a.click();
+      knop.innerHTML = '&#128247; Download als afbeelding'; knop.disabled = false;
+    }).catch(function() { knop.innerHTML = '&#128247; Download als afbeelding'; knop.disabled = false; });
+  }
+
+
+  // -- Parking lot --
+
+  var parkingStudenten = [];
+  var sleepParkingId = null;
+
+  function allesNaarParking() {
+    if (!huidigeToewijzing || !huidigeStoelen) return;
+    huidigeToewijzing.forEach(function(id, idx) {
+      if (id === null || id === undefined) return;
+      var student = studenten.find(function(s) { return s.id === id; });
+      if (!student) return;
+      var alInParking = parkingStudenten.some(function(p) { return p.id === id; });
+      if (!alInParking) {
+        parkingStudenten.push({ id: student.id, naam: student.naam, geslacht: student.geslacht });
+      }
+      huidigeToewijzing[idx] = null;
+    });
+    alleOplossingen[actieveOplossing].toewijzing = huidigeToewijzing.slice();
+    setPerspectief(huidigPerspectief);
+    tekenParkingLot();
+  }
+
+  function tekenParkingLot() {
+    var wrap = document.getElementById("parking-stoelen");
+    wrap.innerHTML = "";
+    parkingStudenten.forEach(function(student) {
+      var el = document.createElement("div");
+      el.className = "stoel";
+      var g = student.geslacht;
+      var kaalCheck = document.getElementById("kale-weergave");
+      if (kaalCheck && kaalCheck.checked) {
+        el.classList.add("kaal");
+      } else {
+        el.classList.add(g === "M" ? "jongen" : (g === "V" ? "meisje" : "overig"));
+      }
+      el.style.width  = getComputedStyle(document.documentElement).getPropertyValue("--tafel-breedte").trim() || "70px";
+      el.style.height = getComputedStyle(document.documentElement).getPropertyValue("--tafel-hoogte").trim() || "56px";
+      el.style.cursor = "grab";
+      el.setAttribute("draggable", "true");
+      el.dataset.parkingId = student.id;
+      var naamEl = document.createElement("div");
+      var delen = student.naam.split(" ");
+      if (delen.length > 1) {
+        naamEl.textContent = delen[0];
+        var achternaam = document.createElement("div");
+        achternaam.style.fontSize = "0.55rem";
+        achternaam.style.opacity  = "0.7";
+        achternaam.textContent = delen.slice(1).join(" ");
+        el.appendChild(naamEl);
+        el.appendChild(achternaam);
+      } else {
+        naamEl.textContent = student.naam;
+        el.appendChild(naamEl);
+      }
+      el.addEventListener("dragstart", function(e) {
+        sleepBron      = -1;
+        sleepParkingId = student.id;
+        // Sla de actieve wrap op zodat parkingDrop weet naar welke versie terug te renderen
+        sleepWrap = huidigPerspectief === 'docent' ? 'plattegrond-wrap-docent' : 'plattegrond-wrap';
+        el.style.opacity = "0.4";
+        e.dataTransfer.effectAllowed = "move";
+      });
+      el.addEventListener("dragend", function() { el.style.opacity = ""; });
+      wrap.appendChild(el);
+    });
+  }
+
+  function parkingDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    document.getElementById("parking-lot").classList.add("sleep-doel");
+  }
+
+  function parkingDragLeave(e) {
+    if (!document.getElementById("parking-lot").contains(e.relatedTarget)) {
+      document.getElementById("parking-lot").classList.remove("sleep-doel");
+    }
+  }
+
+  function parkingDrop(e) {
+    e.preventDefault();
+    document.getElementById("parking-lot").classList.remove("sleep-doel");
+    if (sleepBron === null || sleepBron < 0) return;
+    var stoelIdx = sleepBron;
+    var id = huidigeToewijzing[stoelIdx];
+    if (id === null || id === undefined) return;
+    var student = studenten.find(function(s) { return s.id === id; });
+    if (!student) return;
+    parkingStudenten.push({ id: student.id, naam: student.naam, geslacht: student.geslacht });
+    huidigeToewijzing[stoelIdx] = null;
+    // Schrijf toewijzing terug als master (rekening houdend met docent-versie)
+    var meesterToewijzingParking;
+    if (sleepWrap === 'plattegrond-wrap-docent') {
+      meesterToewijzingParking = spiegelToewijzing(huidigeToewijzing, huidigeStoelen);
+    } else {
+      meesterToewijzingParking = huidigeToewijzing.slice();
+    }
+    alleOplossingen[actieveOplossing].toewijzing = meesterToewijzingParking;
+    sleepBron = null;
+    setPerspectief(huidigPerspectief);
+    tekenParkingLot();
+  }
+
+  var _origVoegDragToe = voegDragToe;
+  voegDragToe = function(el, stoelIdx, stoelen, naamLookup, geslachtLookup) {
+    _origVoegDragToe(el, stoelIdx, stoelen, naamLookup, geslachtLookup);
+    el.addEventListener("drop", function(e) {
+      if (sleepBron !== -1) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      el.classList.remove("sleep-over");
+      if (sleepParkingId === null) return;
+      var oudId = huidigeToewijzing[stoelIdx];
+      huidigeToewijzing[stoelIdx] = sleepParkingId;
+      parkingStudenten = parkingStudenten.filter(function(s) { return s.id !== sleepParkingId; });
+      if (oudId !== null && oudId !== undefined) {
+        var oudeStudent = studenten.find(function(s) { return s.id === oudId; });
+        if (oudeStudent) parkingStudenten.push({ id: oudeStudent.id, naam: oudeStudent.naam, geslacht: oudeStudent.geslacht });
+      }
+      // Schrijf toewijzing terug als master (zelfde logica als normale drop)
+      var meesterToewijzing;
+      if (sleepWrap === 'plattegrond-wrap-docent') {
+        meesterToewijzing = spiegelToewijzing(huidigeToewijzing, huidigeStoelen);
+      } else {
+        meesterToewijzing = huidigeToewijzing.slice();
+      }
+      alleOplossingen[actieveOplossing].toewijzing = meesterToewijzing;
+      sleepParkingId = null;
+      sleepBron      = null;
+      setPerspectief(huidigPerspectief);
+      tekenParkingLot();
+    }, true);
+  };
+
+  var _origToonResultaten = toonResultaten;
+  toonResultaten = function(stoelen, rijen, paren) {
+    parkingStudenten = [];
+    tekenParkingLot();
+    _origToonResultaten(stoelen, rijen, paren);
+  };
+
+  // ================================================================
+  // -- MAATWERK / VRIJE OPSTELLING --
+  // ================================================================
+
+  function startMaatwerkModus() {
+    huidigeOpstelling = "vrij";
+    ontwerpModusActief = true;
+    ontwerpVergrendeld = false;
+    geselecteerdeTafels.clear();
+    huidigeStoelen = [];
+    huidigeToewijzing = [];
+    vrijeTafelTeller = 0;
+    alleOplossingen = [{ toewijzing: huidigeToewijzing, score: 0, stoelen: huidigeStoelen }];
+    actieveOplossing = 0;
+    huidigeNaamLookup = {}; huidigeGeslachtLookup = {};
+    studenten.forEach(function(s) { huidigeNaamLookup[s.id] = s.naam; huidigeGeslachtLookup[s.id] = s.geslacht; });
+    parkingStudenten = studenten.map(function(s) { return { id: s.id, naam: s.naam, geslacht: s.geslacht }; });
+    document.getElementById("btn-bereken").disabled = true;
+    document.getElementById("btn-reset").style.display = "inline-block";
+    document.getElementById("btn-opbreken").style.display = "none";
+    document.getElementById("resultaten-kaart").style.display = "block";
+    document.getElementById("export-knoppen").style.display = "flex";
+    document.getElementById("opl-tabs").innerHTML = "";
+    toonMaatwerkKnoppen();
+    tekenParkingLot();
+    setPerspectief(huidigPerspectief);
+  }
+
+  function herstelParkingVoorMaatwerk() {
+    // Wanneer leerlingen (opnieuw) geladen worden terwijl je al in maatwerk-modus zit
+    if (!huidigeToewijzing) huidigeToewijzing = [];
+    while (huidigeToewijzing.length < huidigeStoelen.length) huidigeToewijzing.push(null);
+    var toegewezenIds = huidigeToewijzing.filter(function(id) { return id !== null && id !== undefined; });
+    parkingStudenten = studenten.filter(function(s) { return toegewezenIds.indexOf(s.id) === -1; })
+      .map(function(s) { return { id: s.id, naam: s.naam, geslacht: s.geslacht }; });
+    huidigeNaamLookup = {}; huidigeGeslachtLookup = {};
+    studenten.forEach(function(s) { huidigeNaamLookup[s.id] = s.naam; huidigeGeslachtLookup[s.id] = s.geslacht; });
+    tekenParkingLot();
+    setPerspectief(huidigPerspectief);
+  }
+
+  function toonMaatwerkKnoppen() {
+    var ontwerpKnoppen = document.getElementById("maatwerk-knoppen-ontwerp");
+    var vergrendeldKnoppen = document.getElementById("maatwerk-knoppen-vergrendeld");
+    if (!ontwerpKnoppen) return;
+    ontwerpKnoppen.style.display = (!ontwerpVergrendeld) ? "flex" : "none";
+    vergrendeldKnoppen.style.display = ontwerpVergrendeld ? "flex" : "none";
+  }
+
+  function voegVrijeTafelToe() {
+    if (huidigeOpstelling !== "vrij" || ontwerpVergrendeld) return;
+    var W = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--tafel-breedte")) || 70;
+    var H = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--tafel-hoogte")) || 56;
+    var eenheid = (W + H) / 2;
+    var n = vrijeTafelTeller++;
+    var kolommen = 6;
+    var px = 20 + (n % kolommen) * (W + 16);
+    var py = 20 + Math.floor(n / kolommen) * (H + 16);
+    var stoel = { idx: huidigeStoelen.length, pxX: px, pxY: py, rotatie: 0, x: px / eenheid, y: py / eenheid };
+    huidigeStoelen.push(stoel);
+    huidigeToewijzing.push(null);
+    alleOplossingen[actieveOplossing].stoelen = huidigeStoelen;
+    alleOplossingen[actieveOplossing].toewijzing = huidigeToewijzing;
+    setPerspectief(huidigPerspectief);
+  }
+
+  function verwijderVrijeTafel(idx) {
+    if (huidigeOpstelling !== "vrij" || ontwerpVergrendeld) return;
+    var studentId = huidigeToewijzing[idx];
+    if (studentId !== null && studentId !== undefined) {
+      var student = studenten.find(function(s) { return s.id === studentId; });
+      if (student) parkingStudenten.push({ id: student.id, naam: student.naam, geslacht: student.geslacht });
+    }
+    huidigeStoelen.splice(idx, 1);
+    huidigeToewijzing.splice(idx, 1);
+    huidigeStoelen.forEach(function(s, i) { s.idx = i; });
+    alleOplossingen[actieveOplossing].stoelen = huidigeStoelen;
+    alleOplossingen[actieveOplossing].toewijzing = huidigeToewijzing;
+    tekenParkingLot();
+    setPerspectief(huidigPerspectief);
+  }
+
+  function roteerVrijeTafel(idx) {
+    if (huidigeOpstelling !== "vrij" || ontwerpVergrendeld) return;
+    var s = huidigeStoelen[idx];
+    s.rotatie = ((s.rotatie || 0) + 15) % 360;
+    setPerspectief(huidigPerspectief);
+  }
+
+  function verplaatsVrijeTafel(idx, links, boven) {
+    var W = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--tafel-breedte")) || 70;
+    var H = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--tafel-hoogte")) || 56;
+    var eenheid = (W + H) / 2;
+    var s = huidigeStoelen[idx];
+    s.pxX = Math.max(0, links);
+    s.pxY = Math.max(0, boven);
+    s.x = s.pxX / eenheid;
+    s.y = s.pxY / eenheid;
+  }
+
+  function vergrendelMaatwerk() {
+    if (huidigeStoelen.length === 0) {
+      document.getElementById("maatwerk-status").textContent = "Voeg eerst minstens één tafel toe.";
+      document.getElementById("maatwerk-status").className = "status fout";
+      return;
+    }
+    ontwerpVergrendeld = true;
+    geselecteerdeTafels.clear();
+    document.getElementById("maatwerk-status").textContent = "";
+    toonMaatwerkKnoppen();
+    setPerspectief(huidigPerspectief);
+  }
+
+  function ontgrendelMaatwerk() {
+    ontwerpVergrendeld = false;
+    geselecteerdeTafels.clear();
+    toonMaatwerkKnoppen();
+    setPerspectief(huidigPerspectief);
+  }
+
+  function exporteerMaatwerkLayout() {
+    var data = {
+      type: "custom",
+      opstellingNaam: "Maatwerk-opstelling (" + new Date().toLocaleDateString() + ")",
+      tafels: huidigeStoelen.map(function(t) { return { x: t.pxX, y: t.pxY, rotatie: t.rotatie || 0 }; })
+    };
+    var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = "tafelopstelling.json"; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function importeerMaatwerkLayout(event) {
+    var file = event.target.files[0];
+    if (!file) return;
+    event.target.value = "";
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        var data = JSON.parse(e.target.result);
+        if (!data || !Array.isArray(data.tafels)) { alert("Ongeldig bestand: geen 'tafels' array gevonden."); return; }
+        var W = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--tafel-breedte")) || 70;
+        var H = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--tafel-hoogte")) || 56;
+        var eenheid = (W + H) / 2;
+        huidigeStoelen = data.tafels.map(function(t, i) {
+          return { idx: i, pxX: t.x || 0, pxY: t.y || 0, rotatie: t.rotatie || 0, x: (t.x || 0) / eenheid, y: (t.y || 0) / eenheid };
+        });
+        huidigeToewijzing = new Array(huidigeStoelen.length).fill(null);
+        vrijeTafelTeller = huidigeStoelen.length;
+        alleOplossingen = [{ toewijzing: huidigeToewijzing, score: 0, stoelen: huidigeStoelen }];
+        actieveOplossing = 0;
+        ontwerpVergrendeld = false;
+        geselecteerdeTafels.clear();
+        parkingStudenten = studenten.map(function(s) { return { id: s.id, naam: s.naam, geslacht: s.geslacht }; });
+        toonMaatwerkKnoppen();
+        tekenParkingLot();
+        setPerspectief(huidigPerspectief);
+        document.getElementById("maatwerk-status").textContent = "&#9989; Layout geladen: " + huidigeStoelen.length + " tafels.";
+        document.getElementById("maatwerk-status").innerHTML = "&#9989; Layout geladen: " + huidigeStoelen.length + " tafels.";
+        document.getElementById("maatwerk-status").className = "status ok";
+      } catch (err) {
+        alert("Fout bij openen van bestand: " + err.message);
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function opbrekenOpstelling() {
+    if (huidigeOpstelling !== "bus" && huidigeOpstelling !== "u") return;
+    if (!huidigeStoelen || !alleOplossingen.length) return;
+    if (!confirm("Hiermee laat je de vaste opstelling los. Je kunt daarna tafels vrij verslepen, draaien, toevoegen of verwijderen. De huidige plekken van de leerlingen blijven behouden. Doorgaan?")) return;
+
+    var W = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--tafel-breedte")) || 70;
+    var H = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--tafel-hoogte")) || 56;
+    var eenheid = (W + H) / 2;
+    var pxLijst = [];
+
+    if (huidigeOpstelling === "u") {
+      var afm = leesUAfmetingen();
+      pxLijst = huidigeStoelen.map(function(s) {
+        var px = berekenUPxPos(s, afm.bB, afm.bD, afm.iB, afm.iD, afm.W, afm.H, afm.N, afm.A);
+        return { left: px.left, top: px.top, rot: s.rotatie || 0 };
+      });
+    } else {
+      var afstandPaar = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--afstand-paar")) || 4;
+      var gangpad = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--gangpad-breedte")) || 24;
+      var rijAfstand = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--rij-afstand")) || 10;
+      pxLijst = huidigeStoelen.map(function(s) {
+        var px = berekenBusPxPos(s, W, H, afstandPaar, gangpad, rijAfstand);
+        return { left: px.left, top: px.top, rot: 0 };
+      });
+    }
+
+    var behoudenToewijzing = alleOplossingen[actieveOplossing].toewijzing.slice();
+    var nieuweStoelen = huidigeStoelen.map(function(s, i) {
+      return { idx: i, pxX: pxLijst[i].left, pxY: pxLijst[i].top, rotatie: pxLijst[i].rot, x: pxLijst[i].left / eenheid, y: pxLijst[i].top / eenheid };
+    });
+
+    huidigeStoelen    = nieuweStoelen;
+    huidigeToewijzing = behoudenToewijzing;
+    huidigeOpstelling = "vrij";
+    vrijeTafelTeller  = huidigeStoelen.length;
+    alleOplossingen = [{ toewijzing: huidigeToewijzing, score: berekenScore(huidigeToewijzing, huidigeStoelen), stoelen: huidigeStoelen }];
+    actieveOplossing = 0;
+    ontwerpModusActief = true;
+    ontwerpVergrendeld = false;
+    geselecteerdeTafels.clear();
+
+    document.getElementById("opstelling").value = "maatwerk";
+    document.getElementById("bus-instellingen").style.display = "none";
+    document.getElementById("u-instellingen").style.display = "none";
+    document.getElementById("maatwerk-instellingen").style.display = "block";
+    document.getElementById("btn-bereken").disabled = true;
+    document.getElementById("btn-opbreken").style.display = "none";
+    document.getElementById("opl-tabs").innerHTML = "";
+
+    toonMaatwerkKnoppen();
+    setPerspectief(huidigPerspectief);
+  }
+
+  function toonVrijePlattegrond(opl, stoelen, naamLookup, geslachtLookup, wrapId, bordOnder) {
+    huidigeToewijzing = opl.toewijzing.slice();
+    var W = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--tafel-breedte")) || 70;
+    var H = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--tafel-hoogte")) || 56;
+
+    var scores = berekenStoelScores(opl.toewijzing, stoelen);
+    var bezet  = scores.filter(function(s, i) { return huidigeToewijzing[i] !== null && huidigeToewijzing[i] !== undefined; });
+    var gem    = bezet.length > 0 ? bezet.reduce(function(a,b){return a+b;},0)/bezet.length : 0;
+    var spr    = bezet.length > 0 ? Math.sqrt(bezet.reduce(function(a,b){return a+(b-gem)*(b-gem);},0)/bezet.length) : 0.001;
+    var drempel = Math.max(spr * 0.5, 0.01);
+    function scoreKleur(sc) {
+      if (sc > gem + drempel) return "#4caf50";
+      if (sc < gem - drempel) return "#f44336";
+      return "#ff9800";
+    }
+
+    var marge = 20;
+    var bordH = 28;
+    var minBreedte = 700, minHoogte = 460;
+    var maxRechts = minBreedte, maxOnder = minHoogte;
+    stoelen.forEach(function(s) {
+      maxRechts = Math.max(maxRechts, s.pxX + W + marge);
+      maxOnder  = Math.max(maxOnder,  s.pxY + H + marge);
+    });
+    var containerW = maxRechts + marge;
+    var containerH = maxOnder + marge + bordH + 8;
+
+    var wrap = document.getElementById(wrapId);
+    wrap.innerHTML = "";
+    var lokaal = document.createElement("div");
+    lokaal.className = "lokaal vrij-canvas";
+    lokaal.style.width  = containerW + "px";
+    lokaal.style.height = containerH + "px";
+
+    var bordEl = document.createElement("div");
+    bordEl.className = "bord";
+    bordEl.textContent = "BORD";
+    bordEl.style.position = "absolute";
+    bordEl.style.left = "50%";
+    if (bordOnder) {
+      bordEl.style.transform = "translateX(-50%)";
+      bordEl.style.top = (containerH - marge - bordH) + "px";
+    } else {
+      bordEl.style.transform = "translateX(-50%)";
+      bordEl.style.top = marge + "px";
+    }
+    lokaal.appendChild(bordEl);
+    var yOff = bordH + 8;
+
+    var editModus = ontwerpModusActief && !ontwerpVergrendeld;
+
+    // Interactie: rubber-band selectie + klik-op-leeg deselecteert (alleen edit-modus)
+    if (editModus) {
+      lokaal.addEventListener("mousedown", function(e) {
+        if (e.button !== 0) return;
+        if (e.target.closest('.tafel-ontwerp') || e.target.closest('.tafel-knop') || e.target.closest('.tafel-handle')) return;
+        e.preventDefault();
+
+        // Shift ingedrukt: selectie-modus (voegt toe), anders nieuwe selectie
+        var shiftIngedrukt = e.shiftKey || e.ctrlKey || e.metaKey;
+        if (!shiftIngedrukt) {
+          geselecteerdeTafels.clear();
+          wisSelectieVisueel();
+        }
+
+        var rect = lokaal.getBoundingClientRect();
+        var startMuisX = e.clientX - rect.left;
+        var startMuisY = e.clientY - rect.top;
+        var sleepBegonnen = false;
+
+        var selVak = document.createElement("div");
+        selVak.className = "selectie-vak";
+        selVak.style.display = "none";
+        lokaal.appendChild(selVak);
+
+        function onMouseMove(ev) {
+          var curX = ev.clientX - rect.left;
+          var curY = ev.clientY - rect.top;
+          var x1 = Math.min(startMuisX, curX);
+          var y1 = Math.min(startMuisY, curY);
+          var w  = Math.abs(curX - startMuisX);
+          var h  = Math.abs(curY - startMuisY);
+
+          if (!sleepBegonnen) {
+            if (w < 5 && h < 5) return;
+            sleepBegonnen = true;
+          }
+
+          selVak.style.display = "block";
+          selVak.style.left = x1 + "px";
+          selVak.style.top  = y1 + "px";
+          selVak.style.width  = w + "px";
+          selVak.style.height = h + "px";
+
+          var selRect = selVak.getBoundingClientRect();
+          lokaal.querySelectorAll('.tafel-ontwerp').forEach(function(tEl) {
+            var tIdx = parseInt(tEl.dataset.stoelIdx);
+            if (tIdx === undefined || isNaN(tIdx)) return;
+            var tRect = tEl.getBoundingClientRect();
+            var snijdt = !(selRect.right < tRect.left || selRect.left > tRect.right || selRect.bottom < tRect.top || selRect.top > tRect.bottom);
+            if (snijdt) geselecteerdeTafels.add(tIdx);
+            else if (!shiftIngedrukt) geselecteerdeTafels.delete(tIdx);
+          });
+          pasSelectieVisueelToe();
+        }
+
+        function onMouseUp() {
+          document.removeEventListener("mousemove", onMouseMove);
+          document.removeEventListener("mouseup", onMouseUp);
+          selVak.remove();
+        }
+
+        document.addEventListener("mousemove", onMouseMove);
+        document.addEventListener("mouseup", onMouseUp);
+      });
+    }
+
+    stoelen.forEach(function(s, si) {
+      var isDocent = (wrapId === 'plattegrond-wrap-docent');
+      var left = isDocent ? (containerW - marge * 2 - s.pxX - W) : s.pxX;
+      var topPx = isDocent ? (containerH - marge - yOff - s.pxY - H) : (marge + yOff + s.pxY);
+      var rot  = (s.rotatie || 0);
+
+      var el;
+      if (editModus) {
+        el = document.createElement("div");
+        el.className = "stoel tafel-ontwerp";
+        el.dataset.stoelIdx = si;
+        if (geselecteerdeTafels.has(si)) el.classList.add('geselecteerd');
+        var studentId = huidigeToewijzing[si];
+        var label = "Tafel " + (si + 1);
+        if (studentId !== null && studentId !== undefined) {
+          label = (naamLookup[studentId] || "?").split(" ")[0];
+        }
+        el.innerHTML = "<div style='font-size:10px; color:#555; pointer-events:none;'>" + label + "</div>";
+
+        var capturedSi = si;
+        var capturedIsDocent = isDocent;
+
+        // --- Tafel slepen (muisevents, ondersteunt groepsslepen) ---
+        el.addEventListener("mousedown", function(e) {
+          if (e.button !== 0) return;
+          if (e.target.closest('.tafel-knop') || e.target.closest('.tafel-handle')) return;
+          e.preventDefault();
+
+          // Selectie-logica
+          if (e.shiftKey || e.ctrlKey || e.metaKey) {
+            if (geselecteerdeTafels.has(capturedSi)) geselecteerdeTafels.delete(capturedSi);
+            else geselecteerdeTafels.add(capturedSi);
+            pasSelectieVisueelToe();
+            return;
+          }
+          if (!geselecteerdeTafels.has(capturedSi)) {
+            geselecteerdeTafels.clear();
+            geselecteerdeTafels.add(capturedSi);
+            pasSelectieVisueelToe();
+          }
+
+          var startMuisX = e.clientX;
+          var startMuisY = e.clientY;
+          var dragData = [];
+          geselecteerdeTafels.forEach(function(idx) {
+            var st = huidigeStoelen[idx];
+            var tEl = lokaal.querySelector('[data-stoel-idx="' + idx + '"]');
+            dragData.push({ idx: idx, startPxX: st.pxX, startPxY: st.pxY, startRot: st.rotatie || 0, element: tEl });
+          });
+          var dragBegonnen = false;
+          lokaal.style.cursor = 'grabbing';
+
+          function onMouseMove(ev) {
+            var dx = ev.clientX - startMuisX;
+            var dy = ev.clientY - startMuisY;
+            if (!dragBegonnen) {
+              if (Math.abs(dx) < 3 && Math.abs(dy) < 3) return;
+              dragBegonnen = true;
+            }
+            var effDx = capturedIsDocent ? -dx : dx;
+            var effDy = capturedIsDocent ? -dy : dy;
+            dragData.forEach(function(d) {
+              var newX = Math.max(0, d.startPxX + effDx);
+              var newY = Math.max(0, d.startPxY + effDy);
+              if (d.element) {
+                var leftVal = capturedIsDocent ? (containerW - marge * 2 - newX - W) : newX;
+                d.element.style.left = (marge + leftVal) + 'px';
+                d.element.style.top  = capturedIsDocent ? (containerH - marge - yOff - newY - H) + 'px' : (marge + yOff + newY) + 'px';
+                // Rotatie behouden tijdens slepen
+                var r = d.startRot || 0;
+                var displayRot = r;
+                if (displayRot) { d.element.style.transform = 'rotate(' + displayRot + 'deg)'; d.element.style.transformOrigin = 'center center'; }
+              }
+            });
+          }
+
+          function onMouseUp(ev) {
+            document.removeEventListener("mousemove", onMouseMove);
+            document.removeEventListener("mouseup", onMouseUp);
+            lokaal.style.cursor = '';
+            if (!dragBegonnen) return;
+            var dx = ev.clientX - startMuisX;
+            var dy = ev.clientY - startMuisY;
+            var effDx = capturedIsDocent ? -dx : dx;
+            var effDy = capturedIsDocent ? -dy : dy;
+            var eenheid = (W + H) / 2;
+            dragData.forEach(function(d) {
+              var st = huidigeStoelen[d.idx];
+              st.pxX = Math.max(0, d.startPxX + effDx);
+              st.pxY = Math.max(0, d.startPxY + effDy);
+              st.x = st.pxX / eenheid;
+              st.y = st.pxY / eenheid;
+            });
+            setPerspectief(huidigPerspectief);
+          }
+
+          document.addEventListener("mousemove", onMouseMove);
+          document.addEventListener("mouseup", onMouseUp);
+        });
+
+        // --- Rotatie-handle (sleep om te draaien, 15° stappen) ---
+        var handle = document.createElement("div");
+        handle.className = "tafel-handle";
+        handle.title = "Sleep om te draaien (15° per stap)";
+        handle.addEventListener("mousedown", function(e) {
+          if (e.button !== 0) return;
+          e.preventDefault();
+          e.stopPropagation();
+          var tafelRect = el.getBoundingClientRect();
+          var cx = tafelRect.left + tafelRect.width / 2;
+          var cy = tafelRect.top + tafelRect.height / 2;
+          var startAngle = Math.atan2(e.clientY - cy, e.clientX - cx) * 180 / Math.PI;
+          var baseRotatie = s.rotatie || 0;
+
+          function onHandleMove(ev) {
+            var angle = Math.atan2(ev.clientY - cy, ev.clientX - cx) * 180 / Math.PI;
+            var delta = angle - startAngle;
+            var newRot = Math.round((baseRotatie + delta) / 15) * 15;
+            newRot = ((newRot % 360) + 360) % 360;
+            s.rotatie = newRot;
+            var displayRot = newRot;
+            el.style.transform = 'rotate(' + displayRot + 'deg)';
+            el.style.transformOrigin = 'center center';
+          }
+          function onHandleUp() {
+            document.removeEventListener("mousemove", onHandleMove);
+            document.removeEventListener("mouseup", onHandleUp);
+          }
+          document.addEventListener("mousemove", onHandleMove);
+          document.addEventListener("mouseup", onHandleUp);
+        });
+        el.appendChild(handle);
+
+        // --- Verwijderknop ---
+        var verwijderKnop = document.createElement("div");
+        verwijderKnop.className = "tafel-knop verwijder";
+        verwijderKnop.innerHTML = "&times;";
+        verwijderKnop.title = "Verwijder tafel";
+        verwijderKnop.addEventListener("click", function(e) { e.stopPropagation(); verwijderVrijeTafel(si); });
+        verwijderKnop.setAttribute("draggable", "false");
+        verwijderKnop.addEventListener("mousedown", function(e) { e.stopPropagation(); });
+        el.appendChild(verwijderKnop);
+      } else {
+        el = maakStoelEl(si, opl.toewijzing, scores, naamLookup, geslachtLookup, scoreKleur, wrapId);
+        voegDragToe(el, si, stoelen, naamLookup, geslachtLookup);
+      }
+
+      el.style.position = "absolute";
+      el.style.width  = W + "px";
+      el.style.height = H + "px";
+      el.style.left = (marge + left) + "px";
+      el.style.top  = topPx + "px";
+      if (rot) { el.style.transform = "rotate(" + rot + "deg)"; el.style.transformOrigin = "center center"; }
+      lokaal.appendChild(el);
+    });
+
+    wrap.appendChild(lokaal);
+    schrijfScoreSectie(stoelen);
+  }
+
+  var sleepTafelIdx = null;
+  var sleepTafelOffsetX = 0;
+  var sleepTafelOffsetY = 0;
+  var geselecteerdeTafels = new Set();
+
+  function wisSelectieVisueel() {
+    var wid = huidigPerspectief === 'docent' ? '#plattegrond-wrap-docent' : '#plattegrond-wrap';
+    var wrap = document.querySelector(wid);
+    if (!wrap) return;
+    wrap.querySelectorAll('.tafel-ontwerp.geselecteerd').forEach(function(el) {
+      el.classList.remove('geselecteerd');
+    });
+  }
+  function pasSelectieVisueelToe() {
+    var wid = huidigPerspectief === 'docent' ? '#plattegrond-wrap-docent' : '#plattegrond-wrap';
+    var wrap = document.querySelector(wid);
+    if (!wrap) return;
+    wrap.querySelectorAll('.tafel-ontwerp').forEach(function(el) {
+      var idx = parseInt(el.dataset.stoelIdx);
+      el.classList.toggle('geselecteerd', geselecteerdeTafels.has(idx));
+    });
+  }
+
+// ============================================================
+//  SOCIOGRAM – Google Apps Script Web App  (Code.gs)
+//
+//  SETUP:
+//  1. Implementeer dit script eenmalig als Web App
+//     - Uitvoeren als: Mijzelf
+//     - Toegang: Iedereen
+//  2. Beheerpagina: [webapp_url]?page=beheer
+//  3. Formulier voor deelnemers: [webapp_url]?page=formulier&sheet=SHEET_ID
+//     (wordt automatisch gegenereerd op de beheerpagina)
+// ============================================================
+
+var NAMEN_TABBLAD    = "Namen";
+var VRAGEN_TABBLAD   = "Vragen";
+var LINK_TABBLAD     = "Formulierlink";
+var REACTIES_TABBLAD = "Reacties";
+var EXTRA_TABBLAD    = "Extra antwoorden";
+
+// ============================================================
+//  Router: stuur naar beheerpagina of formulier
+// ============================================================
+
+function doGet(e) {
+  var page    = e && e.parameter && e.parameter.page    ? e.parameter.page    : "landing";
+  var sheetId = e && e.parameter && e.parameter.sheet   ? e.parameter.sheet   : "";
+
+  logGebruik("paginabezoek: " + page, "");
+
+  if (page === "landing" || page === "") {
+    return HtmlService.createHtmlOutputFromFile("landing")
+      .setTitle("Sociogram Toolkit")
+      .setSandboxMode(HtmlService.SandboxMode.IFRAME)
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  }
+
+  if (page === "beheer") {
+    return HtmlService.createHtmlOutputFromFile("beheer")
+      .setTitle("Sociogram – Vragenlijst-beheertool")
+      .setSandboxMode(HtmlService.SandboxMode.IFRAME)
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  }
+
+  if (page === "visualisatie") {
+    return HtmlService.createHtmlOutputFromFile("sociogram")
+      .setTitle("Sociogram – Visualisatietool")
+      .setSandboxMode(HtmlService.SandboxMode.IFRAME)
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  }
+
+  if (page === "teamindeling") {
+    return HtmlService.createHtmlOutputFromFile("teamindeling")
+      .setTitle("Sociogram – Teamindelingstool")
+      .setSandboxMode(HtmlService.SandboxMode.IFRAME)
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  }
+
+  if (page === "plattegrond") {
+    return HtmlService.createHtmlOutputFromFile("plattegrond")
+      .setTitle("Sociogram – Klassenplattegrond")
+      .setSandboxMode(HtmlService.SandboxMode.IFRAME)
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  }  
+
+  if (page === "rapportage") {
+    return HtmlService.createHtmlOutputFromFile("rapportage")
+      .setTitle("Sociogram – Rapportage")
+      .setSandboxMode(HtmlService.SandboxMode.IFRAME)
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  }  
+
+  if (page === "hulp") {
+    return HtmlService.createHtmlOutputFromFile("hulp")
+      .setTitle("Sociogram – Hulp")
+      .setSandboxMode(HtmlService.SandboxMode.IFRAME)
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  }    
+
+  if (page === "feedback") {
+    return HtmlService.createHtmlOutputFromFile("feedback")
+      .setTitle("Sociogram – Feedback")
+      .setSandboxMode(HtmlService.SandboxMode.IFRAME)
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  }   
+
+  // Formulierpagina: injecteer Sheet-ID via string replace
+  var html = HtmlService.createHtmlOutputFromFile("formulier").getContent();
+  html = html.replace("SHEET_ID_PLACEHOLDER", sheetId);
+
+  var titel = "Vragenlijst";
+  try {
+    var vragenData = getVragen(sheetId);
+    if (vragenData && vragenData.formulier_titel) titel = vragenData.formulier_titel;
+  } catch(e) {}
+
+  return HtmlService.createHtmlOutput(html)
+    .setTitle(titel)
+    .setSandboxMode(HtmlService.SandboxMode.IFRAME)
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+// ============================================================
+//  Beheerpagina: haal lijst van Google Sheets op uit Drive
+// ============================================================
+
+function getSheetsUitDrive() {
+  var sheets  = [];
+  var geziene = {};
+  var files   = DriveApp.getFilesByType(MimeType.GOOGLE_SHEETS);
+  while (files.hasNext()) {
+    var file = files.next();
+    var id   = file.getId();
+    if (geziene[id]) continue;
+    geziene[id] = true;
+    sheets.push({ id: id, naam: file.getName() });
+  }
+  sheets.sort(function(a, b) {
+    return a.naam.toLowerCase().localeCompare(b.naam.toLowerCase());
+  });
+
+  // Zet "Sociogram voorbeelddata" altijd bovenaan
+  var idx = sheets.findIndex(function(s) {
+    return s.naam === "SOCIOGRAM VOORBEELDDATA";
+  });
+  if (idx > 0) {
+    sheets.unshift(sheets.splice(idx, 1)[0]);
+  }
+
+  return sheets;
+}
+
+// Formulier-app: AKfycbxU2gXFfHsBeRk2ChxvosPB6OpvK92Z1bUfeUPjMEUSUU420CheJvZZeuVDmoaKhJIp
+
+function maakFormulierLink(sheetId) {
+  var webappUrl = "https://script.google.com/macros/s/AKfycbxU2gXFfHsBeRk2ChxvosPB6OpvK92Z1bUfeUPjMEUSUU420CheJvZZeuVDmoaKhJIp/exec";
+  var link      = webappUrl + "?sheet=" + sheetId;
+
+  var ss        = SpreadsheetApp.openById(sheetId);
+  var linkSheet = ss.getSheetByName(LINK_TABBLAD);
+  if (!linkSheet) {
+    linkSheet = ss.insertSheet(LINK_TABBLAD);
+  }
+  linkSheet.clearContents();
+  linkSheet.getRange("A1").setValue("Formulierlink voor deelnemers").setFontWeight("bold");
+  linkSheet.getRange("A2").setValue(link);
+  linkSheet.getRange("A2").setFontColor("#1155cc");
+  linkSheet.setColumnWidth(1, 600);
+
+  return link;
+}
+
+// ============================================================
+//  Formulier: namen en vragen ophalen
+// ============================================================
+
+function getNamen(sheetId) {
+  try {
+    var ss    = SpreadsheetApp.openById(sheetId);
+    var sheet = ss.getSheetByName(NAMEN_TABBLAD);
+    if (!sheet) return { namen: [], extra: [] };
+
+    var data = sheet.getDataRange().getValues();
+    
+    var startRij = 0;
+    if (data.length > 0 && data[0][0].toString().toLowerCase() === "naam") {
+      startRij = 1;
+    }
+
+    var namen = [];
+    var extra = [];
+    for (var i = startRij; i < data.length; i++) {
+      var naam = data[i][0].toString().trim();
+      if (!naam) continue;
+      namen.push(naam);
+      extra.push({
+        naam:     naam,
+        geslacht: data[i][1] ? data[i][1].toString().trim() : "",
+        fakeName: data[i][2] ? data[i][2].toString().trim() : ""
+      });
+    }
+    return { namen: namen, extra: extra };
+  } catch(fout) {
+    Logger.log("Fout in getNamen: " + fout.toString());
+    return { namen: [], extra: [] };
+  }
+}
+
+function getVragen(sheetId) {
+  var sheet = SpreadsheetApp.openById(sheetId).getSheetByName(VRAGEN_TABBLAD);
+  if (!sheet) throw new Error("Tabblad '" + VRAGEN_TABBLAD + "' niet gevonden.");
+  var data  = sheet.getRange("A1:B" + sheet.getLastRow()).getValues();
+
+  var alle = {};
+  for (var i = 0; i < data.length; i++) {
+    var s = data[i][0].toString().trim();
+    var w = data[i][1].toString().trim();
+    if (s !== "") alle[s] = w;
+  }
+
+  var resultaat = {
+    formulier_titel:        alle["formulier_titel"]        || "Samenwerking",
+    formulier_beschrijving: alle["formulier_beschrijving"] || "Geef aan met wie je graag samenwerkt en met wie liever niet.",
+    naam_vraag_titel:       alle["naam_vraag_titel"]       || "Wat is jouw naam?",
+    naam_vraag_hint:        alle["naam_vraag_hint"]        || "Selecteer je eigen naam. De lijst past zich daarna automatisch aan.",
+    vragen: []
+  };
+
+  for (var j = 0; j < data.length; j++) {
+    var key = data[j][0].toString().trim();
+    var val = data[j][1].toString().trim();
+    if (val === "") continue;
+    var match = key.match(/^(positieve|negatieve)_vraag_(\d+)$/);
+    if (match) {
+      var type   = match[1];
+      var nummer = match[2];
+      var hint   = alle[type + "_vraag_" + nummer + "_hint"] || "Vink maximaal 3 personen aan.";
+      var max    = parseInt(alle[type + "_vraag_" + nummer + "_max"]) || 3;
+      resultaat.vragen.push({ sleutel: key, titel: val, hint: hint, type: type, max: max });
+    }
+  }
+
+  if (resultaat.vragen.length === 0) {
+    resultaat.vragen = [
+      { sleutel: "positieve_vraag_1", titel: "Met wie werk je graag samen?",       hint: "Vink maximaal 3 personen aan.", type: "positieve", max: 3 },
+      { sleutel: "negatieve_vraag_1", titel: "Met wie werk je liever niet samen?", hint: "Vink maximaal 3 personen aan.", type: "negatieve", max: 3 }
+    ];
+  }
+
+  // Extra vragen lezen (open, likert, meerkeuze)
+  resultaat.extraVragen = [];
+  for (var k = 0; k < data.length; k++) {
+    var eKey = data[k][0].toString().trim();
+    var eVal = data[k][1].toString().trim();
+    if (eVal === "") continue;
+    var eMatch = eKey.match(/^extra_vraag_(\d+)$/);
+    if (eMatch) {
+      var num   = eMatch[1];
+      var type  = alle["extra_vraag_" + num + "_type"]   || "open";
+      var hint  = alle["extra_vraag_" + num + "_hint"]   || "";
+      var opties = alle["extra_vraag_" + num + "_opties"] || "";
+      var schaalMin = parseInt(alle["extra_vraag_" + num + "_schaal_min"]) || 1;
+      var schaalMax = parseInt(alle["extra_vraag_" + num + "_schaal_max"]) || 5;
+      var schaalMinLabel = alle["extra_vraag_" + num + "_schaal_min_label"] || "";
+      var schaalMaxLabel = alle["extra_vraag_" + num + "_schaal_max_label"] || "";
+      resultaat.extraVragen.push({
+        sleutel: eKey, titel: eVal, hint: hint, type: type,
+        opties: opties ? opties.split("|") : [],
+        schaalMin: schaalMin, schaalMax: schaalMax,
+        schaalMinLabel: schaalMinLabel, schaalMaxLabel: schaalMaxLabel
+      });
+    }
+  }
+
+  return resultaat;
+}
+
+// ============================================================
+//  Formulier: inzending opslaan als matrix
+// ============================================================
+
+function slaOpslaan(sheetId, inzending) {
+  try {
+    logGebruik("beheer", sheetId);
+    var naam       = inzending.naam       || "";
+    var antwoorden = inzending.antwoorden || {};
+    var namen      = getNamen(sheetId).namen;
+    var vragen     = getVragen(sheetId).vragen;
+    var ss         = SpreadsheetApp.openById(sheetId);
+    var zelfkeuze  = "";
+    var extraAntwoorden = inzending.extraAntwoorden || {};
+    var extraVraagsData = getVragen(sheetId).extraVragen || [];
+
+    if (Object.keys(extraAntwoorden).length > 0 && extraVraagsData.length > 0) {
+      slaExtraAntwoordenOp(sheetId, naam, extraAntwoorden, extraVraagsData);
+    }
+
+    registreerReactie(ss, naam);
+
+    for (var v = 0; v < vragen.length; v++) {
+      var vraag   = vragen[v];
+      var gekozen = antwoorden[vraag.sleutel] || [];
+      var tabNaam = vraag.titel.substring(0, 50);
+
+      for (var k = 0; k < gekozen.length; k++) {
+        if (gekozen[k] === naam) zelfkeuze += "Zelfkeuze bij: " + vraag.titel + "! ";
+      }
+      verwerkMatrix(ss, tabNaam, namen, naam, gekozen);
+    }
+
+    return { succes: true };
+  } catch (fout) {
+    Logger.log("Fout bij opslaan: " + fout.toString());
+    return { succes: false, fout: fout.toString() };
+  }
+}
+
+function verwerkMatrix(ss, tabNaam, namen, kiezer, gekozen) {
+  var sheet = ss.getSheetByName(tabNaam);
+  if (!sheet) {
+    sheet = ss.insertSheet(tabNaam, ss.getSheets().length);
+    var headerRij = [""].concat(namen);
+    sheet.getRange(1, 1, 1, headerRij.length).setValues([headerRij]);
+    sheet.getRange(1, 1, 1, headerRij.length).setFontWeight("bold");
+    for (var r = 0; r < namen.length; r++) {
+      sheet.getRange(r + 2, 1).setValue(namen[r]).setFontWeight("bold");
+      for (var c = 0; c < namen.length; c++) {
+        sheet.getRange(r + 2, c + 2).setValue(0);
+      }
+    }
+  }
+  var kiezerRij = namen.indexOf(kiezer);
+  if (kiezerRij === -1) return;
+  var rijNummer = kiezerRij + 2;
+
+  for (var r = 0; r < namen.length; r++) {
+    sheet.getRange(rijNummer, r + 2).setValue(0);
+  }
+
+  for (var g = 0; g < gekozen.length; g++) {
+    var kol = namen.indexOf(gekozen[g]);
+    if (kol === -1) continue;
+    sheet.getRange(rijNummer, kol + 2).setValue(1);
+  }
+}
+
+// ============================================================
+//  Beheerpagina: laad bestaande namen en vragen uit sheet
+// ============================================================
+
+function laadUitSheet(sheetId) {
+  try {
+    logGebruik("beheer", sheetId);
+    var namenRes = getNamen(sheetId);
+    var vragenRes = getVragen(sheetId);
+    
+    return {
+      succes: true,
+      namen: namenRes.namen,
+      extra: namenRes.extra,
+      vragen: vragenRes
+    };
+  } catch (fout) {
+    return { succes: false, fout: fout.toString() };
+  }
+}
+
+// ============================================================
+//  Beheerpagina: maak een nieuwe Google Sheet aan
+// ============================================================
+
+function maakNieuweSheet(naam) {
+  try {
+    var ss = SpreadsheetApp.create(naam || "Sociogram");
+    ss.getActiveSheet().setName(NAMEN_TABBLAD);
+    ss.insertSheet(VRAGEN_TABBLAD);
+    var file = DriveApp.getFileById(ss.getId());
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.EDIT);
+    return { succes: true, id: ss.getId(), naam: ss.getName(), url: ss.getUrl() };
+  } catch (fout) {
+    Logger.log("Fout bij aanmaken sheet: " + fout.toString());
+    return { succes: false, fout: fout.toString() };
+  }
+}
+
+// ============================================================
+//  Beheerpagina: schrijf namen naar sheet
+// ============================================================
+
+function slaNamenOp(sheetId, namen, geslachten, fakeNames) {
+  try {
+    if (typeof namen === "string") {
+      namen = namen.split(",").map(function(n) { return n.trim(); });
+    }
+
+    var ss = SpreadsheetApp.openById(sheetId);
+
+    var testSheet = ss.getSheets()[0];
+    try {
+      testSheet.getRange("A1").setValue(testSheet.getRange("A1").getValue());
+    } catch(e) {
+      return { succes: false, fout: "Je hebt geen schrijfrechten voor deze sheet. Kies een andere sheet of maak een nieuwe aan." };
+    }
+
+    var sheet = ss.getSheetByName(NAMEN_TABBLAD);
+    if (!sheet) sheet = ss.insertSheet(NAMEN_TABBLAD);
+    sheet.clearContents();
+
+    var heeftExtra = geslachten && geslachten.length > 0 &&
+      (geslachten.some(function(g) { return g; }) || fakeNames.some(function(f) { return f; }));
+
+    if (heeftExtra) {
+      sheet.getRange(1, 1, 1, 3).setValues([["Naam", "Geslacht", "Gefingeerde naam"]]);
+      var rijen = namen.map(function(naam, i) {
+        return [naam, geslachten[i] || "", fakeNames[i] || ""];
+      });
+      sheet.getRange(2, 1, rijen.length, 3).setValues(rijen);
+    } else {
+      for (var i = 0; i < namen.length; i++) {
+        var naam = namen[i].toString().trim();
+        if (naam !== "") sheet.getRange(i + 1, 1).setValue(naam);
+      }
+    }
+
+    return { succes: true };
+  } catch (fout) {
+    Logger.log("Fout bij opslaan namen: " + fout.toString());
+    var melding = fout.toString().indexOf("niet") !== -1 || fout.toString().indexOf("permission") !== -1 || fout.toString().indexOf("rights") !== -1
+      ? "Je hebt geen schrijfrechten voor deze sheet. Kies een andere sheet of maak een nieuwe aan."
+      : fout.toString();
+    return { succes: false, fout: melding };
+  }
+}
+
+// ============================================================
+//  Beheerpagina: schrijf vragen naar sheet
+// ============================================================
+
+function slaVragenOp(sheetId, vragen) {
+  try {
+    var ss    = SpreadsheetApp.openById(sheetId);
+    var sheet = ss.getSheetByName(VRAGEN_TABBLAD);
+    if (!sheet) {
+      sheet = ss.insertSheet(VRAGEN_TABBLAD);
+    }
+    sheet.clearContents();
+
+    var rijen = [
+      ["formulier_titel",        vragen.formulier_titel],
+      ["formulier_beschrijving", vragen.formulier_beschrijving],
+      ["naam_vraag_titel",       vragen.naam_vraag_titel],
+      ["naam_vraag_hint",        vragen.naam_vraag_hint]
+    ];
+
+    for (var i = 0; i < vragen.positief.length; i++) {
+      rijen.push(["positieve_vraag_" + (i + 1),             vragen.positief[i].titel]);
+      rijen.push(["positieve_vraag_" + (i + 1) + "_hint",   vragen.positief[i].hint]);
+      rijen.push(["positieve_vraag_" + (i + 1) + "_max",    vragen.positief[i].max || 3]);
+    }
+    for (var j = 0; j < vragen.negatief.length; j++) {
+      rijen.push(["negatieve_vraag_" + (j + 1),             vragen.negatief[j].titel]);
+      rijen.push(["negatieve_vraag_" + (j + 1) + "_hint",   vragen.negatief[j].hint]);
+      rijen.push(["negatieve_vraag_" + (j + 1) + "_max",    vragen.negatief[j].max || 3]);
+    }
+
+    if (vragen.extra && vragen.extra.length > 0) {
+      for (var e = 0; e < vragen.extra.length; e++) {
+        var ev = vragen.extra[e];
+        rijen.push(["extra_vraag_" + (e + 1),                   ev.titel]);
+        rijen.push(["extra_vraag_" + (e + 1) + "_type",         ev.type]);
+        rijen.push(["extra_vraag_" + (e + 1) + "_hint",         ev.hint || ""]);
+        if (ev.type === "meerkeuze") {
+          rijen.push(["extra_vraag_" + (e + 1) + "_opties", ev.opties.join("|")]);
+        }
+        if (ev.type === "likert") {
+          rijen.push(["extra_vraag_" + (e + 1) + "_schaal_min",       ev.schaalMin || 1]);
+          rijen.push(["extra_vraag_" + (e + 1) + "_schaal_max",       ev.schaalMax || 5]);
+          rijen.push(["extra_vraag_" + (e + 1) + "_schaal_min_label", ev.schaalMinLabel || ""]);
+          rijen.push(["extra_vraag_" + (e + 1) + "_schaal_max_label", ev.schaalMaxLabel || ""]);
+        }
+      }
+    }
+
+    sheet.getRange(1, 1, rijen.length, 2).setValues(rijen);
+    return { succes: true };
+  } catch (fout) {
+    Logger.log("Fout bij opslaan vragen: " + fout.toString());
+    var melding = fout.toString().indexOf("niet") !== -1 || fout.toString().indexOf("permission") !== -1 || fout.toString().indexOf("rights") !== -1
+      ? "Je hebt geen schrijfrechten voor deze sheet. Kies een andere sheet of maak een nieuwe aan."
+      : fout.toString();
+    return { succes: false, fout: melding };
+  }
+}
+
+// ============================================================
+//  Registreer een reactie in het tabblad "Reacties"
+// ============================================================
+
+function registreerReactie(ss, naam) {
+  var sheet = ss.getSheetByName(REACTIES_TABBLAD);
+  if (!sheet) {
+    sheet = ss.insertSheet(REACTIES_TABBLAD, ss.getSheets().length);
+    sheet.getRange("A1:B1").setValues([["Naam", "Tijdstip"]]);
+    sheet.getRange("A1:B1").setFontWeight("bold");
+  }
+
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (data[i][0].toString().trim() === naam.trim()) {
+      sheet.getRange(i + 1, 2).setValue(new Date());
+      return;
+    }
+  }
+  sheet.appendRow([naam, new Date()]);
+}
+
+// ============================================================
+//  Haal reactiestatus op voor beheerpagina
+// ============================================================
+
+function getReacties(sheetId) {
+  try {
+    var ss    = SpreadsheetApp.openById(sheetId);
+    var namen = getNamen(sheetId).namen;
+
+    if (namen.length === 0) {
+      return {
+        succes:         true,
+        gereageerd:     [],
+        nietGereageerd: [],
+        totaal:         0,
+        waarschuwing:   "Nog geen namen ingevoerd in deze sheet."
+      };
+    }
+    var reactieSheet = ss.getSheetByName(REACTIES_TABBLAD);
+    var gereageerd   = {};
+
+    if (reactieSheet && reactieSheet.getLastRow() > 1) {
+      var data = reactieSheet.getRange(2, 1, reactieSheet.getLastRow() - 1, 2).getValues();
+      for (var i = 0; i < data.length; i++) {
+        var naam     = data[i][0].toString().trim();
+        var tijdstip = data[i][1];
+        if (naam !== "") {
+          gereageerd[naam] = tijdstip instanceof Date
+            ? Utilities.formatDate(tijdstip, Session.getScriptTimeZone(), "dd-MM-yyyy HH:mm")
+            : tijdstip.toString();
+        }
+      }
+    }
+
+    var gereageerdLijst    = [];
+    var nietGereageerdLijst = [];
+
+    namen.forEach(function(naam) {
+      if (gereageerd[naam]) {
+        gereageerdLijst.push({ naam: naam, tijdstip: gereageerd[naam] });
+      } else {
+        nietGereageerdLijst.push(naam);
+      }
+    });
+
+    return {
+      succes:          true,
+      gereageerd:      gereageerdLijst,
+      nietGereageerd:  nietGereageerdLijst,
+      totaal:          namen.length
+    };
+
+  } catch (fout) {
+    Logger.log("Fout bij ophalen reacties: " + fout.toString());
+    return { succes: false, fout: fout.toString() };
+  }
+}
+
+// ============================================================
+//  Genereer JSON export data per vraag
+// ============================================================
+
+function getJsonExport(sheetId) {
+  try {
+    var ss     = SpreadsheetApp.openById(sheetId);
+    var namen = getNamen(sheetId).namen;
+    var vragen = getVragen(sheetId).vragen;
+    var nu     = new Date();
+
+    var students = namen.map(function(naam, index) {
+      return {
+        id:       index + 1,
+        name:     naam,
+        gender:   "X",
+        fakeName: naam,
+        x:        0,
+        y:        0
+      };
+    });
+
+    var naamIndex = {};
+    namen.forEach(function(naam, i) { naamIndex[naam] = i + 1; });
+
+    var exports = [];
+
+    vragen.forEach(function(vraag) {
+      var tabNaam = vraag.titel.substring(0, 50);
+      var sheet   = ss.getSheetByName(tabNaam);
+      var connections = [];
+
+      if (sheet && sheet.getLastRow() > 1) {
+        var data = sheet.getDataRange().getValues();
+        for (var r = 1; r < data.length; r++) {
+          for (var c = 1; c < data[r].length; c++) {
+            if (data[r][c] === 1) {
+              var bronNaam  = data[r][0].toString().trim();
+              var doelNaam  = data[0][c].toString().trim();
+              var bronId    = naamIndex[bronNaam];
+              var doelId    = naamIndex[doelNaam];
+              if (bronId && doelId) {
+                connections.push({
+                  source:   bronId,
+                  target:   doelId,
+                  strength: 1
+                });
+              }
+            }
+          }
+        }
+      }
+
+      exports.push({
+        sleutel:  vraag.sleutel,
+        titel:    vraag.titel,
+        type:     vraag.type,
+        datum:    Utilities.formatDate(nu, Session.getScriptTimeZone(), "yyyy-MM-dd"),
+        data: {
+          metadata: {
+            exportDate:       nu.toISOString(),
+            version:          "1.0",
+            description:      "Sociogram data export – " + vraag.titel,
+            totalStudents:    students.length,
+            totalConnections: connections.length
+          },
+          settings: {
+            numOfStudents: students.length.toString(),
+            styleSettings: {
+              fakeNames:         false,
+              marginalShape:     true,
+              nodeColor:         true,
+              mutualConnections: true,
+              nodeSize:          true,
+              linkSize:          true,
+              shadow:            false,
+              connectionCount:   false
+            },
+            advanced: {
+              manybodyForce: "-500",
+              linkForce:     "200",
+              linkDistance:  "150"
+            }
+          },
+          students:    students,
+          connections: connections
+        }
+      });
+    });
+
+    return { succes: true, exports: exports };
+
+  } catch (fout) {
+    Logger.log("Fout bij JSON export: " + fout.toString());
+    return { succes: false, fout: fout.toString() };
+  }
+}
+
+// ============================================================
+//  Geef de URL van de sheet terug voor de beheerpagina
+// ============================================================
+
+function getSheetUrl(sheetId) {
+  try {
+    var ss = SpreadsheetApp.openById(sheetId);
+    return { succes: true, url: ss.getUrl(), naam: ss.getName() };
+  } catch (fout) {
+    return { succes: false, fout: fout.toString() };
+  }
+}
+
+// ============================================================
+//  Haal de bestaande formulierlink op uit de sheet
+// ============================================================
+
+function getLinkVoorSheet(sheetId) {
+  try {
+    var ss        = SpreadsheetApp.openById(sheetId);
+    var linkSheet = ss.getSheetByName(LINK_TABBLAD);
+    if (!linkSheet || linkSheet.getLastRow() < 2) {
+      var link = maakFormulierLink(sheetId);
+      return { succes: true, link: link };
+    }
+    var link = linkSheet.getRange("A2").getValue().toString().trim();
+    if (!link) {
+      link = maakFormulierLink(sheetId);
+    }
+    return { succes: true, link: link };
+  } catch (fout) {
+    Logger.log("Fout bij ophalen link: " + fout.toString());
+    return { succes: false, fout: fout.toString() };
+  }
+}
+
+// ============================================================
+//  Controleer of een deelnemer al heeft ingevuld
+// ============================================================
+
+function heeftAlIngevuld(sheetId, naam) {
+  try {
+    var ss           = SpreadsheetApp.openById(sheetId);
+    var reactieSheet = ss.getSheetByName(REACTIES_TABBLAD);
+    if (!reactieSheet || reactieSheet.getLastRow() < 2) {
+      return { succes: true, ingevuld: false };
+    }
+    var data = reactieSheet.getRange(2, 1, reactieSheet.getLastRow() - 1, 1).getValues();
+    for (var i = 0; i < data.length; i++) {
+      if (data[i][0].toString().trim() === naam.toString().trim()) {
+        return { succes: true, ingevuld: true };
+      }
+    }
+    return { succes: true, ingevuld: false };
+  } catch (fout) {
+    Logger.log("Fout bij controleren inzending: " + fout.toString());
+    return { succes: false, fout: fout.toString() };
+  }
+}
+
+// ============================================================
+//  Sla antwoorden op extra vragen op in tabblad "Extra antwoorden"
+// ============================================================
+
+function slaExtraAntwoordenOp(sheetId, naam, extraAntwoorden, extraVragen) {
+  try {
+    var ss    = SpreadsheetApp.openById(sheetId);
+    var sheet = ss.getSheetByName(EXTRA_TABBLAD);
+
+    if (!sheet) {
+      sheet = ss.insertSheet(EXTRA_TABBLAD, ss.getSheets().length);
+
+      var header = ["Tijdstip", "Naam"];
+      extraVragen.forEach(function(v) { header.push(v.titel); });
+      sheet.getRange(1, 1, 1, header.length).setValues([header]);
+      sheet.getRange(1, 1, 1, header.length).setFontWeight("bold");
+    }
+
+    var rij = [new Date(), naam];
+    extraVragen.forEach(function(v) {
+      var antwoord = extraAntwoorden[v.sleutel];
+      if (antwoord === undefined || antwoord === null) antwoord = "";
+      if (Array.isArray(antwoord)) antwoord = antwoord.join(", ");
+      rij.push(antwoord.toString());
+    });
+
+    sheet.appendRow(rij);
+    return { succes: true };
+
+  } catch (fout) {
+    Logger.log("Fout bij opslaan extra antwoorden: " + fout.toString());
+    return { succes: false, fout: fout.toString() };
+  }
+}
+
+</script>
+</body>
+</html>

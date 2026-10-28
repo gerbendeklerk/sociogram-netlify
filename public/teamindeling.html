@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teamindeling</title>
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><line x1='48' y1='20' x2='82' y2='32' stroke='%23666' stroke-width='4'/><line x1='48' y1='20' x2='65' y2='65' stroke='%23666' stroke-width='4'/><line x1='48' y1='20' x2='15' y2='48' stroke='%23666' stroke-width='4'/><line x1='82' y1='32' x2='65' y2='65' stroke='%23666' stroke-width='4'/><line x1='15' y1='48' x2='25' y2='85' stroke='%23666' stroke-width='4'/><line x1='15' y1='48' x2='65' y2='65' stroke='%23666' stroke-width='4'/><circle cx='48' cy='20' r='16' fill='%23e8607a' stroke='%23b03050' stroke-width='3'/><circle cx='82' cy='32' r='9' fill='%234a9fd4' stroke='%232a70a8' stroke-width='3'/><circle cx='65' cy='65' r='12' fill='%23e8607a' stroke='%23b03050' stroke-width='3'/><circle cx='15' cy='48' r='13' fill='%234a9fd4' stroke='%232a70a8' stroke-width='3'/><circle cx='25' cy='85' r='8' fill='%23e8607a' stroke='%23b03050' stroke-width='3'/></svg>">
+
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&family=Google+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: #f0ebf8;
+      min-height: 100vh;
+      padding: 0 0 60px 0;
+      color: #202124;
+    }
+
+    header {
+      background: #673ab7;
+      color: white;
+      padding: 20px 24px;
+      font-family: 'Google Sans', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      position: relative;
+    }
+
+    .container { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
+
+    .card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px rgba(0,0,0,.14), 0 1px 3px rgba(0,0,0,.12);
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .card h2 {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #202124;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stap {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #673ab7;
+      color: #fff;
+      border-radius: 50%;
+      width: 24px; height: 24px;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+
+    .upload-zone {
+      border: 2px dashed #dadce0;
+      border-radius: 8px;
+      padding: 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s;
+      color: #5f6368;
+      font-size: 0.9rem;
+    }
+
+    .upload-zone:hover { border-color: #673ab7; background: #faf8ff; }
+    .upload-zone.geladen { border-color: #137333; background: #e6f4ea; color: #137333; }
+    .upload-zone .icoon { font-size: 2rem; margin-bottom: 8px; }
+
+    .instelling-rij {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .instelling-rij label {
+      font-size: 0.9rem;
+      color: #202124;
+      white-space: nowrap;
+    }
+
+    input[type="number"] {
+      width: 80px;
+      padding: 8px 10px;
+      border: 1px solid #dadce0;
+      border-radius: 4px;
+      font-family: 'Roboto', sans-serif;
+      font-size: 0.9rem;
+      color: #202124;
+      outline: none;
+    }
+
+    input[type="number"]:focus { border-color: #673ab7; }
+
+    .toggle-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      color: #202124;
+    }
+
+    input[type="checkbox"],
+    input[type="radio"] {
+      width: 16px; height: 16px;
+      accent-color: #673ab7;
+      cursor: pointer;
+    }
+
+    button.primair {
+      background: #673ab7; color: #fff; border: none;
+      padding: 10px 24px; border-radius: 4px;
+      font-family: 'Google Sans', sans-serif;
+      font-size: 0.875rem; font-weight: 500;
+      cursor: pointer; transition: background 0.15s;
+    }
+
+    button.primair:hover { background: #5e35b1; }
+    button.primair:disabled { background: #dadce0; color: #5f6368; cursor: not-allowed; }
+
+    button.secundair {
+      background: #fff; color: #673ab7; border: 1px solid #673ab7;
+      padding: 8px 16px; border-radius: 4px;
+      font-family: 'Google Sans', sans-serif;
+      font-size: 0.875rem; font-weight: 500;
+      cursor: pointer;
+    }
+
+    button.secundair:hover { background: #ede7f6; }
+
+    .status { font-size: 0.8rem; color: #5f6368; margin-top: 8px; }
+    .status.fout { color: #d93025; }
+    .status.ok { color: #137333; }
+
+    .chip { cursor: default; transition: opacity 0.1s; }
+    .chip.highlight-pos { outline: 2.5px solid #137333; outline-offset: 1px; }
+    .chip.highlight-neg { outline: 2.5px solid #d93025; outline-offset: 1px; }
+    .chip.highlight-dim { opacity: 0.3; }
+
+    .voortgang-wrap { display: none; margin-top: 16px; }
+
+    .voortgang-balk-wrap {
+      background: #f1f3f4;
+      border-radius: 99px;
+      height: 8px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .voortgang-balk {
+      background: #673ab7;
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.1s;
+    }
+
+    .voortgang-tekst { font-size: 0.8rem; color: #5f6368; }
+
+    .oplossingen-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 15px;
+      margin-top: 8px;
+    }
+
+    .oplossing-kaart {
+      border: 2px solid #dadce0;
+      border-radius: 8px;
+      padding: 16px;
+      background: #fafafa;
+      transition: border-color 0.15s;
+    }
+
+    .oplossing-kaart:hover { border-color: #673ab7; }
+    .oplossing-kaart.beste { border-color: #137333; background: #f0faf0; }
+
+    .oplossing-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 6px;
+    }
+
+    .oplossing-titel {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #202124;
+    }
+
+    .beste-badge {
+      background: #137333;
+      color: white;
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 99px;
+      font-weight: 500;
+    }
+
+    .score-rij { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+
+    .score-badge { font-size: 0.75rem; padding: 3px 10px; border-radius: 99px; font-weight: 500; }
+    .score-badge.positief { background: #d8f3dc; color: #137333; }
+    .score-badge.negatief { background: #ffe5e5; color: #d93025; }
+    .score-badge.totaal   { background: #ede7f6; color: #673ab7; }
+
+    .team-lijst { display: flex; flex-direction: column; gap: 8px; }
+
+    .team-blok {
+      background: white;
+      border: 1px solid #e8eaed;
+      border-radius: 6px;
+      padding: 10px 12px;
+    }
+
+    .team-naam {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #673ab7;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+
+    .team-score { font-size: 0.7rem; color: #5f6368; margin-bottom: 6px; }
+
+    .leerling-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+
+    .chip { font-size: 0.9rem; padding: 2px 8px; border-radius: 99px; font-weight: 400; }
+    .chip.jongen { background: #e3f2fd; color: #1565c0; }
+    .chip.meisje { background: #fce4ec; color: #880e4f; }
+    .chip.overig { background: #f3e5f5; color: #4a148c; }
+
+    .neg-relaties { font-size: 0.75rem; color: #d93025; margin-top: 6px; line-height: 1.5; }
+
+    .geen-data { text-align: center; color: #5f6368; font-size: 0.9rem; padding: 32px; }
+
+    .info-tekst { font-size: 0.85rem; color: #5f6368; margin-bottom: 16px; line-height: 1.5; }
+
+    .data-info {
+      display: none;
+      background: #f8f5ff;
+      border: 1px solid #ce93d8;
+      border-radius: 6px;
+      padding: 12px 16px;
+      font-size: 0.85rem;
+      color: #4a148c;
+      margin-top: 12px;
+    }
+
+    .knop-rij { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+    input[type="range"] { accent-color: #673ab7; width: 140px; }
+
+    select {
+      padding: 8px 10px;
+      border: 1px solid #dadce0;
+      border-radius: 4px;
+      font-family: 'Roboto', sans-serif;
+      font-size: 0.9rem;
+      color: #202124;
+      outline: none;
+      background: white;
+    }
+
+    select:focus { border-color: #673ab7; }
+
+    .laden-lijst { padding: 24px; text-align: center; color: #5f6368; font-size: 0.875rem; }
+    .spinner { width: 24px; height: 24px; border: 3px solid #dadce0; border-top-color: #673ab7; border-radius: 50%; animation: draaien 0.8s linear infinite; margin: 0 auto 10px; }
+    @keyframes draaien { to { transform: rotate(360deg); } }
+
+    /* Sessie-lader stijl */
+    .sessie-lader {
+      display: none;
+      background: #f8f5ff;
+      border: 1px solid #d1c4e9;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .sessie-lader h3 { font-size: 0.9rem; font-weight: 600; color: #4a148c; margin-bottom: 12px; }
+    .sessie-lader label { font-size: 0.85rem; color: #5f6368; display: block; margin-bottom: 4px; }
+    .sessie-lader input[type="text"] {
+      width: 100%; padding: 8px 10px; border: 1px solid #dadce0; border-radius: 4px;
+      font-family: 'Roboto', sans-serif; font-size: 0.9rem; color: #202124;
+      outline: none; margin-bottom: 10px;
+    }
+    .sessie-lader input[type="text"]:focus { border-color: #673ab7; }
+    .sessie-vraag-knoppen { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+    .sessie-vraag-knop {
+      display: block; width: 100%; text-align: left; padding: 8px 12px;
+      background: #f8f9fa; border: 1px solid #dadce0; border-radius: 6px;
+      cursor: pointer; font-size: 0.875rem; color: #202124;
+      font-family: 'Roboto', sans-serif;
+    }
+    .sessie-vraag-knop:hover { background: #e8f0fe; border-color: #673ab7; }
+  </style>
+</head>
+<body>
+
+<header>
+  <svg width="32" height="32" viewBox="0 0 100 100">
+    <line x1="48" y1="20" x2="82" y2="32" stroke="#000" stroke-width="2"/>
+    <line x1="48" y1="20" x2="65" y2="65" stroke="#000" stroke-width="2"/>
+    <line x1="48" y1="20" x2="15" y2="48" stroke="#000" stroke-width="2"/>
+    <line x1="82" y1="32" x2="65" y2="65" stroke="#000" stroke-width="2"/>
+    <line x1="15" y1="48" x2="35" y2="85" stroke="#000" stroke-width="2"/>
+    <line x1="65" y1="65" x2="35" y2="85" stroke="#000" stroke-width="2"/>
+    <line x1="15" y1="48" x2="65" y2="65" stroke="#000" stroke-width="2"/>
+    <circle cx="48" cy="20" r="16" fill="#ffaaaa" stroke="#fff" stroke-width="3"/>
+    <circle cx="82" cy="32" r="9"  fill="#aaddff" stroke="#fff" stroke-width="3"/>
+    <circle cx="65" cy="65" r="12" fill="#ffaaaa" stroke="#fff" stroke-width="3"/>
+    <circle cx="15" cy="48" r="13" fill="#aaddff" stroke="#fff" stroke-width="3"/>
+    <circle cx="35" cy="85" r="8"  fill="#ffaaaa" stroke="#fff" stroke-width="3"/>
+  </svg>
+  Teamindeling
+  <a href="/" style="position:absolute; right:16px; color:white; text-decoration:none; font-size:0.85rem; opacity:0.85;">
+    &#8592; Overzicht
+  </a>
+</header>
+
+<div id="team-info-card" style="display:none;"></div>
+
+<div class="container">
+
+  <!-- Stap 1: Data laden -->
+  <div class="card">
+    <h2><span class="stap">1</span>Laad sociogram-data</h2>
+    <p class="info-tekst">Importeer een sociogram-bestand dat je hebt geëxporteerd vanuit de beheerpagina of de visualisatietool. Gebruik een positieve vraag (bijvoorbeeld: Met wie werk je graag samen?).</p>
+
+    <div style="margin-bottom:12px; display:flex; gap:8px; flex-wrap:wrap;">
+      <button class="secundair" onclick="toonSessieLader('pos')">&#128196; Positieve vraag laden uit sessie</button>
+      <button class="secundair" id="btn-sessie-negatief" onclick="toonSessieLader('neg')">&#128196; Negatieve vraag laden uit sessie</button>
+    </div>
+
+    <!-- Netlify sessie-lader (vervangt Google Sheets picker) -->
+    <div class="sessie-lader" id="sessie-lader">
+      <h3 id="sessie-lader-titel">Laad uit sessie</h3>
+      <label>Sessie-ID:</label>
+      <input type="text" id="sessie-id-input" placeholder="bv. klas3a-2024">
+      <label>Beheertoken:</label>
+      <input type="text" id="sessie-token-input" placeholder="beheertoken">
+      <div id="sessie-vraag-wrap" style="display:none;">
+        <div style="font-size:0.85rem; font-weight:600; color:#4a148c; margin-bottom:6px;">Kies een vraag:</div>
+        <div id="sessie-vraag-knoppen" class="sessie-vraag-knoppen"></div>
+      </div>
+      <div style="display:flex; gap:8px; margin-top:10px; align-items:center; flex-wrap:wrap;">
+        <button class="primair" onclick="laadSessieVragen()" style="padding:8px 18px; font-size:0.85rem;">Haal vragen op</button>
+        <button class="secundair" onclick="sluitSessieLader()" style="padding:7px 14px; font-size:0.85rem;">Annuleer</button>
+        <span id="sessie-lader-status" style="font-size:0.8rem; color:#5f6368;"></span>
+      </div>
+      <div id="sheet-lader-team-waarschuwing" style="display:none; margin-top:8px; font-size:0.85rem; color:#e37400;"></div>
+    </div>
+
+    <div class="upload-zone" id="upload-zone" onclick="document.getElementById('json-input').click()">
+      <div class="icoon">&#128193;</div>
+      <div>Klik om een sociogram-bestand (.JSON) te selecteren</div>
+      <div style="font-size:0.78rem; margin-top:4px;">of sleep het bestand hierheen</div>
+    </div>
+    <input type="file" id="json-input" accept=".json" style="display:none;" onchange="laadJson(event)">
+
+    <div class="data-info" id="data-info"></div>
+  </div>
+
+  <!-- Stap 2: Instellingen -->
+  <div class="card">
+    <h2><span class="stap">2</span>Instellingen</h2>
+
+    <div class="instelling-rij" style="flex-direction:column; align-items:flex-start; gap:10px;">
+      <label class="toggle-wrap">
+        <input type="radio" name="geslacht-modus" id="geslacht-gemengd" value="gemengd" checked onchange="updateGeslachtModus()">
+        Geen voorkeur voor geslacht
+      </label>
+      <label class="toggle-wrap">
+        <input type="radio" name="geslacht-modus" id="geslacht-gescheiden" value="gescheiden" onchange="updateGeslachtModus()">
+        Jongens en meisjes in aparte teams
+      </label>
+      <label class="toggle-wrap">
+        <input type="radio" name="geslacht-modus" id="geslacht-mixen" value="mixen" onchange="updateGeslachtModus()">
+        Jongens en meisjes zoveel mogelijk mixen
+      </label>
+    </div>
+
+    <div id="mix-gewicht-rij" style="display:none;" class="instelling-rij">
+      <label>Mixgewicht:</label>
+      <input type="range" id="mix-gewicht-team" min="0" max="5" step="0.5" value="1" oninput="document.getElementById('mix-gewicht-team-waarde').textContent=parseFloat(this.value).toFixed(1)">
+      <span id="mix-gewicht-team-waarde" style="font-family:monospace; font-size:0.85rem; min-width:30px;">1.0</span>
+    </div>
+
+    <div class="instelling-rij">
+      <label>Teamgrootte:</label>
+      <input type="number" id="teamgrootte" min="2" max="20" value="4">
+      <label>leerlingen per team</label>
+    </div>
+
+    <div class="instelling-rij">
+      <label class="toggle-wrap">
+        <input type="checkbox" id="teamgrootte-maximum">
+        Teams mogen niet groter zijn (wel kleiner)
+      </label>
+    </div>
+
+    <div id="teams-info-wrap" style="margin-bottom:12px;">
+      <div id="teams-info" style="font-size:0.85rem; color:#5f6368; padding:8px 12px; background:#f8f5ff; border-radius:6px; border:1px solid #e8e0f0; line-height:1.7;"></div>
+    </div>
+
+    <div class="instelling-rij">
+      <label>Aantal oplossingen:</label>
+      <select id="aantal-oplossingen">
+        <option value="1">1</option>
+        <option value="3" selected>3</option>
+        <option value="5">5</option>
+        <option value="10">10</option>
+      </select>
+    </div>
+
+    <div class="instelling-rij">
+      <label>Kwaliteit:</label>
+      <select id="kwaliteit">
+        <option value="snel">Snel (50k iteraties, 1 herstart)</option>
+        <option value="normaal" selected>Normaal (500k iteraties, 3 herstarts)</option>
+        <option value="grondig">Grondig (2M iteraties, 5 herstarts)</option>
+      </select>
+    </div>
+
+    <div class="instelling-rij">
+      <label class="toggle-wrap">
+        <input type="checkbox" id="weeg-negatief" checked>
+        Ook negatieve relaties meewegen
+      </label>
+    </div>
+
+    <div id="negatief-json-wrap" style="margin-top:8px; display:block;">
+      <p class="info-tekst">Optioneel: laad ook een negatieve vraag (bijvoorbeeld: Met wie werk je liever niet samen?)</p>
+      <div class="knop-rij">
+        <button class="secundair" onclick="document.getElementById('json-negatief-input').click()">&#128193; Laad sociogram-data voor negatieve vraag</button>
+        <span class="status" id="status-negatief"></span>
+      </div>
+      <input type="file" id="json-negatief-input" accept=".json" style="display:none;" onchange="laadNegatiefJson(event)">
+
+      <div class="instelling-rij" style="margin-top:8px;">
+        <label>Gewicht negatieve relaties:</label>
+        <select id="gewicht-neg">
+          <option value="1" selected>1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="10">10</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stap 3: Uitvoeren -->
+  <div class="card">
+    <h2><span class="stap">3</span>Bereken optimale teamindeling</h2>
+    <div class="knop-rij">
+      <button class="primair" id="btn-bereken" onclick="berekenTeamindeling()" disabled>Bereken teamindeling</button>
+      <button class="secundair" id="btn-reset" onclick="resetResultaten()" style="display:none;">&#8634; Opnieuw</button>
+    </div>
+
+    <div class="voortgang-wrap" id="voortgang-wrap">
+      <div class="voortgang-balk-wrap">
+        <div class="voortgang-balk" id="voortgang-balk" style="width:0%"></div>
+      </div>
+      <div class="voortgang-tekst" id="voortgang-tekst">Bezig...</div>
+    </div>
+
+    <div class="status" id="status-bereken"></div>
+  </div>
+
+  <!-- Resultaten -->
+  <div class="card" id="resultaten-kaart" style="display:none;">
+    <h2>Resultaten</h2>
+    <div class="oplossingen-grid" id="oplossingen-grid"></div>
+    <div id="export-knop-wrap" style="display:none; margin-top:16px; display:flex; gap:8px; flex-wrap:wrap;">
+      <button class="secundair" onclick="exporteerOplossingen()">&#8595; Exporteer oplossingen als CSV</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  var studenten        = [];
+  var positieveMatrix  = {};
+  var negatiefMatrix   = {};
+  var heeftNegatief    = false;
+  var geldenUitSessie  = false;
+  var sessieLaderIsNegatief = false;
+
+  // ============================================================
+  //  NETLIFY SESSIE-LADER (vervangt Google Sheets picker)
+  // ============================================================
+
+  function toonSessieLader(type) {
+    sessieLaderIsNegatief = (type === 'neg');
+    var lader = document.getElementById('sessie-lader');
+    var titel = document.getElementById('sessie-lader-titel');
+    titel.textContent = sessieLaderIsNegatief
+      ? 'Laad negatieve vraag uit sessie'
+      : 'Laad positieve vraag uit sessie';
+    document.getElementById('sessie-vraag-wrap').style.display = 'none';
+    document.getElementById('sessie-lader-status').textContent = '';
+    lader.style.display = 'block';
+  }
+
+  function sluitSessieLader() {
+    document.getElementById('sessie-lader').style.display = 'none';
+  }
+
+  function laadSessieVragen() {
+    var sessieId = document.getElementById('sessie-id-input').value.trim();
+    var token    = document.getElementById('sessie-token-input').value.trim();
+    var statusEl = document.getElementById('sessie-lader-status');
+
+    if (!sessieId || !token) {
+      statusEl.textContent = 'Vul sessie-ID en beheertoken in.';
+      return;
+    }
+
+    statusEl.textContent = 'Laden...';
+    document.getElementById('sessie-vraag-wrap').style.display = 'none';
+
+    fetch('/api/get-responses?sessie=' + encodeURIComponent(sessieId) + '&token=' + encodeURIComponent(token))
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!data.succes) {
+          statusEl.textContent = 'Fout: ' + (data.fout || 'Onbekende fout');
+          return;
+        }
+        statusEl.textContent = '';
+        // Toon vragen als knoppen
+        var vragen = (data.config && data.config.vragen) ? data.config.vragen : [];
+        var kiesVragen = vragen.filter(function(v) { return v.type === 'kies'; });
+        if (kiesVragen.length === 0) {
+          statusEl.textContent = 'Geen keuze-vragen gevonden in deze sessie.';
+          return;
+        }
+        var wrap = document.getElementById('sessie-vraag-knoppen');
+        wrap.innerHTML = '';
+        kiesVragen.forEach(function(v) {
+          var knop = document.createElement('button');
+          knop.className = 'sessie-vraag-knop';
+          knop.textContent = v.titel + ' (' + v.sleutel + ')';
+          knop.onclick = function() {
+            verwerkSessieData(data, v.sleutel, sessieLaderIsNegatief);
+          };
+          wrap.appendChild(knop);
+        });
+        document.getElementById('sessie-vraag-wrap').style.display = 'block';
+      })
+      .catch(function(err) {
+        statusEl.textContent = 'Fout: ' + err.message;
+      });
+  }
+
+  function verwerkSessieData(sessieData, vraagSleutel, isNegatief) {
+    // Zet antwoorden om naar { students, connections } formaat
+    var studList = sessieData.alleNamen.map(function(n, i) {
+      return { id: i, name: n.naam, gender: n.geslacht === 'm' ? 'M' : (n.geslacht === 'v' ? 'V' : '') };
+    });
+    var naamNaarId = {};
+    studList.forEach(function(s) { naamNaarId[s.name] = s.id; });
+    var connections = [];
+    sessieData.antwoorden.forEach(function(antw) {
+      var bronId = naamNaarId[antw.naam];
+      if (bronId === undefined) return;
+      var keuzes = antw.antwoorden[vraagSleutel] || [];
+      keuzes.forEach(function(doel) {
+        var doelId = naamNaarId[doel];
+        if (doelId !== undefined) connections.push({ source: bronId, target: doelId });
+      });
+    });
+    var jsonData = { students: studList, connections: connections };
+
+    // Maak een nep-Blob object zodat verwerkJson kan worden hergebruikt
+    geldenUitSessie = true;
+    verwerkJsonData(jsonData, isNegatief, vraagSleutel);
+    geldenUitSessie = false;
+
+    sluitSessieLader();
+    if (isNegatief) {
+      document.getElementById('status-negatief').innerHTML = '&#10003; Geladen uit sessie (' + connections.length + ' verbindingen)';
+      document.getElementById('status-negatief').className = 'status ok';
+    }
+  }
+
+  // ============================================================
+  //  JSON laden (bestand of sessie)
+  // ============================================================
+
+  var zone = document.getElementById("upload-zone");
+  zone.addEventListener("dragover", function(e) { e.preventDefault(); zone.style.borderColor = "#673ab7"; });
+  zone.addEventListener("dragleave", function() { zone.style.borderColor = "#dadce0"; });
+  zone.addEventListener("drop", function(e) {
+    e.preventDefault();
+    zone.style.borderColor = "#dadce0";
+    var file = e.dataTransfer.files[0];
+    if (file) verwerkJson(file, false);
+  });
+
+  function laadJson(event) {
+    verwerkJson(event.target.files[0], false);
+    event.target.value = "";
+  }
+
+  function laadNegatiefJson(event) {
+    verwerkJson(event.target.files[0], true);
+    event.target.value = "";
+  }
+
+  function verwerkJson(file, isNegatief) {
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        var data = JSON.parse(e.target.result);
+        verwerkJsonData(data, isNegatief, file.name);
+      } catch(err) {
+        alert("Fout bij lezen van JSON: " + err.message);
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function verwerkJsonData(data, isNegatief, label) {
+    if (!data.students || !data.connections) {
+      alert("Ongeldig JSON-bestand.");
+      return;
+    }
+
+    if (!isNegatief) {
+      studenten = data.students.map(function(s) {
+        return { id: s.id, naam: s.name, geslacht: s.gender || "" };
+      });
+
+      positieveMatrix = {};
+      studenten.forEach(function(s) { positieveMatrix[s.id] = {}; });
+      data.connections.forEach(function(c) {
+        positieveMatrix[c.source][c.target] = 1;
+      });
+
+      if (!geldenUitSessie) {
+        var z = document.getElementById("upload-zone");
+        z.classList.add("geladen");
+        z.innerHTML = '<div class="icoon">&#9989;</div><div>' + label + '</div><div style="font-size:0.78rem; margin-top:4px;">' + studenten.length + ' leerlingen, ' + data.connections.length + ' verbindingen</div>';
+      } else {
+        var z = document.getElementById("upload-zone");
+        z.classList.add("geladen");
+        z.innerHTML = '<div class="icoon">&#9989;</div><div>Geladen uit sessie: <strong>' + label + '</strong></div><div style="font-size:0.78rem; margin-top:4px;">' + studenten.length + ' leerlingen, ' + data.connections.length + ' verbindingen</div>';
+      }
+
+      var info = document.getElementById("data-info");
+      info.style.display = "block";
+      var jongens = studenten.filter(function(s) { return s.geslacht === "M"; }).length;
+      var meisjes = studenten.filter(function(s) { return s.geslacht === "V"; }).length;
+      var overig  = studenten.length - jongens - meisjes;
+      info.innerHTML = "&#128101; <strong>" + studenten.length + "</strong> leerlingen &mdash; " +
+        jongens + " jongens, " + meisjes + " meisjes" +
+        (overig > 0 ? ", " + overig + " overig" : "");
+
+      document.getElementById("btn-bereken").disabled = false;
+      updateTeamsInfo();
+
+      heeftNegatief = false;
+      negatiefMatrix = {};
+      document.getElementById("status-negatief").textContent = "";
+
+    } else {
+      var negNamen = data.students.map(function(s) { return s.name; }).sort();
+      var posNamen = studenten.map(function(s) { return s.naam; }).sort();
+      var statusEl = document.getElementById("status-negatief");
+
+      if (negNamen.length !== posNamen.length) {
+        statusEl.textContent = "Fout: " + negNamen.length + " leerlingen in negatieve vraag, maar " + posNamen.length + " in positieve vraag.";
+        statusEl.className = "status fout";
+        return;
+      }
+
+      var mismatch = [];
+      for (var ni = 0; ni < negNamen.length; ni++) {
+        if (negNamen[ni] !== posNamen[ni]) mismatch.push(negNamen[ni]);
+      }
+
+      if (mismatch.length > 0) {
+        statusEl.textContent = "Namen komen niet overeen: " + mismatch.slice(0, 3).join(", ") + (mismatch.length > 3 ? " en " + (mismatch.length - 3) + " meer." : ".");
+        statusEl.className = "status fout";
+        return;
+      }
+
+      var naamNaarId = {};
+      studenten.forEach(function(s) { naamNaarId[s.naam] = s.id; });
+      var negIdNaarNaam = {};
+      data.students.forEach(function(s) { negIdNaarNaam[s.id] = s.name; });
+
+      negatiefMatrix = {};
+      studenten.forEach(function(s) { negatiefMatrix[s.id] = {}; });
+
+      data.connections.forEach(function(c) {
+        var bronNaam = negIdNaarNaam[c.source];
+        var doelNaam = negIdNaarNaam[c.target];
+        var bronId   = naamNaarId[bronNaam];
+        var doelId   = naamNaarId[doelNaam];
+        if (bronId !== undefined && doelId !== undefined) negatiefMatrix[bronId][doelId] = 1;
+      });
+
+      heeftNegatief = true;
+      if (!geldenUitSessie) {
+        statusEl.innerHTML = "&#10003; " + label + " geladen (" + data.connections.length + " negatieve verbindingen)";
+        statusEl.className = "status ok";
+      }
+    }
+  }
+
+  document.getElementById("teamgrootte").addEventListener("input", updateTeamsInfo);
+  document.getElementById("teamgrootte-maximum").addEventListener("change", updateTeamsInfo);
+  document.getElementById("weeg-negatief").addEventListener("change", function() {
+    document.getElementById("negatief-json-wrap").style.display = this.checked ? "block" : "none";
+    document.getElementById("btn-sessie-negatief").style.display = this.checked ? "inline-block" : "none";
+    if (!this.checked) {
+      heeftNegatief = false;
+      negatiefMatrix = {};
+      document.getElementById("status-negatief").textContent = "";
+    }
+  });
+
+  function getGeslachtModus() {
+    var el = document.querySelector('input[name="geslacht-modus"]:checked');
+    return el ? el.value : 'gemengd';
+  }
+
+  function updateGeslachtModus() {
+    var modus = getGeslachtModus();
+    document.getElementById('mix-gewicht-rij').style.display = modus === 'mixen' ? 'flex' : 'none';
+    updateTeamsInfo();
+  }
+
+  function teamVerdelingTekst(aantal, grootte) {
+    if (aantal === 0) return null;
+    var isMaximum   = document.getElementById("teamgrootte-maximum").checked;
+    var aantalTeams = isMaximum
+      ? Math.ceil(aantal / grootte)
+      : Math.max(1, Math.round(aantal / grootte));
+    var groot = aantal % aantalTeams;
+    var klein = aantalTeams - groot;
+    var grootGrootte = Math.ceil(aantal / aantalTeams);
+    var kleinGrootte = Math.floor(aantal / aantalTeams);
+    var omschrijving;
+    if (groot === 0) {
+      omschrijving = aantalTeams + " team" + ((aantalTeams != 1) ? "s" : "") + " van " + kleinGrootte;
+    } else {
+      omschrijving = groot + " team" + ((groot != 1) ? "s" : "") + " van " + grootGrootte + " leerlingen, plus " + klein + " team" + ((klein != 1) ? "s" : "") + " van " + kleinGrootte;
+    }
+    return { aantalTeams: aantalTeams, omschrijving: omschrijving };
+  }
+
+  function updateTeamsInfo() {
+    if (studenten.length === 0) return;
+    var grootte    = parseInt(document.getElementById("teamgrootte").value) || 4;
+    var gescheiden = getGeslachtModus() === "gescheiden";
+    var el         = document.getElementById("teams-info");
+
+    if (!gescheiden) {
+      var res = teamVerdelingTekst(studenten.length, grootte);
+      el.innerHTML = "Er zijn " + studenten.length + " leerlingen. Je krijgt <strong>" + res.aantalTeams + " team" + ((res.aantalTeams != 1) ? "s" : "") + "</strong> (" + res.omschrijving + " leerlingen)";
+    } else {
+      var jongens = studenten.filter(function(s) { return s.geslacht === "M"; });
+      var meisjes = studenten.filter(function(s) { return s.geslacht === "V"; });
+      var overig  = studenten.filter(function(s) { return s.geslacht !== "M" && s.geslacht !== "V"; });
+      var html = "";
+      if (jongens.length > 0) {
+        var resJ = teamVerdelingTekst(jongens.length, grootte);
+        html += "Er zijn " + jongens.length + " jongens. Je krijgt <strong>" + resJ.aantalTeams + " team" + ((resJ.aantalTeams != 1) ? "s" : "") + "</strong> (" + resJ.omschrijving + " leerlingen)<br>";
+      }
+      if (meisjes.length > 0) {
+        var resM = teamVerdelingTekst(meisjes.length, grootte);
+        html += "Er zijn " + meisjes.length + " meisjes. Je krijgt <strong>" + resM.aantalTeams + " team" + ((resM.aantalTeams != 1) ? "s" : "") + "</strong> (" + resM.omschrijving + " leerlingen)<br>";
+      }
+      if (overig.length > 0) {
+        var resO = teamVerdelingTekst(overig.length, grootte);
+        html += "Er zijn " + overig.length + " overige leerlingen. Je krijgt <strong>" + resO.aantalTeams + " team" + ((resO.aantalTeams != 1) ? "s" : "") + "</strong> (" + resO.omschrijving + " leerlingen)";
+      }
+      el.innerHTML = html;
+    }
+  }
+
+  // ============================================================
+  //  SIMULATED ANNEALING
+  // ============================================================
+
+  function berekenScore(indeling, studIds) {
+    var positief = 0;
+    var negatief = 0;
+    var mix     = 0;
+    var gewicht_neg = parseInt(document.getElementById("gewicht-neg").value);
+    var mixGewicht  = getGeslachtModus() === 'mixen'
+      ? parseFloat(document.getElementById("mix-gewicht-team").value) : 0;
+
+    var geslachtMap = {};
+    studenten.forEach(function(s) { geslachtMap[s.id] = s.geslacht; });
+
+    for (var team = 0; team < indeling.length; team++) {
+      var leden = indeling[team];
+      for (var i = 0; i < leden.length; i++) {
+        for (var j = i + 1; j < leden.length; j++) {
+          var a = leden[i];
+          var b = leden[j];
+          if (positieveMatrix[a] && positieveMatrix[a][b]) positief++;
+          if (positieveMatrix[b] && positieveMatrix[b][a]) positief++;
+          if (heeftNegatief && document.getElementById("weeg-negatief").checked) {
+            if (negatiefMatrix[a] && negatiefMatrix[a][b]) negatief++;
+            if (negatiefMatrix[b] && negatiefMatrix[b][a]) negatief++;
+          }
+          if (mixGewicht > 0) {
+            var gA = geslachtMap[a], gB = geslachtMap[b];
+            if ((gA === 'M' && gB === 'V') || (gA === 'V' && gB === 'M')) mix++;
+          }
+        }
+      }
+    }
+    return { positief: positief, negatief: negatief, totaal: positief - gewicht_neg * negatief + mixGewicht * mix };
+  }
+
+  function maakWillekeurigeIndeling(ids, grootte) {
+    var isMaximum   = document.getElementById("teamgrootte-maximum").checked;
+    var aantalTeams = isMaximum ? Math.ceil(ids.length / grootte) : Math.max(1, Math.round(ids.length / grootte));
+    var geschud = ids.slice().sort(function() { return Math.random() - 0.5; });
+    var teams = [];
+    for (var i = 0; i < aantalTeams; i++) teams.push([]);
+    for (var j = 0; j < geschud.length; j++) { teams[j % aantalTeams].push(geschud[j]); }
+    return teams;
+  }
+
+  function wisselTweeleden(indeling) {
+    var kopie = indeling.map(function(t) { return t.slice(); });
+    var t1 = Math.floor(Math.random() * kopie.length);
+    var t2 = Math.floor(Math.random() * kopie.length);
+    if (kopie.length > 1) { while (t2 === t1) t2 = Math.floor(Math.random() * kopie.length); }
+    var l1 = Math.floor(Math.random() * kopie[t1].length);
+    var l2 = Math.floor(Math.random() * kopie[t2].length);
+    var tmp = kopie[t1][l1];
+    kopie[t1][l1] = kopie[t2][l2];
+    kopie[t2][l2] = tmp;
+    return kopie;
+  }
+
+  function maakGreedyIndeling(ids, grootte) {
+    var isMaximum   = document.getElementById("teamgrootte-maximum").checked;
+    var aantalTeams = isMaximum ? Math.ceil(ids.length / grootte) : Math.max(1, Math.round(ids.length / grootte));
+    var teams = [];
+    for (var i = 0; i < aantalTeams; i++) teams.push([]);
+    var toegewezen = {};
+    var resterend = ids.slice();
+    resterend.sort(function(a, b) {
+      var aantalB = ids.filter(function(id) { return positieveMatrix[id] && positieveMatrix[id][b]; }).length;
+      var aantalA = ids.filter(function(id) { return positieveMatrix[id] && positieveMatrix[id][a]; }).length;
+      return aantalB - aantalA;
+    });
+    resterend.forEach(function(id) {
+      if (toegewezen[id]) return;
+      var kleinsteTeam = teams.reduce(function(min, t, i) { return t.length < teams[min].length ? i : min; }, 0);
+      teams[kleinsteTeam].push(id);
+      toegewezen[id] = true;
+    });
+    return teams;
+  }
+
+  function simulatedAnnealing(ids, grootte, iteraties, herstarts) {
+    var globalBeste = null;
+    var globalBesteScore = -Infinity;
+    for (var r = 0; r < herstarts; r++) {
+      var huidig = (r === 0) ? maakGreedyIndeling(ids, grootte) : maakWillekeurigeIndeling(ids, grootte);
+      var huidigeScore = berekenScore(huidig, ids).totaal;
+      var beste = huidig.map(function(t) { return t.slice(); });
+      var besteScore = huidigeScore;
+      var T = 10.0;
+      var afkoeling = Math.pow(0.001 / T, 1.0 / iteraties);
+      for (var i = 0; i < iteraties; i++) {
+        var kandidaat = wisselTweeleden(huidig);
+        var kandidaatScore = berekenScore(kandidaat, ids).totaal;
+        var delta = kandidaatScore - huidigeScore;
+        if (delta > 0 || Math.random() < Math.exp(delta / T)) {
+          huidig = kandidaat;
+          huidigeScore = kandidaatScore;
+        }
+        if (huidigeScore > besteScore) {
+          beste = huidig.map(function(t) { return t.slice(); });
+          besteScore = huidigeScore;
+        }
+        T *= afkoeling;
+      }
+      if (besteScore > globalBesteScore) {
+        globalBeste = beste;
+        globalBesteScore = besteScore;
+      }
+    }
+    return { indeling: globalBeste, score: berekenScore(globalBeste, ids) };
+  }
+
+  function berekenTeamindeling() {
+    if (studenten.length === 0) return;
+    var grootte    = parseInt(document.getElementById("teamgrootte").value) || 4;
+    var aantalOpl  = parseInt(document.getElementById("aantal-oplossingen").value) || 3;
+    var gescheiden = getGeslachtModus() === "gescheiden";
+    var kwaliteit  = document.getElementById("kwaliteit").value;
+    var iteraties  = kwaliteit === "snel" ? 50000 : (kwaliteit === "grondig" ? 2000000 : 500000);
+    var herstarts  = kwaliteit === "snel" ? 1 : (kwaliteit === "grondig" ? 5 : 3);
+
+    document.getElementById("btn-bereken").disabled = true;
+    document.getElementById("btn-reset").style.display = "none";
+    document.getElementById("voortgang-wrap").style.display = "block";
+    document.getElementById("resultaten-kaart").style.display = "none";
+    document.getElementById("status-bereken").textContent = "";
+
+    var oplossingen = [];
+    var huidig = 0;
+    var totaal = aantalOpl;
+
+    function berekenVolgende() {
+      if (huidig >= totaal) {
+        toonResultaten(oplossingen, gescheiden);
+        return;
+      }
+      var pct = Math.round((huidig / totaal) * 100);
+      document.getElementById("voortgang-balk").style.width = pct + "%";
+      var kw = document.getElementById("kwaliteit").value;
+      var hst = kw === "snel" ? 1 : (kw === "grondig" ? 5 : 3);
+      document.getElementById("voortgang-tekst").textContent =
+        "Oplossing " + (huidig + 1) + " van " + totaal + " berekenen (" + hst + " herstarts)...";
+
+      setTimeout(function() {
+        var resultaat;
+        if (gescheiden) {
+          var jongenIds = studenten.filter(function(s) { return s.geslacht === "M"; }).map(function(s) { return s.id; });
+          var meisjeIds = studenten.filter(function(s) { return s.geslacht === "V"; }).map(function(s) { return s.id; });
+          var overigIds = studenten.filter(function(s) { return s.geslacht !== "M" && s.geslacht !== "V"; }).map(function(s) { return s.id; });
+          var indelingJ = jongenIds.length >= 2 ? simulatedAnnealing(jongenIds, grootte, iteraties, herstarts).indeling : [jongenIds];
+          var indelingM = meisjeIds.length >= 2 ? simulatedAnnealing(meisjeIds, grootte, iteraties, herstarts).indeling : [meisjeIds];
+          var indelingO = overigIds.length >= 2 ? simulatedAnnealing(overigIds, grootte, iteraties, herstarts).indeling : (overigIds.length > 0 ? [overigIds] : []);
+          var gecombineerd = indelingJ.concat(indelingM).concat(indelingO).filter(function(t) { return t.length > 0; });
+          var score = berekenScore(gecombineerd, studenten.map(function(s) { return s.id; }));
+          resultaat = { indeling: gecombineerd, score: score };
+        } else {
+          var alleIds = studenten.map(function(s) { return s.id; });
+          resultaat = simulatedAnnealing(alleIds, grootte, iteraties, herstarts);
+        }
+        oplossingen.push(resultaat);
+        huidig++;
+        berekenVolgende();
+      }, 10);
+    }
+
+    berekenVolgende();
+  }
+
+  function oplossingsSleutel(indeling, naamLookup) {
+    var canoniekeTeams = indeling.map(function(team) {
+      return team.slice().sort(function(a, b) { return naamLookup[a].localeCompare(naamLookup[b]); }).map(function(id) { return naamLookup[id]; }).join(",");
+    });
+    canoniekeTeams.sort(function(a, b) { return a.localeCompare(b); });
+    return canoniekeTeams.join("|");
+  }
+
+  function toonResultaten(oplossingen, gescheiden) {
+    oplossingen.sort(function(a, b) { return b.score.totaal - a.score.totaal; });
+    document.getElementById("voortgang-balk").style.width = "100%";
+    document.getElementById("voortgang-tekst").textContent = "Klaar!";
+    document.getElementById("btn-bereken").disabled = false;
+    document.getElementById("btn-reset").style.display = "inline-block";
+    document.getElementById("resultaten-kaart").style.display = "block";
+
+    var grid = document.getElementById("oplossingen-grid");
+    grid.innerHTML = "";
+
+    var naamLookup = {};
+    var geslachtLookup = {};
+    studenten.forEach(function(s) {
+      naamLookup[s.id] = s.naam;
+      geslachtLookup[s.id] = s.geslacht;
+    });
+
+    var geziendeSleutels = {};
+    var uniekeOplossingen = [];
+    oplossingen.forEach(function(opl) {
+      var sleutel = oplossingsSleutel(opl.indeling, naamLookup);
+      if (!geziendeSleutels[sleutel]) {
+        geziendeSleutels[sleutel] = true;
+        uniekeOplossingen.push(opl);
+      }
+    });
+    oplossingen = uniekeOplossingen;
+
+    if (oplossingen.length === 0) {
+      grid.innerHTML = "<div class='geen-data'>Geen unieke oplossingen gevonden.</div>";
+      return;
+    }
+
+    window._huidigeOplossingen = oplossingen;
+    window._huidigNaamLookup   = naamLookup;
+    window._huidigGeslacht     = geslachtLookup;
+
+    document.getElementById("export-knop-wrap").style.display = "flex";
+
+    var teamNamen = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"];
+
+    oplossingen.forEach(function(opl, idx) {
+      var kaart = document.createElement("div");
+      kaart.className = "oplossing-kaart" + (idx === 0 ? " beste" : "");
+
+      var teamHtml = "";
+      opl.indeling.forEach(function(team, ti) {
+        if (team.length === 0) return;
+        var teamScore = berekenScore([team], team);
+        var chipsHtml = team.slice().sort().map(function(id) {
+          var g = geslachtLookup[id];
+          var cls = g === "M" ? "jongen" : (g === "V" ? "meisje" : "overig");
+          return '<span class="chip ' + cls + '" data-id="' + id + '">' +
+            naamLookup[id] + '</span>'
+        }).join("");
+
+        var negRelHtml = "";
+        if (heeftNegatief && document.getElementById("weeg-negatief").checked && teamScore.negatief > 0) {
+          var negParen = [];
+          for (var ni = 0; ni < team.length; ni++) {
+            for (var nj = 0; nj < team.length; nj++) {
+              if (ni === nj) continue;
+              var na = team[ni]; var nb = team[nj];
+              if (negatiefMatrix[na] && negatiefMatrix[na][nb]) {
+                negParen.push(naamLookup[na] + " &#8594; " + naamLookup[nb]);
+              }
+            }
+          }
+          if (negParen.length > 0) {
+            negRelHtml = '<div class="neg-relaties">&#10060; ' + negParen.join(", ") + '</div>';
+          }
+        }
+
+        teamHtml +=
+          '<div class="team-blok">' +
+          '<div class="team-naam">Team ' + (teamNamen[ti] || (ti+1)) + '</div>' +
+          '<div class="team-score">&#9989; ' + teamScore.positief + ' positief' +
+          (heeftNegatief && document.getElementById("weeg-negatief").checked ? ' &nbsp;&#10060; ' + teamScore.negatief + ' negatief' : '') +
+          '</div>' +
+          '<div class="leerling-chips">' + chipsHtml + '</div>' +
+          negRelHtml + '</div>';
+      });
+
+      kaart.dataset.oplIdx = idx;
+      kaart.innerHTML =
+        '<div class="oplossing-header">' +
+          '<span class="oplossing-titel">Oplossing ' + (idx + 1) + '</span>' +
+          '<div style="display:flex; gap:6px; align-items:center;">' +
+            (idx === 0 ? '<span class="beste-badge">Beste</span>' : '') +
+            '<button class="secundair" style="padding:4px 10px; font-size:0.75rem;" onclick="kopieerOplossing(' + idx + ')">&#9112; Kopieer</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="score-rij">' +
+          '<span class="score-badge positief">&#9989; ' + opl.score.positief + ' positief</span>' +
+          (heeftNegatief && document.getElementById("weeg-negatief").checked
+            ? '<span class="score-badge negatief">&#10060; ' + opl.score.negatief + ' negatief</span>' : '') +
+          '<span class="score-badge totaal">Score: ' + opl.score.totaal + '</span>' +
+        '</div>' +
+        '<div class="team-lijst">' + teamHtml + '</div>';
+
+      grid.appendChild(kaart);
+
+      (function(currentOplIdx) {
+        kaart.querySelectorAll(".chip[data-id]").forEach(function(chip) {
+          chip.addEventListener("mouseenter", function(e) {
+            toonTeamInfoCard(e, parseInt(chip.dataset.id), currentOplIdx);
+          });
+          chip.addEventListener("mousemove", plaatsTeamInfoCard);
+          chip.addEventListener("mouseleave", verbergTeamInfoCard);
+        });
+      })(idx);
+    });
+  }
+
+  function resetResultaten() {
+    document.getElementById("resultaten-kaart").style.display = "none";
+    document.getElementById("voortgang-wrap").style.display = "none";
+    document.getElementById("btn-reset").style.display = "none";
+    document.getElementById("btn-bereken").disabled = false;
+    document.getElementById("status-bereken").textContent = "";
+  }
+
+  function kopieerOplossing(idx) {
+    if (!window._huidigeOplossingen || !window._huidigNaamLookup) return;
+    var teamNamen = ["1","2","3","4","5","6","7","8","9","10","11","12"];
+    var opl = window._huidigeOplossingen[idx];
+    var regels = [];
+    opl.indeling.forEach(function(team, ti) {
+      if (team.length === 0) return;
+      regels.push("Team " + (teamNamen[ti] || (ti + 1)) + ":");
+      team.forEach(function(id) { regels.push(window._huidigNaamLookup[id]); });
+      regels.push("");
+    });
+    navigator.clipboard.writeText(regels.join("\n")).then(function() {
+      var knoppen = document.querySelectorAll(".oplossing-kaart .secundair");
+      var knop = knoppen[idx];
+      if (knop) {
+        var origineel = knop.textContent;
+        knop.innerHTML = "&#10003; Gekopieerd!";
+        setTimeout(function() { knop.textContent = origineel; }, 1500);
+      }
+    });
+  }
+
+  function exporteerOplossingen() {
+    if (!window._huidigeOplossingen) return;
+    var teamNamen = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"];
+    var regels = ["Oplossing; Naam; Geslacht; Team\n"];
+    window._huidigeOplossingen.forEach(function(opl, idx) {
+      opl.indeling.forEach(function(team, ti) {
+        team.forEach(function(id) {
+          regels.push((idx + 1) + "; " + window._huidigNaamLookup[id] + "; " + (window._huidigGeslacht[id] || "X") + "; " + (teamNamen[ti] || String(ti + 1)) + "\n");
+        });
+      });
+    });
+    var nu = new Date();
+    var datum = nu.getFullYear() + "-" + String(nu.getMonth() + 1).padStart(2, "0") + "-" + String(nu.getDate()).padStart(2, "0");
+    var blob = new Blob([regels.join("")], { type: "text/csv;charset=utf-8;" });
+    var url  = URL.createObjectURL(blob);
+    var a    = document.createElement("a");
+    a.href = url; a.download = "Teamindeling_" + datum + ".csv"; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // ============================================================
+  //  HOVER INFO-CARD
+  // ============================================================
+
+  function toonTeamInfoCard(e, id, oplIdx) {
+    highlightTeamChips(id, oplIdx !== undefined ? oplIdx : 0);
+
+    var naam  = window._huidigNaamLookup  ? (window._huidigNaamLookup[id]  || "?") : "?";
+    var weegNeg = document.getElementById("weeg-negatief").checked;
+
+    var alleIds = window._huidigeOplossingen && window._huidigeOplossingen[0]
+      ? window._huidigeOplossingen[0].indeling.reduce(function(acc, team) { return acc.concat(team); }, [])
+      : [];
+
+    var kieztPos = alleIds.filter(function(bid) {
+      return bid !== id && positieveMatrix[id] && positieveMatrix[id][bid];
+    }).map(function(bid) { return window._huidigNaamLookup[bid] || "?"; });
+
+    var gekozenDoor = alleIds.filter(function(bid) {
+      return bid !== id && positieveMatrix[bid] && positieveMatrix[bid][id];
+    }).map(function(bid) { return window._huidigNaamLookup[bid] || "?"; });
+
+    var negatiefMet = [];
+    if (heeftNegatief && weegNeg) {
+      negatiefMet = alleIds.filter(function(bid) {
+        return bid !== id && negatiefMatrix[id] && negatiefMatrix[id][bid];
+      }).map(function(bid) { return window._huidigNaamLookup[bid] || "?"; });
+    }
+
+    var html = "<div style='font-weight:700; font-size:0.95rem; color:#202124; margin-bottom:4px;'>" + naam + "</div>";
+    if (kieztPos.length > 0) {
+      html += "<div style='font-size:0.82rem; margin-bottom:4px;'><span style='color:#e53935; font-size:1rem;'>&#9829;</span> <span style='color:#5f6368;'>Kiest:</span> " + kieztPos.join(", ") + "</div>";
+    }
+    if (gekozenDoor.length > 0) {
+      html += "<div style='font-size:0.82rem; margin-bottom:4px;'><span style='color:#e53935; font-size:1rem;'>&#9829;</span> <span style='color:#5f6368;'>Gekozen door:</span> " + gekozenDoor.join(", ") + "</div>";
+    }
+    if (negatiefMet.length > 0) {
+      html += "<div style='font-size:0.82rem; color:#d93025;'><span style='font-size:1rem;'>&#9889;</span> <span style='color:#5f6368;'>Conflict:</span> " + negatiefMet.join(", ") + "</div>";
+    }
+    if (kieztPos.length === 0 && gekozenDoor.length === 0 && negatiefMet.length === 0) {
+      html += "<div style='font-size:0.8rem; color:#9e9e9e; font-style:italic;'>Geen relaties gevonden</div>";
+    }
+
+    var card = document.getElementById("team-info-card");
+    card.innerHTML = html;
+    card.setAttribute("style",
+      "display:block; position:fixed !important; z-index:9999; pointer-events:none;" +
+      "background:rgba(255,252,180,0.92); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px);" +
+      "border:1.5px solid rgba(200,190,80,0.4); border-radius:10px; padding:12px 16px;" +
+      "min-width:180px; max-width:260px; box-shadow:0 4px 16px rgba(0,0,0,0.12);" +
+      "font-family:'Roboto',sans-serif; left:-9999px; top:-9999px;"
+    );
+    plaatsTeamInfoCard(e);
+  }
+
+  function plaatsTeamInfoCard(e) {
+    var card = document.getElementById("team-info-card");
+    var x = e.clientX + 14;
+    var y = e.clientY + 14;
+    var cardW = card.offsetWidth || 200;
+    var cardH = card.offsetHeight || 120;
+    if (x + cardW > window.innerWidth  - 10) x = e.clientX - cardW - 10;
+    if (y + cardH > window.innerHeight - 10) y = e.clientY - cardH - 10;
+    card.style.left = x + "px";
+    card.style.top  = y + "px";
+  }
+
+  function verbergTeamInfoCard() {
+    document.getElementById("team-info-card").style.display = "none";
+    unhighlightTeamChips();
+  }
+
+  function highlightTeamChips(id, oplIdx) {
+    var oplIds = {};
+    if (window._huidigeOplossingen && window._huidigeOplossingen[oplIdx]) {
+      window._huidigeOplossingen[oplIdx].indeling.forEach(function(team) {
+        team.forEach(function(tid) { oplIds[tid] = true; });
+      });
+    }
+
+    document.querySelectorAll(".chip[data-id]").forEach(function(el) {
+      var bid = parseInt(el.dataset.id);
+      if (!el.closest("[data-opl-idx]") || parseInt(el.closest("[data-opl-idx]").dataset.oplIdx) !== oplIdx) {
+        return;
+      }
+      if (bid === id) {
+        el.style.outline = "2.5px dashed #673ab7";
+        el.style.outlineOffset = "1px";
+        return;
+      }
+      var isPos = positieveMatrix[id] && positieveMatrix[id][bid];
+      var isNeg = heeftNegatief && document.getElementById("weeg-negatief").checked &&
+                  negatiefMatrix[id] && negatiefMatrix[id][bid];
+      if (isPos) {
+        el.classList.add("highlight-pos");
+        el.classList.remove("highlight-dim");
+      } else if (isNeg) {
+        el.classList.add("highlight-neg");
+        el.classList.remove("highlight-dim");
+      } else {
+        el.classList.add("highlight-dim");
+      }
+    });
+  }
+
+  function unhighlightTeamChips() {
+    document.querySelectorAll(".chip[data-id]").forEach(function(el) {
+      el.classList.remove("highlight-pos", "highlight-neg", "highlight-dim");
+      el.style.outline = "";
+      el.style.outlineOffset = "";
+    });
+  }
+
+</script>
+</body>
+</html>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hulp &ndash; Sociogram Toolkit</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blauw: #1a73e8; --blauw-donker: #1558b0; --blauw-licht: #e8f0fe;
+      --tekst: #202124; --grijs: #5f6368; --rand: #dadce0; --wit: #ffffff; --bg: #f0f4ff;
+    }
+    body { font-family: "DM Sans", sans-serif; background: var(--bg); color: var(--tekst); min-height: 100vh; padding-bottom: 60px; }
+    header { background: var(--blauw); color: white; padding: 18px 24px; display: flex; align-items: center; gap: 14px; box-shadow: 0 2px 8px rgba(26,115,232,0.3); position: relative; }
+    header h1 { font-size: 1.3rem; font-weight: 600; }
+    header a.terug { position: absolute; right: 20px; color: rgba(255,255,255,0.85); text-decoration: none; font-size: 0.85rem; }
+    .container { max-width: 800px; margin: 0 auto; padding: 32px 16px; }
+    .card { background: var(--wit); border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); padding: 28px 32px; margin-bottom: 20px; }
+    h2 { font-size: 1.1rem; font-weight: 700; color: var(--blauw-donker); margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--blauw-licht); }
+    h3 { font-size: 0.95rem; font-weight: 600; color: var(--tekst); margin: 18px 0 8px; }
+    p { font-size: 0.875rem; color: var(--grijs); line-height: 1.65; margin-bottom: 10px; }
+    .module-lijst { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 8px; }
+    .module-item { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border: 1px solid var(--rand); border-radius: 8px; background: #fafafa; flex-wrap: nowrap; }
+    .module-tekst { flex: 1; min-width: 0; }
+
+    /* Carousel */
+    .carousel {
+      position: relative;
+      width: 400px;
+      flex-shrink: 0;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #f0f4ff;
+      border: 1px solid var(--rand);
+    }
+    .carousel-slides {
+      display: flex;
+      transition: transform 0.35s ease;
+    }
+    .carousel-slide {
+      min-width: 100%;
+      aspect-ratio: 16/9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #e8f0fe 0%, #f0f4ff 100%);
+      color: var(--grijs);
+      font-size: 0.85rem;
+      gap: 10px;
+    }
+    .carousel-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .carousel-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,0.9);
+      border: 1px solid var(--rand);
+      border-radius: 50%;
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+      color: var(--tekst);
+      z-index: 2;
+      transition: background 0.15s;
+    }
+    .carousel-btn:hover { background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+    .carousel-btn.prev { left: 8px; }
+    .carousel-btn.next { right: 8px; }
+    .carousel-btn:disabled { opacity: 0.3; cursor: default; }
+    .carousel-dots {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 0 4px;
+    }
+    .carousel-caption {
+      font-size: 0.72rem;
+      color: var(--grijs);
+      text-align: center;
+      padding: 4px 8px 6px;
+      background: white;
+      border-top: 1px solid var(--rand);
+    }
+    .carousel-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--rand);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .carousel-dot.actief { background: var(--blauw); }
+    .module-num { font-family: "DM Mono", monospace; font-size: 0.72rem; font-weight: 600; color: var(--blauw); background: var(--blauw-licht); padding: 2px 7px; border-radius: 99px; flex-shrink: 0; margin-top: 1px; }
+    .module-tekst strong { display: block; font-size: 0.875rem; margin-bottom: 3px; }
+    .module-tekst span { font-size: 0.82rem; color: var(--grijs); }
+    .stap-lijst { counter-reset: stap; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .stap-item { display: flex; gap: 12px; align-items: flex-start; font-size: 0.875rem; }
+    .stap-item::before { counter-increment: stap; content: counter(stap); display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; background: var(--blauw); color: white; border-radius: 50%; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+    .stap-item span { color: var(--grijs); line-height: 1.55; }
+  </style>
+</head>
+<body>
+<header>
+  <svg width="28" height="28" viewBox="0 0 100 100">
+    <line x1="48" y1="23" x2="82" y2="35" stroke="#fff" stroke-width="3"/>
+    <line x1="48" y1="23" x2="65" y2="68" stroke="#fff" stroke-width="3"/>
+    <line x1="48" y1="23" x2="15" y2="51" stroke="#fff" stroke-width="3"/>
+    <circle cx="48" cy="23" r="13" fill="#4285f4" stroke="#fff" stroke-width="2"/>
+    <circle cx="82" cy="35" r="8"  fill="#aaddff" stroke="#fff" stroke-width="2"/>
+    <circle cx="65" cy="68" r="10" fill="#4285f4" stroke="#fff" stroke-width="2"/>
+    <circle cx="15" cy="51" r="11" fill="#aaddff" stroke="#fff" stroke-width="2"/>
+  </svg>
+  <h1>Hulp</h1>
+  <a class="terug" href="/">&#8592; Overzicht</a>
+</header>
+<div class="container">
+  <div class="card">
+    <h2>Wat is de Sociogram Toolkit?</h2>
+    <p>De Sociogram Toolkit helpt docenten om sociogrammen af te nemen in de klas en de resultaten te analyseren. Leerlingen vullen een digitale vragenlijst in, en de toolkit visualiseert de relaties, berekent optimale zitplaatsindelingen en genereert rapportages.</p>
+  </div>
+
+  <div class="card">
+    <h2>De vijf modules</h2>
+    <ul class="module-lijst">
+      <li class="module-item"><span class="module-num">01</span><div class="module-tekst"><strong>Vragenlijst-beheer</strong><span>Maak een vragenlijst aan, genereer een deelbaar formulierlink en bekijk wie er al heeft gereageerd.</span></div>
+      <div class="carousel" id="carousel-1">
+      <div class="carousel-slides">
+        <div class="carousel-slide">
+          <img src="https://lh3.googleusercontent.com/d/1ovX3WBfrafXjj1E4j-Alp-_XqCvsWlsj" alt="Maak een vragenlijst aan of bewerk een bestaande">
+          <div class="carousel-caption">Maak een vragenlijst aan of bewerk een bestaande</div>
+        </div>
+        <div class="carousel-slide">
+          <img src="https://lh3.googleusercontent.com/d/1ovX3WBfrafXjj1E4j-Alp-_XqCvsWlsj" alt="Namen en geslacht invoeren">
+          <div class="carousel-caption">Namen en geslachten invoeren</div>
+        </div>
+        <div class="carousel-slide">
+          <img src="https://lh3.googleusercontent.com/d/1gf5NOChwwfjm9lUAjo0ftqNQIQ6ww5Nr" alt="Vragen aanmaken">
+          <div class="carousel-caption">Vragen aanmaken</div>
+        </div>
+        <div class="carousel-slide">
+          <img src="https://lh3.googleusercontent.com/d/1HaGYQAVI5ni8TCyU4xbIHHNT5k_q0Yiq" alt="Formulierlink genereren">
+          <div class="carousel-caption">Formulierlink genereren</div>
+        </div>
+        <div class="carousel-slide">
+          <img src="https://lh3.googleusercontent.com/d/1vhoMLbIb8tniy50npXoo3jckfdsc5tVn" alt="Reacties bijhouden">
+          <div class="carousel-caption">Reacties bijhouden</div>
+        </div>
+      </div>
+      <button class="carousel-btn prev">&#8249;</button>
+      <button class="carousel-btn next">&#8250;</button>
+      <div class="carousel-dots"><div class="carousel-dot"></div><div class="carousel-dot"></div><div class="carousel-dot"></div><div class="carousel-dot"></div><div class="carousel-dot"></div></div>
+    </div></li>
+      <li class="module-item"><span class="module-num">02</span><div class="module-tekst"><strong>Visualisatie</strong><span>Bekijk de sociogramdata als interactief netwerk. Filter op positieve of negatieve relaties en sla op als afbeelding.</span></div>
+      <div class="carousel" id="carousel-2">
+      <div class="carousel-slides">
+        <div class="carousel-slide">
+          <img src="https://lh3.googleusercontent.com/d/1m7ATpYPVV6sQ_-26Ostwv8rYMb3HYFJt" alt="Netwerk-visualisatie">
+          <div class="carousel-caption">Netwerk-visualisatie</div>
+        </div>
+        <div class="carousel-slide">
+          <img src="https://lh3.googleusercontent.com/d/1ujQbTJSFs1-54az6U6_U7UtncQGQ27aS" alt="Positieve en negatieve relaties">
+          <div class="carousel-caption">Positieve en negatieve relaties</div>
+        </div>
+        <div class="carousel-slide">
+          <img src="https://lh3.googleusercontent.com/d/137uhVH_MThAL8VJhO4ttxgJ1apMWA-Np" alt="Filteren op leerling">
+          <div class="carousel-caption">Filteren op leerling</div>
+        </div>
+        <div class="carousel-slide">
+          <img src="https://lh3.googleusercontent.com/d/1TM8f9EHJM7vQP88B33K90e6aHwVLzJBY" alt="Exporteren als afbeelding">
+          <div class="carousel-caption">Exporteren als afbeelding</div>
+        </div>
+      </div>
+      <button class="carousel-btn prev">&#8249;</button>
+      <button class="carousel-btn next">&#8250;</button>
+      <div class="carousel-dots"><div class="carousel-dot"></div><div class="carousel-dot"></div><div class="carousel-dot"></div><div class="carousel-dot"></div></div>
+    </div></li>
+      <li class="module-item"><span class="module-num">03</span><div class="module-tekst"><strong>Teamindeling</strong><span>Bereken optimale teamindelingen op basis van de sociogramdata, met keuze voor teamgrootte en weging van relaties.</span></div>
+      <div class="carousel" id="carousel-3">
+      <div class="carousel-slides">
+        <div class="carousel-slide">
+          <img src="https://lh3.googleusercontent.com/d/1izU319OFOiNskb_YTNbCpfjTTafuypm9" alt="Teamindeling berekenen">
+          <div class="carousel-caption">Teamindeling berekenen</div>
+        </div>
+        <div class="carousel-slide">
+          <img src="https://lh3.googleusercontent.com/d/1jKhcTe3K2st8tHdNLBe8F_gx50GnUokR" alt="Resultaten vergelijken">
+          <div class="carousel-caption">Resultaten vergelijken</div>
+        </div>
+        <div class="carousel-slide">
+          <img src="https://lh3.googleusercontent.com/d/1SPgNNHdNXuaapYXg1XthD7ackUqY9IrY" alt="Eenvoudig instellingen aanpassen">
+          <div class="carousel-caption">Eenvoudig instellingen aanpassen</div>
+        </div>
+      </div>
+      <button class="carousel-btn prev">&#8249;</button>
+      <button class="carousel-btn next">&#8250;</button>
+      <div class="carousel-dots"><div class="carousel-dot"></div><div class="carousel-dot"></div><div class="carousel-dot"></div></div>
+    </div></li>
+      <li class="module-item"><span class="module-num">04</span><div class="module-tekst"><strong>Plattegrond</strong><span>Genereer een optimale zitplaatsindeling voor de klas. Kies bus- of U-opstelling en pas handmatig aan door te slepen.</span></div>
+      <div class="carousel" id="carousel-4">
+      <div class="carousel-slides">
+        <div class="carousel-slide">
+          <img src="https://lh3.googleusercontent.com/d/13yMV9sxw07tQySy_q8R192gJ88LGTxun" alt="Data laden">
+          <div class="carousel-caption">Data laden</div>
+        </div>
+        <div class="carousel-slide">
+          <img src="https://lh3.googleusercontent.com/d/1rdYtv9nJJz6Gp5sH1ccdxJPGWFElgzcR" alt="Dubbele U-opstelling">
+          <div class="carousel-caption">Dubbele U-opstelling</div>
+        </div>
+        <div class="carousel-slide">
+          <img src="https://lh3.googleusercontent.com/d/1pdF7yStE8IsfRI0claFD39i9K8ebVKoD" alt="Handmatig slepen">
+          <div class="carousel-caption">Handmatig aanpassen van de plattegrond</div>
+        </div>
+        <div class="carousel-slide">
+          <img src="https://lh3.googleusercontent.com/d/11iQKgNH_LBLzpbao3MRXFfoSe37b6y2D" alt="Instellingen aanpassen">
+          <div class="carousel-caption">Instellingen van de plattegrond aanpassen</div>
+        </div>
+        <div class="carousel-slide">
+          <img src="https://lh3.googleusercontent.com/d/1zFl0v3L746AfKLTs2JhG2AsH-cnAS4ZE" alt="Exporteren">
+          <div class="carousel-caption">Exporteren</div>
+        </div>
+      </div>
+      <button class="carousel-btn prev">&#8249;</button>
+      <button class="carousel-btn next">&#8250;</button>
+      <div class="carousel-dots"><div class="carousel-dot"></div><div class="carousel-dot"></div><div class="carousel-dot"></div><div class="carousel-dot"></div><div class="carousel-dot"></div></div>
+    </div></li>
+      <li class="module-item"><span class="module-num">05</span><div class="module-tekst"><strong>Rapportage</strong><span>Genereer een volledig rapport per vraag: sociomatrix, ranglijsten, relatie-analyse en populariteitsoverzicht.</span></div>
+      <div class="carousel" id="carousel-5">
+      <div class="carousel-slides">
+        <div class="carousel-slide">
+          <img src="https://lh3.googleusercontent.com/d/1tyfeDvks7xW11WbBIDcmgKW7jGtqASKH" alt="Sociomatrix">
+          <div class="carousel-caption">Een interactieve sociomatrix</div>
+        </div>
+        <div class="carousel-slide">
+          <img src="https://lh3.googleusercontent.com/d/1Znh1RDpMVUDscw8ZBGc9qwCMs8pjoVKK" alt="Ranglijsten">
+          <div class="carousel-caption">Overzichtelijke rapportages</div>
+        </div>
+        <div class="carousel-slide">
+          <img src="https://lh3.googleusercontent.com/d/1HWLSToGYk7NtMm9yBSGc9qwCMs8pjoVKK" alt="Relatie-analyse">
+          <div class="carousel-caption">Uitgebreide relatie-analyse</div>
+        </div>
+        <div class="carousel-slide">
+          <img src="https://lh3.googleusercontent.com/d/1MQJbGWXNOk8ipVA63CkoHc4J-BHoGY-1" alt="Rapportage downloaden">
+          <div class="carousel-caption">Aanvullende analyses</div>
+        </div>
+      </div>
+      <button class="carousel-btn prev">&#8249;</button>
+      <button class="carousel-btn next">&#8250;</button>
+      <div class="carousel-dots"><div class="carousel-dot"></div><div class="carousel-dot"></div><div class="carousel-dot"></div><div class="carousel-dot"></div></div>
+    </div></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Aan de slag</h2>
+    <ol class="stap-lijst">
+      <li class="stap-item"><span>Open <strong>Module 1</strong> en maak een nieuwe vragenlijst aan voor je klas.</span></li>
+      <li class="stap-item"><span>Deel de gegenereerde formulierlink met je leerlingen en wacht tot iedereen heeft ingevuld.</span></li>
+      <li class="stap-item"><span>Open <strong>Module 2</strong> om de resultaten te visualiseren als sociogram-netwerk.</span></li>
+      <li class="stap-item"><span>Gebruik <strong>Module 4</strong> voor een optimale zitplaatsindeling, of <strong>Module 3</strong> voor teamindelingen.</span></li>
+      <li class="stap-item"><span>Genereer een volledig rapport via <strong>Module 5</strong> en download het als Word-document.</span></li>
+    </ol>
+  </div>
+
+</div>
+
+<script>
+  function initCarousel(id) {
+    var carousel = document.getElementById(id);
+    if (!carousel) return;
+    var slides = carousel.querySelector('.carousel-slides');
+    var dots   = carousel.querySelectorAll('.carousel-dot');
+    var prev   = carousel.querySelector('.carousel-btn.prev');
+    var next   = carousel.querySelector('.carousel-btn.next');
+    var n      = carousel.querySelectorAll('.carousel-slide').length;
+    var huidig = 0;
+
+    function ga(idx) {
+      huidig = Math.max(0, Math.min(idx, n - 1));
+      slides.style.transform = 'translateX(-' + (huidig * 100) + '%)';
+      dots.forEach(function(d, i) { d.classList.toggle('actief', i === huidig); });
+      prev.disabled = huidig === 0;
+      next.disabled = huidig === n - 1;
+    }
+
+    prev.addEventListener('click', function() { ga(huidig - 1); });
+    next.addEventListener('click', function() { ga(huidig + 1); });
+    dots.forEach(function(d, i) { d.addEventListener('click', function() { ga(i); }); });
+    ga(0);
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    ['carousel-1','carousel-2','carousel-3','carousel-4','carousel-5'].forEach(initCarousel);
+  });
+</script>
+</body>
+</html>

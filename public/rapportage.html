@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sociogram Rapportage</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --paars:       #673ab7;
+      --paars-donker:#4527a0;
+      --paars-licht: #ede7f6;
+      --groen:       #137333;
+      --groen-licht: #e6f4ea;
+      --groen-cel:   #c8e6c9;
+      --rood:        #d93025;
+      --rood-licht:  #fce8e6;
+      --rood-cel:    #ffcdd2;
+      --oranje:      #e37400;
+      --grijs:       #5f6368;
+      --rand:        #dadce0;
+      --tekst:       #202124;
+      --bg:          #f5f0ff;
+      --wit:         #ffffff;
+    }
+
+    body {
+      font-family: "DM Sans", sans-serif;
+      background: var(--bg);
+      color: var(--tekst);
+      min-height: 100vh;
+      padding-bottom: 60px;
+    }
+
+    header {
+      background: var(--paars);
+      color: white;
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 2px 8px rgba(103,58,183,0.3);
+      position: relative;
+    }
+
+    header h1 { font-size: 1.3rem; font-weight: 600; letter-spacing: -0.01em; }
+
+    header a.terug {
+      position: absolute; right: 20px;
+      color: rgba(255,255,255,0.85);
+      text-decoration: none; font-size: 0.85rem;
+    }
+
+    .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+
+    .card {
+      background: var(--wit);
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08), 0 2px 12px rgba(103,58,183,0.06);
+      padding: 22px 24px;
+      margin-bottom: 16px;
+    }
+
+    .card h2 {
+      font-size: 0.95rem; font-weight: 600;
+      margin-bottom: 16px;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    .stap {
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--paars); color: white;
+      border-radius: 50%; width: 22px; height: 22px;
+      font-size: 0.75rem; font-weight: 600; flex-shrink: 0;
+    }
+
+    /* Knoppen */
+    button.primair {
+      background: var(--paars); color: white; border: none;
+      padding: 9px 22px; border-radius: 6px;
+      font-family: "DM Sans", sans-serif; font-size: 0.875rem; font-weight: 600;
+      cursor: pointer; transition: background 0.15s;
+    }
+    button.primair:hover { background: var(--paars-donker); }
+    button.primair:disabled { background: var(--rand); color: var(--grijs); cursor: not-allowed; }
+    button.secundair {
+      background: white; color: var(--paars); border: 1px solid var(--paars);
+      padding: 7px 16px; border-radius: 6px;
+      font-family: "DM Sans", sans-serif; font-size: 0.875rem; font-weight: 500;
+      cursor: pointer;
+    }
+    button.secundair:hover { background: var(--paars-licht); }
+
+    .knop-rij { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .status { font-size: 0.8rem; color: var(--grijs); margin-top: 8px; }
+    .info-tekst { font-size: 0.85rem; color: var(--grijs); margin-bottom: 14px; line-height: 1.5; }
+
+    /* Sessie lader */
+    .sessie-lader {
+      display: none; background: #f8f5ff;
+      border: 1px solid #d1c4e9; border-radius: 8px;
+      padding: 16px; margin-bottom: 16px;
+    }
+    .sessie-lader label { font-size: 0.85rem; color: var(--grijs); display: block; margin-bottom: 4px; }
+    .sessie-lader input[type="text"] {
+      width: 100%; padding: 8px 10px; border: 1px solid var(--rand); border-radius: 4px;
+      font-family: "DM Sans", sans-serif; font-size: 0.9rem; color: var(--tekst);
+      outline: none; margin-bottom: 10px;
+    }
+    .sessie-lader input[type="text"]:focus { border-color: var(--paars); }
+    .laden-lijst { padding: 20px; text-align: center; color: var(--grijs); font-size: 0.875rem; }
+    .spinner { width: 22px; height: 22px; border: 2.5px solid var(--rand); border-top-color: var(--paars); border-radius: 50%; animation: draaien 0.8s linear infinite; margin: 0 auto 8px; }
+    @keyframes draaien { to { transform: rotate(360deg); } }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 20px; border-bottom: 2px solid var(--rand); padding-bottom: 0; }
+
+    /* Kwadrantendiagram */
+    .kwadranten-wrap {
+      position: relative;
+      margin: 0 auto;
+      max-width: 600px;
+    }
+
+    .kwadranten-canvas {
+      width: 100%;
+      aspect-ratio: 1;
+      position: relative;
+      border-left: 2px solid var(--tekst);
+      border-bottom: 2px solid var(--tekst);
+    }
+
+    .kwadranten-as-label {
+      font-size: 0.72rem;
+      color: var(--grijs);
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .kwadranten-as-label.verticaal {
+      position: absolute;
+      left: -48px;
+      top: 50%;
+      transform: translateY(-50%) rotate(-90deg);
+      white-space: nowrap;
+    }
+
+    .kwadranten-as-label.horizontaal {
+      margin-top: 8px;
+    }
+
+    .kwadrant-label {
+      position: absolute;
+      font-size: 0.68rem;
+      font-weight: 600;
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .kwadranten-punt {
+      position: absolute;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6rem;
+      font-weight: 700;
+      color: white;
+      cursor: default;
+      transform: translate(-50%, 50%);
+      z-index: 2;
+      transition: transform 0.15s;
+    }
+
+    .kwadranten-punt:hover {
+      transform: translate(-50%, 50%) scale(1.2);
+      z-index: 10;
+    }
+
+    .kwadranten-punt .punt-tooltip {
+      display: none;
+      position: absolute;
+      bottom: 120%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      border: 1px solid var(--rand);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 0.72rem;
+      color: var(--tekst);
+      white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      z-index: 20;
+    }
+
+    .kwadranten-punt:hover .punt-tooltip { display: block; }
+
+    .kwadranten-scheiding {
+      position: absolute;
+      background: var(--rand);
+    }
+
+    .kwadranten-scheiding.horizontaal {
+      width: 100%;
+      height: 1px;
+    }
+
+    .kwadranten-scheiding.verticaal {
+      height: 100%;
+      width: 1px;
+    }
+
+    .kwadrant-achtergrond {
+      position: absolute;
+      opacity: 0.04;
+    }
+
+    .tab {
+      padding: 8px 18px; border-radius: 6px 6px 0 0;
+      border: 1px solid transparent; border-bottom: none;
+      font-size: 0.85rem; cursor: pointer; background: none;
+      color: var(--grijs); font-family: "DM Sans", sans-serif;
+      font-weight: 500; transition: all 0.15s;
+      margin-bottom: -2px;
+    }
+    .tab:hover { background: var(--paars-licht); color: var(--paars); }
+    .tab.actief {
+      background: var(--wit); color: var(--paars);
+      border-color: var(--rand); border-bottom-color: var(--wit);
+      font-weight: 600;
+    }
+
+    .tab-inhoud { display: none; }
+    .tab-inhoud.actief { display: block; }
+
+    /* Sectie headers */
+    .sectie {
+      margin-bottom: 32px;
+    }
+
+    .sectie-titel {
+      font-size: 1rem; font-weight: 700;
+      color: var(--paars); margin-bottom: 14px;
+      padding-bottom: 8px; border-bottom: 2px solid var(--paars-licht);
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    /* Sociomatrix */
+    .matrix-wrap { overflow-x: auto; margin-bottom: 8px; }
+
+    table.sociomatrix {
+      border-collapse: collapse;
+      font-size: 0.72rem;
+      font-family: "DM Mono", monospace;
+    }
+
+    table.sociomatrix th, table.sociomatrix td {
+      border: 1px solid #e8eaed;
+      padding: 4px 6px;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    table.sociomatrix th {
+      background: var(--paars-licht);
+      color: var(--paars-donker);
+      font-weight: 600;
+    }
+
+    table.sociomatrix th.rij-header {
+      text-align: right;
+      min-width: 100px;
+      max-width: 140px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    table.sociomatrix th.col-header {
+      padding: 0;
+      vertical-align: bottom;
+      width: 28px;
+      min-width: 28px;
+    }
+
+    .col-naam {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      white-space: nowrap;
+      padding: 6px 4px;
+      font-size: 0.7rem;
+      max-height: 120px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    table.sociomatrix td.hl,
+    table.sociomatrix th.hl {
+      background: #fff9c4 !important;
+    }
+
+    table.sociomatrix .totaal-cel {
+      font-weight: 600;
+      font-family: "DM Mono", monospace;
+      font-size: 0.75rem;
+      color: var(--grijs);
+    }
+
+    table.sociomatrix .totaal-header {
+      font-weight: 600;
+      color: var(--groen);
+      font-size: 0.75rem;
+    }
+
+    table.sociomatrix tr.totaal-rij th,
+    table.sociomatrix tr.totaal-rij td {
+      background: #f8f9fa;
+      font-weight: 600;
+      font-family: "DM Mono", monospace;
+      font-size: 0.75rem;
+    }
+
+    table.sociomatrix td.pos { background: var(--groen-cel); color: var(--groen); font-weight: 700; }
+    table.sociomatrix td.neg { background: var(--rood-cel); color: var(--rood); font-weight: 700; }
+    table.sociomatrix td.zelf { background: #f5f5f5; color: #bbb; }
+    table.sociomatrix td.leeg { color: #e0e0e0; }
+
+    .matrix-legenda {
+      display: flex; gap: 16px; font-size: 0.75rem; color: var(--grijs);
+      margin-top: 6px; flex-wrap: wrap;
+    }
+    .matrix-legenda-item { display: flex; align-items: center; gap: 5px; }
+    .legenda-kleur { width: 14px; height: 14px; border-radius: 3px; }
+
+    /* Ranglijst + staafdiagram */
+    .rang-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 8px;
+    }
+
+    @media (max-width: 700px) { .rang-wrap { grid-template-columns: 1fr; } }
+
+    .rang-sectie h4 {
+      font-size: 0.85rem; font-weight: 600; color: var(--tekst);
+      margin-bottom: 10px;
+    }
+
+    .rang-rij {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 5px; font-size: 0.82rem;
+    }
+
+    .rang-naam { min-width: 100px; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .rang-balk-wrap { flex: 1; height: 16px; background: #f1f3f4; border-radius: 99px; overflow: hidden; }
+    .rang-balk { height: 100%; border-radius: 99px; transition: width 0.4s ease; }
+    .rang-getal { font-family: "DM Mono", monospace; font-size: 0.75rem; color: var(--grijs); min-width: 20px; text-align: right; }
+
+    .rang-balk.pos { background: var(--groen); }
+    .rang-balk.neg { background: var(--rood); }
+
+    /* Analyse items */
+    .analyse-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .analyse-kaart {
+      border: 1px solid var(--rand);
+      border-radius: 8px;
+      padding: 12px 14px;
+      background: #fafafa;
+      font-size: 0.82rem;
+    }
+
+    .analyse-kaart .ak-titel {
+      font-weight: 600; color: var(--tekst);
+      margin-bottom: 6px; font-size: 0.85rem;
+    }
+
+    .analyse-kaart .ak-namen {
+      color: var(--grijs); line-height: 1.6;
+    }
+
+    .symbool { font-size: 1rem; }
+
+    .geen-data {
+      text-align: center; color: var(--grijs);
+      font-size: 0.875rem; padding: 20px;
+      font-style: italic;
+    }
+
+    /* Voortgang */
+    .voortgang-wrap { display: none; margin-top: 14px; }
+    .voortgang-balk-wrap { background: #f1f3f4; border-radius: 99px; height: 6px; overflow: hidden; margin-bottom: 6px; }
+    .voortgang-balk { background: var(--paars); height: 100%; border-radius: 99px; transition: width 0.2s; }
+    .voortgang-tekst { font-size: 0.78rem; color: var(--grijs); }
+
+    /* Extra vragen */
+    .extra-vraag-blok {
+      margin-bottom: 20px;
+      border: 1px solid var(--rand);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .extra-vraag-titel {
+      font-size: 0.875rem; font-weight: 600;
+      background: var(--paars-licht);
+      color: var(--paars-donker);
+      padding: 10px 14px;
+      border-bottom: 1px solid #d1c4e9;
+    }
+
+    .extra-vraag-type {
+      font-size: 0.7rem; font-weight: 400;
+      color: var(--grijs); margin-left: 8px;
+    }
+
+    .extra-tabel {
+      width: 100%; border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    .extra-tabel th {
+      background: #f8f9fa; color: var(--grijs);
+      padding: 6px 12px; text-align: left;
+      border-bottom: 1px solid var(--rand);
+      font-weight: 600; font-size: 0.78rem;
+    }
+
+    .extra-tabel td {
+      padding: 6px 12px;
+      border-bottom: 1px solid #f1f3f4;
+      vertical-align: top;
+    }
+
+    .extra-tabel tr:last-child td { border-bottom: none; }
+    .extra-tabel tr:hover td { background: #fafafa; }
+
+    /* Populariteitslijst */
+    .pop-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    @media (max-width: 600px) { .pop-grid { grid-template-columns: 1fr; } }
+
+    .pop-kaart {
+      border: 1px solid var(--rand);
+      border-radius: 8px;
+      padding: 12px 14px;
+      background: #fafafa;
+    }
+
+    .pop-kaart.populair { border-color: var(--groen); background: var(--groen-licht); }
+    .pop-kaart.negatief { border-color: var(--rood); background: var(--rood-licht); }
+
+    .pop-kaart .ak-titel { font-weight: 600; font-size: 0.85rem; margin-bottom: 6px; }
+    .pop-kaart .ak-namen { font-size: 0.82rem; color: var(--tekst); line-height: 1.8; }
+
+    /* Likert staafdiagram aggregaat */
+    .likert-balk-wrap { margin-bottom: 6px; display: flex; align-items: center; gap: 8px; font-size: 0.78rem; }
+    .likert-label { min-width: 20px; text-align: right; color: var(--grijs); }
+    .likert-balk-outer { flex: 1; height: 14px; background: #f1f3f4; border-radius: 99px; overflow: hidden; }
+    .likert-balk-inner { height: 100%; border-radius: 99px; background: var(--paars); }
+    .likert-getal { min-width: 24px; font-family: "DM Mono", monospace; color: var(--grijs); }
+
+    /* Print / PDF */
+    @media print {
+      header a.terug, #stap1-kaart, .tabs, button { display: none !important; }
+      body { background: white; }
+      .card { box-shadow: none; border: 1px solid #eee; page-break-inside: avoid; }
+      .tab-inhoud { display: block !important; }
+      .tab-inhoud::before { content: attr(data-titel); display: block; font-size: 1.1rem; font-weight: 700; color: var(--paars); margin: 24px 0 16px; border-top: 2px solid var(--paars-licht); padding-top: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <svg width="28" height="28" viewBox="0 0 100 100">
+    <line x1="48" y1="20" x2="82" y2="32" stroke="#fff" stroke-width="3"/>
+    <line x1="48" y1="20" x2="65" y2="65" stroke="#fff" stroke-width="3"/>
+    <line x1="48" y1="20" x2="15" y2="48" stroke="#fff" stroke-width="3"/>
+    <line x1="82" y1="32" x2="65" y2="65" stroke="#fff" stroke-width="3"/>
+    <line x1="15" y1="48" x2="25" y2="85" stroke="#fff" stroke-width="3"/>
+    <line x1="15" y1="48" x2="65" y2="65" stroke="#fff" stroke-width="3"/>
+    <circle cx="48" cy="20" r="14" fill="#ffaaaa" stroke="white" stroke-width="2.5"/>
+    <circle cx="82" cy="32" r="8"  fill="#aaddff" stroke="white" stroke-width="2.5"/>
+    <circle cx="65" cy="65" r="11" fill="#ffaaaa" stroke="white" stroke-width="2.5"/>
+    <circle cx="15" cy="48" r="12" fill="#aaddff" stroke="white" stroke-width="2.5"/>
+    <circle cx="25" cy="85" r="7"  fill="#ffaaaa" stroke="white" stroke-width="2.5"/>
+  </svg>
+  <h1>Sociogram Rapportage</h1>
+  <a class="terug" href="/">&#8592; Overzicht</a>
+</header>
+
+<div class="container">
+
+  <!-- Stap 1: Sessie laden -->
+  <div class="card" id="stap1-kaart">
+    <h2><span class="stap">1</span>Laad sociogram-data</h2>
+    <p class="info-tekst">Vul het sessie-ID en de beheertoken in om een volledig rapport te genereren.</p>
+
+    <div class="sessie-lader" id="sessie-lader" style="display:block;">
+      <label>Sessie-ID:</label>
+      <input type="text" id="sessie-id-input" placeholder="bv. klas3a-2024">
+      <label>Beheertoken:</label>
+      <input type="text" id="sessie-token-input" placeholder="beheertoken">
+      <div class="knop-rij" style="margin-top:4px;">
+        <button class="primair" onclick="laadSessie()" style="padding:8px 18px; font-size:0.85rem;">Sessie ophalen</button>
+        <span id="sessie-status" style="font-size:0.8rem; color:var(--grijs);"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stap 2: Genereer rapport -->
+  <div class="card" id="stap2-kaart" style="display:none;">
+    <h2><span class="stap">2</span>Genereer rapport</h2>
+    <div id="sessie-info" style="font-size:0.85rem; color:var(--grijs); margin-bottom:14px;"></div>
+    <div class="knop-rij">
+      <button class="primair" id="btn-genereer" onclick="genereerRapport()">Genereer rapport</button>
+      <button class="secundair" onclick="resetRapport()">&#8634; Andere sessie</button>
+    </div>
+    <div class="voortgang-wrap" id="voortgang-wrap">
+      <div class="voortgang-balk-wrap"><div class="voortgang-balk" id="voortgang-balk" style="width:0%"></div></div>
+      <div class="voortgang-tekst" id="voortgang-tekst">Laden...</div>
+    </div>
+    <div class="status" id="status-genereer"></div>
+  </div>
+
+  <!-- Rapport -->
+  <div class="card" id="rapport-kaart" style="display:none;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+      <h2 style="margin-bottom:0;">Rapport</h2>
+      <div class="knop-rij">
+        <button class="secundair" onclick="window.print()">&#128438; Afdrukken / PDF</button>
+        <button class="secundair" id="btn-word" onclick="exporteerAlsWord()">&#128196; Download als Word</button>
+      </div>
+    </div>
+    <div class="tabs" id="rapport-tabs"></div>
+    <div id="rapport-inhoud"></div>
+  </div>
+
+</div>
+
+<script>
+  var huidigeSessieData = null;   // volledige API-respons
+  var huidigeSessieId   = null;
+  var huidigeSessieNaam = "";
+  var vraagData = {};     // sleutel -> { students, connections }
+
+  // ============================================================
+  //  NETLIFY SESSIE-LADER
+  // ============================================================
+
+  async function laadSessie() {
+    var sessieId = document.getElementById("sessie-id-input").value.trim();
+    var token    = document.getElementById("sessie-token-input").value.trim();
+    var statusEl = document.getElementById("sessie-status");
+
+    if (!sessieId || !token) {
+      statusEl.textContent = "Vul sessie-ID en beheertoken in.";
+      return;
+    }
+
+    statusEl.textContent = "Laden...";
+
+    try {
+      var resp = await fetch("/api/get-responses?sessie=" + encodeURIComponent(sessieId) + "&token=" + encodeURIComponent(token));
+      var data = await resp.json();
+
+      if (!data.succes) {
+        statusEl.textContent = "Fout: " + (data.fout || "onbekende fout");
+        return;
+      }
+
+      huidigeSessieData = data;
+      huidigeSessieId   = sessieId;
+      huidigeSessieNaam = data.sessieNaam || sessieId;
+
+      var vragen = (data.config && data.config.vragen) ? data.config.vragen : [];
+      var kiesVragen = vragen.filter(function(v) { return v.type === "kies"; });
+
+      statusEl.textContent = "";
+      document.getElementById("stap2-kaart").style.display = "block";
+      document.getElementById("sessie-info").innerHTML =
+        "<strong>" + huidigeSessieNaam + "</strong> &mdash; " +
+        kiesVragen.length + " keuze-vragen, " +
+        (data.alleNamen ? data.alleNamen.length : 0) + " leerlingen, " +
+        (data.aantalIngevuld || 0) + " ingevuld";
+
+    } catch(e) {
+      statusEl.textContent = "Fout bij ophalen: " + e.message;
+    }
+  }
+
+  function resetRapport() {
+    huidigeSessieData = null;
+    huidigeSessieId   = null;
+    vraagData = {};
+    document.getElementById("stap2-kaart").style.display = "none";
+    document.getElementById("rapport-kaart").style.display = "none";
+    document.getElementById("rapport-tabs").innerHTML = "";
+    document.getElementById("rapport-inhoud").innerHTML = "";
+    document.getElementById("sessie-status").textContent = "";
+    document.getElementById("sessie-id-input").value = "";
+    document.getElementById("sessie-token-input").value = "";
+  }
+
+  // ============================================================
+  //  RAPPORT GENEREREN (uit sessiedata, volledig client-side)
+  // ============================================================
+
+  function genereerRapport() {
+    if (!huidigeSessieData) return;
+    var data = huidigeSessieData;
+    var vragen = (data.config && data.config.vragen) ? data.config.vragen : [];
+    var kiesVragen = vragen.filter(function(v) { return v.type === "kies"; });
+
+    if (kiesVragen.length === 0) {
+      document.getElementById("status-genereer").textContent = "Geen keuze-vragen gevonden in deze sessie.";
+      return;
+    }
+
+    document.getElementById("btn-genereer").disabled = true;
+    document.getElementById("voortgang-wrap").style.display = "block";
+    document.getElementById("rapport-kaart").style.display = "none";
+    vraagData = {};
+
+    // Zet sessiedata om naar { students, connections } per vraag
+    var studenten = data.alleNamen.map(function(n, i) {
+      return { id: i, name: n.naam, gender: n.geslacht === "m" ? "M" : (n.geslacht === "v" ? "V" : "") };
+    });
+    var naamNaarId = {};
+    studenten.forEach(function(s) { naamNaarId[s.name] = s.id; });
+
+    kiesVragen.forEach(function(v) {
+      var connections = [];
+      (data.antwoorden || []).forEach(function(antw) {
+        var bronId = naamNaarId[antw.naam];
+        if (bronId === undefined) return;
+        var keuzes = antw.antwoorden[v.sleutel] || [];
+        keuzes.forEach(function(doel) {
+          var doelId = naamNaarId[doel];
+          if (doelId !== undefined) connections.push({ source: bronId, target: doelId });
+        });
+      });
+      vraagData[v.sleutel] = { students: studenten, connections: connections, sleutel: v.sleutel };
+    });
+
+    // Bouw extra antwoorden (open/likert/meerkeuze vragen)
+    var extraVragen = vragen.filter(function(v) { return v.type !== "kies"; });
+    var extraAntwoordenData = null;
+    if (extraVragen.length > 0) {
+      var vraagHeaders = extraVragen.map(function(v) { return v.titel; });
+      var vraagMeta    = extraVragen.map(function(v) { return { type: v.type }; });
+      var antwoorden   = (data.alleNamen || []).map(function(n) {
+        var leerlingAntw = (data.antwoorden || []).find(function(a) { return a.naam === n.naam; });
+        var rijtje = extraVragen.map(function(v) {
+          if (!leerlingAntw) return "";
+          var val = leerlingAntw.antwoorden[v.sleutel];
+          if (Array.isArray(val)) return val.join(", ");
+          return val || "";
+        });
+        return { naam: n.naam, antwoorden: rijtje };
+      });
+      extraAntwoordenData = { antwoorden: antwoorden, vraagHeaders: vraagHeaders, vraagMeta: vraagMeta };
+    }
+
+    document.getElementById("voortgang-balk").style.width = "100%";
+    document.getElementById("voortgang-tekst").textContent = "Rapport bouwen...";
+
+    setTimeout(function() {
+      bouwRapport(kiesVragen, extraAntwoordenData);
+    }, 30);
+  }
+
+  // ============================================================
+  //  RAPPORT BOUWEN
+  // ============================================================
+
+  function bouwRapport(vragen, extraAntwoordenData) {
+    document.getElementById("btn-genereer").disabled = false;
+    document.getElementById("voortgang-wrap").style.display = "none";
+    document.getElementById("rapport-kaart").style.display = "block";
+
+    var tabs   = document.getElementById("rapport-tabs");
+    var inhoud = document.getElementById("rapport-inhoud");
+    tabs.innerHTML = "";
+    inhoud.innerHTML = "";
+
+    // Groepeer vragen: koppel negatieve vragen aan positieve als studenten overeenkomen
+    var groepen = [];
+    var geplaatst = {};
+    vragen.forEach(function(v) {
+      if (geplaatst[v.sleutel]) return;
+      var data = vraagData[v.sleutel];
+      if (!data) { groepen.push({ pos: v, neg: null }); geplaatst[v.sleutel] = true; return; }
+      if (v.type !== "negatieve") {
+        var koppel = null;
+        vragen.forEach(function(v2) {
+          if (geplaatst[v2.sleutel] || v2.type !== "negatieve") return;
+          var data2 = vraagData[v2.sleutel];
+          if (!data2) return;
+          var n1 = data.students.map(function(s) { return s.name; }).sort().join(",");
+          var n2 = data2.students.map(function(s) { return s.name; }).sort().join(",");
+          if (n1 === n2 && !koppel) koppel = v2;
+        });
+        groepen.push({ pos: v, neg: koppel });
+        geplaatst[v.sleutel] = true;
+        if (koppel) geplaatst[koppel.sleutel] = true;
+      } else {
+        groepen.push({ pos: null, neg: v });
+        geplaatst[v.sleutel] = true;
+      }
+    });
+
+    // Voeg extra antwoorden tabblad toe
+    if (extraAntwoordenData && extraAntwoordenData.antwoorden && extraAntwoordenData.antwoorden.length > 0 &&
+        extraAntwoordenData.vraagHeaders && extraAntwoordenData.vraagHeaders.length > 0) {
+      var extraIdx = groepen.length;
+      var tabExtra = document.createElement("button");
+      tabExtra.className = "tab";
+      tabExtra.textContent = "Overige vragen";
+      tabExtra.onclick = (function(i) { return function() {
+        document.querySelectorAll(".tab").forEach(function(t) { t.classList.remove("actief"); });
+        document.querySelectorAll(".tab-inhoud").forEach(function(t) { t.classList.remove("actief"); });
+        tabExtra.classList.add("actief");
+        document.getElementById("tab-inhoud-" + i).classList.add("actief");
+      }; })(extraIdx);
+      tabs.appendChild(tabExtra);
+
+      var divExtra = document.createElement("div");
+      divExtra.className = "tab-inhoud";
+      divExtra.id = "tab-inhoud-" + extraIdx;
+      divExtra.setAttribute("data-titel", "Overige vragen");
+      divExtra.innerHTML = bouwExtraVragenRapport(extraAntwoordenData);
+      inhoud.appendChild(divExtra);
+    }
+
+    groepen.forEach(function(groep, idx) {
+      var posData = groep.pos ? vraagData[groep.pos.sleutel] : null;
+      var negData = groep.neg ? vraagData[groep.neg.sleutel] : null;
+      var data    = posData || negData;
+      var titel   = groep.pos ? groep.pos.titel : groep.neg.titel;
+
+      var tab = document.createElement("button");
+      tab.className = "tab" + (idx === 0 ? " actief" : "");
+      tab.textContent = titel;
+      tab.onclick = (function(i) { return function() {
+        document.querySelectorAll(".tab").forEach(function(t) { t.classList.remove("actief"); });
+        document.querySelectorAll(".tab-inhoud").forEach(function(t) { t.classList.remove("actief"); });
+        tab.classList.add("actief");
+        document.getElementById("tab-inhoud-" + i).classList.add("actief");
+      }; })(idx);
+      tabs.appendChild(tab);
+
+      var div = document.createElement("div");
+      div.className = "tab-inhoud" + (idx === 0 ? " actief" : "");
+      div.id = "tab-inhoud-" + idx;
+      div.setAttribute("data-titel", titel);
+
+      if (!data || !data.students) {
+        div.innerHTML = "<div class='geen-data'>Geen data beschikbaar.</div>";
+      } else {
+        div.innerHTML = bouwGecombineerdRapport(posData, groep.pos, negData, groep.neg);
+      }
+      inhoud.appendChild(div);
+    });
+
+    // Activeer eerste tab als die bestaat
+    if (groepen.length > 0) {
+      var eersteTab = tabs.querySelector(".tab");
+      if (eersteTab && !eersteTab.classList.contains("actief")) eersteTab.classList.add("actief");
+      var eersteInhoud = inhoud.querySelector(".tab-inhoud");
+      if (eersteInhoud && !eersteInhoud.classList.contains("actief")) eersteInhoud.classList.add("actief");
+    }
+  }
+
+  function bouwGecombineerdRapport(posData, posVraag, negData, negVraag) {
+    var basisData = posData || negData;
+    var studenten = basisData.students.slice().sort(function(a, b) {
+      return a.name.localeCompare(b.name, "nl");
+    });
+    var ids   = studenten.map(function(s) { return s.id; });
+    var namen = {};
+    studenten.forEach(function(s) { namen[s.id] = s.name; });
+
+    // Positieve matrix
+    var posMatrix = {};
+    ids.forEach(function(i) { posMatrix[i] = {}; });
+    if (posData) posData.connections.forEach(function(c) {
+      if (posMatrix[c.source]) posMatrix[c.source][c.target] = 1;
+    });
+
+    // Negatieve matrix (op naam gemapped)
+    var negMatrix = {};
+    ids.forEach(function(i) { negMatrix[i] = {}; });
+    if (negData) {
+      var negNaamNaarId = {};
+      studenten.forEach(function(s) { negNaamNaarId[s.name] = s.id; });
+      var negIdNaarNaam = {};
+      negData.students.forEach(function(s) { negIdNaarNaam[s.id] = s.name; });
+      negData.connections.forEach(function(c) {
+        var bronId = negNaamNaarId[negIdNaarNaam[c.source]];
+        var doelId = negNaamNaarId[negIdNaarNaam[c.target]];
+        if (bronId !== undefined && doelId !== undefined && negMatrix[bronId]) negMatrix[bronId][doelId] = 1;
+      });
+    }
+
+    // Tel keuzes
+    var posOntv = {}, posGeg = {}, negOntv = {}, negGeg = {};
+    ids.forEach(function(i) { posOntv[i] = 0; posGeg[i] = 0; negOntv[i] = 0; negGeg[i] = 0; });
+    if (posData) posData.connections.forEach(function(c) {
+      if (posOntv[c.target] !== undefined) posOntv[c.target]++;
+      if (posGeg[c.source] !== undefined)  posGeg[c.source]++;
+    });
+    if (negData) {
+      var negIdNaarNaam2 = {};
+      negData.students.forEach(function(s) { negIdNaarNaam2[s.id] = s.name; });
+      negData.connections.forEach(function(c) {
+        var bronNaam = negIdNaarNaam2[c.source];
+        var doelNaam = negIdNaarNaam2[c.target];
+        var bronId = ids.find(function(i) { return namen[i] === bronNaam; });
+        var doelId = ids.find(function(i) { return namen[i] === doelNaam; });
+        if (bronId !== undefined && negGeg[bronId] !== undefined) negGeg[bronId]++;
+        if (doelId !== undefined && negOntv[doelId] !== undefined) negOntv[doelId]++;
+      });
+    }
+
+    var matrixId = "mx" + Math.random().toString(36).substr(2, 6);
+    var html = "";
+
+    // 1. Sociomatrix
+    html += "<div class='sectie'><div class='sectie-titel'>&#9632; Sociomatrix</div>";
+    html += "<div class='matrix-wrap'><table class='sociomatrix' id='" + matrixId + "'>";
+    html += "<thead><tr><th class='rij-header'>Kiest &rarr;</th>";
+    studenten.forEach(function(s, ci) {
+      html += "<th class='col-header' data-col='" + ci + "'><div class='col-naam'>" + s.name + "</div></th>";
+    });
+    html += "<th class='totaal-header'>+</th>";
+    if (negData) html += "<th class='totaal-header' style='color:var(--rood);'>-</th>";
+    html += "</tr></thead><tbody>";
+
+    studenten.forEach(function(s, ri) {
+      html += "<tr><th class='rij-header' data-rij='" + ri + "'>" + s.name + "</th>";
+      studenten.forEach(function(t, ci) {
+        if (s.id === t.id) {
+          html += "<td class='zelf' data-rij='" + ri + "' data-col='" + ci + "'>-</td>";
+        } else {
+          var isPos = posMatrix[s.id] && posMatrix[s.id][t.id];
+          var isNeg = negData && negMatrix[s.id] && negMatrix[s.id][t.id];
+          var cls = isPos ? "pos" : (isNeg ? "neg" : "leeg");
+          var sym = isPos ? "&#10003;" : (isNeg ? "&#10006;" : "&#183;");
+          html += "<td class='" + cls + "' data-rij='" + ri + "' data-col='" + ci + "'>" + sym + "</td>";
+        }
+      });
+      html += "<td class='totaal-cel'>" + posGeg[s.id] + "</td>";
+      if (negData) html += "<td class='totaal-cel' style='color:var(--rood);'>" + negGeg[s.id] + "</td>";
+      html += "</tr>";
+    });
+
+    html += "<tr class='totaal-rij'><th class='rij-header'>Ontvangen +</th>";
+    studenten.forEach(function(s, ci) {
+      html += "<td class='totaal-cel' data-col='" + ci + "'>" + posOntv[s.id] + "</td>";
+    });
+    html += "<td></td>"; if (negData) html += "<td></td>";
+    html += "</tr>";
+    if (negData) {
+      html += "<tr class='totaal-rij'><th class='rij-header' style='color:var(--rood);'>Ontvangen -</th>";
+      studenten.forEach(function(s, ci) {
+        html += "<td class='totaal-cel' style='color:var(--rood);' data-col='" + ci + "'>" + negOntv[s.id] + "</td>";
+      });
+      html += "<td></td><td></td></tr>";
+    }
+    html += "</tbody></table></div>";
+    html += "<div class='matrix-legenda'>" +
+      (posData ? "<div class='matrix-legenda-item'><div class='legenda-kleur' style='background:var(--groen-cel);'></div>Positieve keuze</div>" : "") +
+      (negData ? "<div class='matrix-legenda-item'><div class='legenda-kleur' style='background:var(--rood-cel);'></div>Negatieve keuze</div>" : "") +
+      "<div class='matrix-legenda-item'><div class='legenda-kleur' style='background:#f5f5f5;'></div>Zelf</div>" +
+      "</div></div>";
+
+    // 2. Ranglijsten
+    html += "<div class='sectie'><div class='sectie-titel'>&#9632; Ranglijsten</div><div class='rang-wrap'>";
+    var maxPos = Math.max.apply(null, ids.map(function(i) { return posOntv[i]; }).concat([1]));
+    var sortPos = ids.slice().sort(function(a, b) { return posOntv[b] - posOntv[a]; });
+    html += "<div class='rang-sectie'><h4>Ontvangen positieve keuzes</h4>";
+    sortPos.forEach(function(id) {
+      var n = posOntv[id], pct = Math.round(n / maxPos * 100);
+      html += "<div class='rang-rij'><span class='rang-naam'>" + namen[id] + "</span>" +
+        "<div class='rang-balk-wrap'><div class='rang-balk pos' style='width:" + pct + "%'></div></div>" +
+        "<span class='rang-getal'>" + n + "</span></div>";
+    });
+    html += "</div>";
+    if (negData) {
+      var maxNeg = Math.max.apply(null, ids.map(function(i) { return negOntv[i]; }).concat([1]));
+      var sortNeg = ids.slice().sort(function(a, b) { return negOntv[b] - negOntv[a]; });
+      html += "<div class='rang-sectie'><h4>Ontvangen negatieve keuzes</h4>";
+      sortNeg.forEach(function(id) {
+        var n = negOntv[id], pct = Math.round(n / maxNeg * 100);
+        html += "<div class='rang-rij'><span class='rang-naam'>" + namen[id] + "</span>" +
+          "<div class='rang-balk-wrap'><div class='rang-balk neg' style='width:" + pct + "%'></div></div>" +
+          "<span class='rang-getal'>" + n + "</span></div>";
+      });
+      html += "</div>";
+    }
+    html += "</div></div>";
+
+    // 3. Relatie-analyse
+    html += "<div class='sectie'><div class='sectie-titel'>&#9632; Relatie-analyse</div><div class='analyse-grid'>";
+    if (posData) {
+      var wedPos = [];
+      ids.forEach(function(i) { ids.forEach(function(j) {
+        if (i >= j) return;
+        if (posMatrix[i][j] && posMatrix[j][i]) wedPos.push(namen[i] + " &harr; " + namen[j]);
+      }); });
+      html += "<div class='analyse-kaart'><div class='ak-titel'><span class='symbool'>&#9829;</span> Wederzijds positief (" + wedPos.length + ")</div>" +
+        "<div class='ak-namen'>" + (wedPos.length ? wedPos.join("<br>") : "<span style='color:#bbb;font-style:italic;'>Geen</span>") + "</div></div>";
+    }
+    if (negData) {
+      var wedNeg = [];
+      ids.forEach(function(i) { ids.forEach(function(j) {
+        if (i >= j) return;
+        if (negMatrix[i][j] && negMatrix[j][i]) wedNeg.push(namen[i] + " &harr; " + namen[j]);
+      }); });
+      html += "<div class='analyse-kaart'><div class='ak-titel'><span class='symbool'>&#9889;</span> Wederzijds negatief (" + wedNeg.length + ")</div>" +
+        "<div class='ak-namen'>" + (wedNeg.length ? wedNeg.join("<br>") : "<span style='color:#bbb;font-style:italic;'>Geen</span>") + "</div></div>";
+    }
+    if (posData && negData) {
+      var tegen = [];
+      ids.forEach(function(i) { ids.forEach(function(j) {
+        if (i >= j) return;
+        if ((posMatrix[i][j] && negMatrix[j][i]) || (posMatrix[j][i] && negMatrix[i][j]))
+          tegen.push(namen[i] + " &#8646; " + namen[j]);
+      }); });
+      html += "<div class='analyse-kaart'><div class='ak-titel'><span class='symbool'>&#8646;</span> Tegengesteld (" + tegen.length + ")</div>" +
+        "<div class='ak-namen'>" + (tegen.length ? tegen.join("<br>") : "<span style='color:#bbb;font-style:italic;'>Geen</span>") + "</div></div>";
+    }
+    html += "</div></div>";
+
+    // Marginalen
+    if (posData) {
+      html += "<div class='sectie'><div class='sectie-titel'>&#9632; Marginalen</div>";
+      html += marginalenSectie(ids, namen, posOntv, posGeg, negOntv, negGeg, !!negData);
+      html += "</div>";
+    }
+
+    // Populariteit
+    if (posData) {
+      html += populariteitSectie(ids, namen, posOntv, negOntv, !!negData);
+    }
+
+    // 4. Kliekjes
+    if (posData) {
+      var kliekjes = bronKerbosch(ids, posMatrix);
+      html += "<div class='sectie'><div class='sectie-titel'>&#9632; Kliekjes (min. 3 leerlingen)</div>";
+      if (!kliekjes.length) {
+        html += "<div class='geen-data'>Geen kliekjes gevonden.</div>";
+      } else {
+        html += "<div class='analyse-grid'>";
+        kliekjes.forEach(function(k, i) {
+          html += "<div class='analyse-kaart'><div class='ak-titel'>Kliekje " + (i+1) + " (" + k.length + " leerlingen)</div>" +
+            "<div class='ak-namen'>" + k.map(function(id) { return namen[id]; }).join("<br>") + "</div></div>";
+        });
+        html += "</div>";
+      }
+      html += "</div>";
+    }
+
+    // 5. Kwadrantendiagram (alleen als er negatieve data is)
+    if (negData) {
+      var maxPosOntv = Math.max.apply(null, ids.map(function(i) { return posOntv[i]; }).concat([0]));
+      var maxNegOntv = Math.max.apply(null, ids.map(function(i) { return negOntv[i]; }).concat([0]));
+
+      function mediaan(arr) {
+        var s = arr.slice().sort(function(a, b) { return a - b; });
+        var m = Math.floor(s.length / 2);
+        return s.length % 2 !== 0 ? s[m] : (s[m-1] + s[m]) / 2;
+      }
+      var posWaarden = ids.map(function(i) { return posOntv[i]; });
+      var negWaarden = ids.map(function(i) { return negOntv[i]; });
+      var grensPosOntv = mediaan(posWaarden);
+      var grensNegOntv = mediaan(negWaarden);
+
+      if (grensPosOntv === 0) grensPosOntv = 0.5;
+      if (grensNegOntv === 0) grensNegOntv = 0.5;
+
+      var schaalX = maxPosOntv > 0 ? maxPosOntv : 1;
+      var schaalY = maxNegOntv > 0 ? maxNegOntv : 1;
+
+      var kwadrantLabels = [
+        { x: 75, y: 10,  label: "Populair",      kleur: "#137333" },
+        { x: 10, y: 10,  label: "Genegeerd",      kleur: "#5f6368" },
+        { x: 75, y: 75,  label: "Controversieel", kleur: "#e37400" },
+        { x: 10, y: 75,  label: "Afgewezen",      kleur: "#d93025" },
+      ];
+
+      html += "<div class='sectie'><div class='sectie-titel'>&#9632; Kwadrantendiagram</div>";
+      html += "<p style='font-size:0.82rem; color:var(--grijs); margin-bottom:16px;'>" +
+        "Horizontaal: ontvangen positieve keuzes &mdash; Verticaal: ontvangen negatieve keuzes. " +
+        "Grenswaarden: positief &ge; " + grensPosOntv.toFixed(1) + ", negatief &ge; " + grensNegOntv.toFixed(1) + "." +
+        "</p>";
+      html += "<div class='kwadranten-wrap' style='padding-left:56px; padding-bottom:32px;'>";
+      html += "<span class='kwadranten-as-label verticaal'>Negatieve keuzes &uarr;</span>";
+      html += "<div class='kwadranten-canvas'>";
+
+      var grensXpct = Math.round(grensPosOntv / schaalX * 100);
+      var grensYpct = Math.round(grensNegOntv / schaalY * 100);
+      var grensYcanvas = 100 - grensYpct;
+
+      html += "<div class='kwadranten-scheiding horizontaal' style='bottom:" + grensYcanvas + "%;'></div>";
+      html += "<div class='kwadranten-scheiding verticaal'   style='left:"   + grensXpct   + "%;'></div>";
+
+      kwadrantLabels.forEach(function(kl) {
+        html += "<div class='kwadrant-label' style='left:" + kl.x + "%; bottom:" + (100 - kl.y) + "%; color:" + kl.kleur + ";'>" + kl.label + "</div>";
+      });
+
+      ids.forEach(function(id) {
+        var px = posOntv[id] / schaalX * 100;
+        var py = negOntv[id] / schaalY * 100;
+
+        var isPopulair       = posOntv[id] >= grensPosOntv && negOntv[id] < grensNegOntv;
+        var isGenegeerd      = posOntv[id] < grensPosOntv  && negOntv[id] < grensNegOntv;
+        var isControversieel = posOntv[id] >= grensPosOntv && negOntv[id] >= grensNegOntv;
+        var isAfgewezen      = posOntv[id] < grensPosOntv  && negOntv[id] >= grensNegOntv;
+
+        var kleur = isPopulair ? "#137333" : isAfgewezen ? "#d93025" : isControversieel ? "#e37400" : "#5f6368";
+
+        var delen = namen[id].split(" ");
+        var init  = delen[0][0] + (delen.length > 1 ? delen[delen.length-1][0] : "");
+        init = init.toUpperCase();
+
+        html += "<div class='kwadranten-punt' style='left:" + px + "%; bottom:" + py + "%; background:" + kleur + ";'>" +
+          init +
+          "<div class='punt-tooltip'>" + namen[id] + "<br>+ " + posOntv[id] + " / - " + negOntv[id] + "</div>" +
+          "</div>";
+      });
+
+      html += "</div>"; // canvas
+      html += "<div class='kwadranten-as-label horizontaal'>Positieve keuzes &rarr;</div>";
+      html += "</div>"; // kwadranten-wrap
+
+      html += "<div class='legenda-kwadranten' style='display:flex; gap:16px; flex-wrap:wrap; margin-top:12px; font-size:0.78rem;'>";
+      [
+        { kleur: "#137333", label: "Populair (veel + / weinig -)" },
+        { kleur: "#5f6368", label: "Genegeerd (weinig + / weinig -)" },
+        { kleur: "#e37400", label: "Controversieel (veel + / veel -)" },
+        { kleur: "#d93025", label: "Afgewezen (weinig + / veel -)" },
+      ].forEach(function(l) {
+        html += "<div style='display:flex; align-items:center; gap:6px;'>" +
+          "<div style='width:12px; height:12px; border-radius:50%; background:" + l.kleur + ";'></div>" +
+          l.label + "</div>";
+      });
+      html += "</div>";
+      html += "</div>"; // sectie
+    }
+
+    return html;
+  }
+
+  // ============================================================
+  //  POPULARITEIT & MARGINALEN
+  // ============================================================
+
+  function populariteitSectie(ids, namen, posOntv, negOntv, heeftNeg) {
+    var DREMPEL = 3;
+    var populair = ids.filter(function(i) { return posOntv[i] > DREMPEL; })
+      .sort(function(a, b) { return posOntv[b] - posOntv[a]; });
+    var negatief = ids.filter(function(i) { return heeftNeg && negOntv[i] > DREMPEL; })
+      .sort(function(a, b) { return negOntv[b] - negOntv[a]; });
+
+    var html = "<div class='sectie'><div class='sectie-titel'>&#9632; Populariteit (drempel: " + DREMPEL + " keuzes)</div>";
+    html += "<div class='pop-grid'>";
+    html += "<div class='pop-kaart populair'><div class='ak-titel'>&#9829; Populair (meer dan " + DREMPEL + " positieve keuzes)</div>";
+    html += "<div class='ak-namen'>" + (populair.length ?
+      populair.map(function(i) { return namen[i] + " <span style='color:var(--groen);font-family:\"DM Mono\",monospace;'>(" + posOntv[i] + ")</span>"; }).join("<br>") :
+      "<span style='color:#bbb;font-style:italic;'>Geen</span>") + "</div></div>";
+    if (heeftNeg) {
+      html += "<div class='pop-kaart negatief'><div class='ak-titel'>&#9889; Negatief opvallend (meer dan " + DREMPEL + " negatieve keuzes)</div>";
+      html += "<div class='ak-namen'>" + (negatief.length ?
+        negatief.map(function(i) { return namen[i] + " <span style='color:var(--rood);font-family:\"DM Mono\",monospace;'>(" + negOntv[i] + ")</span>"; }).join("<br>") :
+        "<span style='color:#bbb;font-style:italic;'>Geen</span>") + "</div></div>";
+    }
+    html += "</div></div>";
+
+    return html;
+  }
+
+  function marginalenSectie(ids, namen, posOntv, posGeg, negOntv, negGeg, heeftNeg) {
+    var html = "<div class='analyse-grid'>";
+
+    var niemandPosGekozen = ids.filter(function(i) { return posOntv[i] === 0; }).map(function(i) { return namen[i]; });
+    var niemandPosKiest   = ids.filter(function(i) { return posGeg[i] === 0; }).map(function(i) { return namen[i]; });
+
+    html += "<div class='analyse-kaart'><div class='ak-titel'><span class='symbool'>&#128203;</span> Door niemand positief gekozen (" + niemandPosGekozen.length + ")</div>" +
+      "<div class='ak-namen'>" + (niemandPosGekozen.length ? niemandPosGekozen.join("<br>") : "<span style='color:#bbb;font-style:italic;'>Geen</span>") + "</div></div>";
+
+    html += "<div class='analyse-kaart'><div class='ak-titel'><span class='symbool'>&#128203;</span> Kiest niemand positief (" + niemandPosKiest.length + ")</div>" +
+      "<div class='ak-namen'>" + (niemandPosKiest.length ? niemandPosKiest.join("<br>") : "<span style='color:#bbb;font-style:italic;'>Geen</span>") + "</div></div>";
+
+    if (heeftNeg) {
+      var niemandNegGekozen = ids.filter(function(i) { return negOntv[i] === 0; }).map(function(i) { return namen[i]; });
+      var niemandNegKiest   = ids.filter(function(i) { return negGeg[i] === 0; }).map(function(i) { return namen[i]; });
+
+      html += "<div class='analyse-kaart'><div class='ak-titel'><span class='symbool'>&#128203;</span> Door niemand negatief gekozen (" + niemandNegGekozen.length + ")</div>" +
+        "<div class='ak-namen'>" + (niemandNegGekozen.length ? niemandNegGekozen.join("<br>") : "<span style='color:#bbb;font-style:italic;'>Geen</span>") + "</div></div>";
+      html += "<div class='analyse-kaart'><div class='ak-titel'><span class='symbool'>&#128203;</span> Kiest niemand negatief (" + niemandNegKiest.length + ")</div>" +
+        "<div class='ak-namen'>" + (niemandNegKiest.length ? niemandNegKiest.join("<br>") : "<span style='color:#bbb;font-style:italic;'>Geen</span>") + "</div></div>";
+    }
+
+    html += "</div>";
+
+    return html;
+  }
+
+  // ============================================================
+  //  EXTRA VRAGEN RAPPORT
+  // ============================================================
+
+  function bouwExtraVragenRapport(extraData) {
+    var antwoorden    = extraData.antwoorden;
+    var vraagHeaders  = extraData.vraagHeaders;
+    var vraagMeta     = extraData.vraagMeta || [];
+
+    if (!vraagHeaders || vraagHeaders.length === 0) {
+      return "<div class='geen-data'>Geen extra vragen gevonden.</div>";
+    }
+
+    var html = "";
+
+    vraagHeaders.forEach(function(header, qi) {
+      var meta = vraagMeta[qi] || {};
+      var type = meta.type || "open";
+      var typeLabel = type === "likert" ? "Likert" : (type === "meerkeuze" ? "Meerkeuze" : "Open vraag");
+
+      html += "<div class='extra-vraag-blok'>";
+      html += "<div class='extra-vraag-titel'>" + header + " <span class='extra-vraag-type'>(" + typeLabel + ")</span></div>";
+
+      var alleAntwoorden = antwoorden.map(function(r) { return { naam: r.naam, antwoord: r.antwoorden[qi] || "" }; });
+
+      if (type === "likert") {
+        var telling = {};
+        var schaalMin = meta.schaalMin || 1;
+        var schaalMax = meta.schaalMax || 5;
+        for (var s = schaalMin; s <= schaalMax; s++) telling[s] = 0;
+        var totaalIngevuld = 0;
+        alleAntwoorden.forEach(function(r) {
+          var val = parseInt(r.antwoord);
+          if (!isNaN(val) && val >= schaalMin && val <= schaalMax) {
+            telling[val]++;
+            totaalIngevuld++;
+          }
+        });
+        var maxTelling = Math.max.apply(null, Object.values(telling).concat([1]));
+        var totaalWaarde = 0;
+        for (var s = schaalMin; s <= schaalMax; s++) { totaalWaarde += s * telling[s]; }
+        var gemiddelde = totaalIngevuld > 0 ? (totaalWaarde / totaalIngevuld).toFixed(1) : "0.0";
+
+        html += "<div style='padding:12px 14px;'>";
+        html += "<div style='font-size:0.78rem; color:var(--grijs); margin-bottom:10px;'>Gemiddelde: <strong>" + gemiddelde + "</strong> (n=" + totaalIngevuld + ")</div>";
+        for (var s = schaalMin; s <= schaalMax; s++) {
+          var pct = Math.round(telling[s] / maxTelling * 100);
+          html += "<div class='likert-balk-wrap'><span class='likert-label'>" + s + "</span>" +
+            "<div class='likert-balk-outer'><div class='likert-balk-inner' style='width:" + pct + "%;'></div></div>" +
+            "<span class='likert-getal'>" + telling[s] + "</span></div>";
+        }
+        html += "<div style='margin-top:12px; font-size:0.78rem; font-weight:600; color:var(--grijs); margin-bottom:6px;'>Per leerling:</div>";
+        html += "<table class='extra-tabel'><tr><th>Naam</th><th>Antwoord</th></tr>";
+        alleAntwoorden.sort(function(a, b) { return a.naam.localeCompare(b.naam, "nl"); }).forEach(function(r) {
+          html += "<tr><td>" + r.naam + "</td><td>" + (r.antwoord || "<span style='color:#bbb;'>-</span>") + "</td></tr>";
+        });
+        html += "</table></div>";
+
+      } else if (type === "meerkeuze") {
+        var opties = meta.opties ? meta.opties.split("|") : [];
+        var teller = {};
+        opties.forEach(function(o) { teller[o.trim()] = 0; });
+        alleAntwoorden.forEach(function(r) {
+          if (r.antwoord) {
+            var opt = r.antwoord.trim();
+            if (teller[opt] !== undefined) teller[opt]++;
+            else teller[opt] = 1;
+          }
+        });
+        var maxT = Math.max.apply(null, Object.values(teller).concat([1]));
+
+        html += "<div style='padding:12px 14px;'>";
+        Object.keys(teller).sort().forEach(function(opt) {
+          var pct = Math.round(teller[opt] / maxT * 100);
+          html += "<div class='rang-rij'><span class='rang-naam' style='min-width:140px;max-width:200px;'>" + opt + "</span>" +
+            "<div class='rang-balk-wrap'><div class='rang-balk pos' style='width:" + pct + "%'></div></div>" +
+            "<span class='rang-getal'>" + teller[opt] + "</span></div>";
+        });
+        html += "<div style='margin-top:12px; font-size:0.78rem; font-weight:600; color:var(--grijs); margin-bottom:6px;'>Per leerling:</div>";
+        html += "<table class='extra-tabel'><tr><th>Naam</th><th>Antwoord</th></tr>";
+        alleAntwoorden.sort(function(a, b) { return a.naam.localeCompare(b.naam, "nl"); }).forEach(function(r) {
+          html += "<tr><td>" + r.naam + "</td><td>" + (r.antwoord || "<span style='color:#bbb;'>-</span>") + "</td></tr>";
+        });
+        html += "</table></div>";
+
+      } else {
+        html += "<div style='padding:12px 14px;'>";
+        html += "<table class='extra-tabel'><tr><th>Naam</th><th>Antwoord</th></tr>";
+        alleAntwoorden.sort(function(a, b) { return a.naam.localeCompare(b.naam, "nl"); }).forEach(function(r) {
+          html += "<tr><td style='white-space:nowrap;'>" + r.naam + "</td><td>" + (r.antwoord || "<span style='color:#bbb;'>-</span>") + "</td></tr>";
+        });
+        html += "</table></div>";
+      }
+
+      html += "</div>";
+    });
+
+    return html;
+  }
+
+  // ============================================================
+  //  MATRIX HIGHLIGHT
+  // ============================================================
+
+  document.addEventListener("mouseover", function(e) {
+    var cel = e.target.closest("td[data-rij], td[data-col]");
+    if (!cel) return;
+    var tbl = cel.closest("table.sociomatrix");
+    if (!tbl) return;
+    tbl.querySelectorAll(".hl").forEach(function(el) { el.classList.remove("hl"); });
+    var r = cel.dataset.rij, c = cel.dataset.col;
+    tbl.querySelectorAll("[data-rij='" + r + "'], [data-col='" + c + "']").forEach(function(el) {
+      el.classList.add("hl");
+    });
+  });
+  document.addEventListener("mouseout", function(e) {
+    var cel = e.target.closest("td[data-rij]");
+    if (!cel) return;
+    var tbl = cel.closest("table.sociomatrix");
+    if (!tbl) return;
+    if (!tbl.contains(e.relatedTarget)) {
+      tbl.querySelectorAll(".hl").forEach(function(el) { el.classList.remove("hl"); });
+    }
+  });
+
+  // ============================================================
+  //  BRON-KERBOSCH
+  // ============================================================
+
+  function bronKerbosch(ids, matrix) {
+    var resultaten = [];
+
+    function bk(R, P, X) {
+      if (P.length === 0 && X.length === 0) {
+        if (R.length >= 3) resultaten.push(R.slice());
+        return;
+      }
+      var pivot = P.concat(X).reduce(function(best, v) {
+        var buren = P.filter(function(u) { return matrix[v] && matrix[v][u] && matrix[u] && matrix[u][v]; });
+        return buren.length > (best.buren || 0) ? { id: v, buren: buren.length } : best;
+      }, { id: null, buren: -1 }).id;
+
+      var kandidaten = P.filter(function(v) {
+        return !(matrix[pivot] && matrix[pivot][v] && matrix[v] && matrix[v][pivot]);
+      });
+
+      kandidaten.forEach(function(v) {
+        var buren = P.filter(function(u) { return matrix[v] && matrix[v][u] && matrix[u] && matrix[u][v]; });
+        bk(R.concat([v]), buren, X.filter(function(u) { return matrix[v] && matrix[v][u]; }));
+        P = P.filter(function(u) { return u !== v; });
+        X = X.concat([v]);
+      });
+    }
+
+    bk([], ids.slice(), []);
+    return resultaten.sort(function(a, b) { return b.length - a.length; });
+  }
+
+  // ============================================================
+  //  WORD EXPORT
+  // ============================================================
+
+  function exporteerAlsWord() {
+    var inhoud = document.getElementById("rapport-inhoud");
+    if (!inhoud || !inhoud.innerHTML.trim()) return;
+
+    var knop = document.getElementById("btn-word");
+    knop.textContent = "Bezig...";
+    knop.disabled = true;
+
+    var nu    = new Date();
+    var datum = nu.getFullYear() + "-" +
+      String(nu.getMonth()+1).padStart(2,"0") + "-" +
+      String(nu.getDate()).padStart(2,"0");
+
+    var secties = "";
+    document.querySelectorAll(".tab-inhoud").forEach(function(div) {
+      var titel = div.getAttribute("data-titel") || "";
+      secties +=
+        "<h1 style='color:#4527a0; font-family:Arial; border-bottom:2pt solid #ede7f6; padding-bottom:6pt; margin-top:24pt;'>" +
+        titel + "</h1>" + div.innerHTML;
+    });
+
+    var wordHtml =
+      "<html xmlns:o='urn:schemas-microsoft-com:office:office' " +
+      "xmlns:w='urn:schemas-microsoft-com:office:word' " +
+      "xmlns='http://www.w3.org/TR/REC-html40'>" +
+      "<head><meta charset='UTF-8'>" +
+      "<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View>" +
+      "<w:Zoom>100</w:Zoom><w:DoNotOptimizeForBrowser/></w:WordDocument></xml><![endif]-->" +
+      "<style>" +
+      "body { font-family: Arial, sans-serif; font-size: 10pt; color: #202124; }" +
+      "h1 { font-size: 14pt; font-weight: bold; color: #4527a0; page-break-before: always; }" +
+      "h1:first-child { page-break-before: avoid; }" +
+      "h2, .sectie-titel { font-size: 11pt; font-weight: bold; color: #4527a0; margin-top: 12pt; margin-bottom: 6pt; border-bottom: 1pt solid #ede7f6; padding-bottom: 3pt; }" +
+      "table { border-collapse: collapse; width: 100%; font-size: 8pt; margin-bottom: 10pt; }" +
+      "th, td { border: 1pt solid #dadce0; padding: 3pt 5pt; text-align: center; }" +
+      "th { background: #ede7f6; color: #4527a0; font-weight: bold; }" +
+      "th.rij-header { text-align: right; min-width: 80pt; background: #ede7f6; }" +
+      "td.pos { background: #c8e6c9; color: #137333; font-weight: bold; }" +
+      "td.neg { background: #ffcdd2; color: #d93025; font-weight: bold; }" +
+      "td.zelf { background: #f5f5f5; color: #bbb; }" +
+      "td.leeg { color: #e0e0e0; }" +
+      "tr.totaal-rij th, tr.totaal-rij td { background: #f8f9fa; font-weight: bold; }" +
+      ".rang-rij { margin-bottom: 4pt; font-size: 9pt; }" +
+      ".sectie { margin-bottom: 14pt; }" +
+      ".analyse-kaart { border: 1pt solid #dadce0; padding: 6pt 8pt; font-size: 9pt; margin-bottom: 6pt; }" +
+      ".ak-titel { font-weight: bold; margin-bottom: 4pt; }" +
+      ".pop-kaart { border: 1pt solid #dadce0; padding: 6pt 8pt; font-size: 9pt; margin-bottom: 6pt; }" +
+      ".pop-kaart.populair { border-color: #137333; background: #e6f4ea; }" +
+      ".pop-kaart.negatief { border-color: #d93025; background: #fce8e6; }" +
+      "</style>" +
+      "</head><body>" +
+      "<h2 style='color:#4527a0; font-size:16pt; border-bottom:2pt solid #4527a0; page-break-before:avoid;'>" +
+      "Sociogram Rapport &mdash; " + huidigeSessieNaam + "</h2>" +
+      "<p style='color:#5f6368; font-size:9pt; margin-bottom:16pt;'>Gegenereerd op " + datum + "</p>" +
+      secties +
+      "</body></html>";
+
+    var blob = new Blob([wordHtml], { type: "application/vnd.ms-word;charset=utf-8" });
+    var url  = URL.createObjectURL(blob);
+    var a    = document.createElement("a");
+    a.href = url;
+    a.download = "Rapport_" + huidigeSessieNaam.replace(/[^a-zA-Z0-9]/g, "_") + "_" + datum + ".doc";
+    a.click();
+    URL.revokeObjectURL(url);
+
+    knop.innerHTML = "&#128196; Download als Word";
+    knop.disabled = false;
+  }
+
+</script>
+</body>
+</html>

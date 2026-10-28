@@ -2,697 +2,1575 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><line x1='48' y1='20' x2='82' y2='32' stroke='%23000000' stroke-width='2'/><line x1='48' y1='20' x2='65' y2='65' stroke='%23000000' stroke-width='2'/><line x1='48' y1='20' x2='15' y2='48' stroke='%23000000' stroke-width='2'/><line x1='82' y1='32' x2='65' y2='65' stroke='%23000000' stroke-width='2'/><line x1='15' y1='48' x2='35' y2='85' stroke='%23000000' stroke-width='2'/><line x1='65' y1='65' x2='35' y2='85' stroke='%23000000' stroke-width='2'/><line x1='15' y1='48' x2='65' y2='65' stroke='%23000000' stroke-width='2'/><circle cx='48' cy='20' r='16' fill='%23ffaaaa' stroke='%23ffffff' stroke-width='3'/><circle cx='82' cy='32' r='9' fill='%23aaddff' stroke='%23ffffff' stroke-width='3'/><circle cx='65' cy='65' r='12' fill='%23ffaaaa' stroke='%23ffffff' stroke-width='3'/><circle cx='15' cy='48' r='13' fill='%23aaddff' stroke='%23ffffff' stroke-width='3'/><circle cx='35' cy='85' r='8' fill='%23ffaaaa' stroke='%23ffffff' stroke-width='3'/></svg>">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sociogram – Beheer</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <title>Vragenlijst – Beheer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&family=Google+Sans:wght@400;500&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    :root {
-      --paars:       #673ab7;
-      --paars-donker:#4527a0;
-      --paars-licht: #ede7f6;
-      --groen:       #137333;
-      --groen-licht: #e6f4ea;
-      --rood:        #d93025;
-      --rood-licht:  #fce8e6;
-      --grijs:       #5f6368;
-      --rand:        #dadce0;
-      --tekst:       #202124;
-      --bg:          #f5f0ff;
-      --wit:         #ffffff;
-    }
-
     body {
-      font-family: "DM Sans", sans-serif;
-      background: var(--bg);
+      font-family: 'Roboto', sans-serif;
+      background: #f0ebf8;
       min-height: 100vh;
-      color: var(--tekst);
+      padding: 32px 16px 60px;
     }
 
-    header {
-      background: var(--paars);
-      color: white;
-      padding: 16px 24px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      box-shadow: 0 2px 8px rgba(103,58,183,0.3);
-    }
+    .container { max-width: 680px; margin: 0 auto; }
 
-    header h1 {
-      font-size: 1.2rem;
-      font-weight: 600;
-    }
-
-    header .subtitel {
-      font-size: 0.85rem;
-      opacity: 0.8;
-      font-weight: 400;
-    }
-
-    .main { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
-
-    .tabs {
-      display: flex;
-      gap: 0;
-      border-bottom: 2px solid var(--rand);
-      margin-bottom: 24px;
-    }
-
-    .tab {
-      padding: 10px 20px;
-      cursor: pointer;
-      font-weight: 500;
-      font-size: 0.9rem;
-      color: var(--grijs);
-      border-bottom: 3px solid transparent;
-      margin-bottom: -2px;
-      transition: color 0.15s;
-    }
-
-    .tab:hover { color: var(--paars); }
-
-    .tab.actief {
-      color: var(--paars);
-      border-bottom-color: var(--paars);
-    }
-
-    .tab-inhoud { display: none; }
-    .tab-inhoud.actief { display: block; }
-
-    /* Kaarten */
-    .kaart {
-      background: var(--wit);
-      border-radius: 10px;
-      padding: 20px 24px;
-      margin-bottom: 16px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-    }
-
-    .kaart h2 {
-      font-size: 1rem;
-      font-weight: 600;
-      margin-bottom: 12px;
-      color: var(--tekst);
-    }
-
-    label {
-      display: block;
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: var(--grijs);
-      margin-bottom: 4px;
-    }
-
-    input[type="text"], textarea {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid var(--rand);
-      border-radius: 6px;
-      font-family: "DM Sans", sans-serif;
-      font-size: 0.9375rem;
-      color: var(--tekst);
-      outline: none;
-      transition: border-color 0.15s;
-      margin-bottom: 12px;
-    }
-
-    input[type="text"]:focus, textarea:focus {
-      border-color: var(--paars);
-      box-shadow: 0 0 0 3px rgba(103,58,183,0.12);
-    }
-
-    textarea { resize: vertical; min-height: 120px; }
-
-    .knop {
-      padding: 10px 20px;
-      border-radius: 6px;
-      border: none;
-      font-family: "DM Sans", sans-serif;
-      font-size: 0.9375rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background 0.15s, box-shadow 0.15s;
-    }
-
-    .knop-primair {
-      background: var(--paars);
-      color: white;
-    }
-
-    .knop-primair:hover {
-      background: var(--paars-donker);
-      box-shadow: 0 2px 6px rgba(103,58,183,0.25);
-    }
-
-    .knop-secundair {
-      background: var(--paars-licht);
-      color: var(--paars);
-    }
-
-    .knop-secundair:hover {
-      background: #d1c4e9;
-    }
-
-    .knop:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    /* Link-box */
-    .link-box {
-      display: none;
-      background: var(--groen-licht);
-      border: 1px solid #34a853;
+    .header-card {
+      background: #fff;
       border-radius: 8px;
-      padding: 16px;
-      margin-top: 16px;
+      border-top: 10px solid #673ab7;
+      box-shadow: 0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px rgba(0,0,0,.14), 0 1px 3px rgba(0,0,0,.12);
+      padding: 28px 24px 24px;
+      margin-bottom: 16px;
     }
 
-    .link-box .label {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--groen);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+    .header-card h1 {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 400;
+      color: #202124;
       margin-bottom: 6px;
     }
 
-    .link-box .url {
-      font-family: "DM Mono", monospace;
-      font-size: 0.85rem;
-      color: var(--tekst);
-      word-break: break-all;
-      background: white;
-      padding: 8px 12px;
-      border-radius: 4px;
-      border: 1px solid var(--rand);
-      margin-bottom: 8px;
-    }
+    .header-card p { font-size: 0.875rem; color: #5f6368; line-height: 1.5; }
 
-    .kopieer-knop {
-      font-size: 0.8rem;
-      padding: 6px 12px;
-    }
-
-    /* Voortgang */
-    .voortgang-balk {
-      background: var(--rand);
-      border-radius: 4px;
-      height: 8px;
-      margin: 8px 0 4px;
-      overflow: hidden;
-    }
-
-    .voortgang-balk-vulling {
-      height: 100%;
-      background: var(--paars);
-      border-radius: 4px;
-      transition: width 0.3s;
-    }
-
-    .voortgang-tekst {
-      font-size: 0.85rem;
-      color: var(--grijs);
+    .card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px rgba(0,0,0,.14), 0 1px 3px rgba(0,0,0,.12);
+      padding: 24px;
       margin-bottom: 16px;
     }
 
-    /* Namen-tabel */
-    .namen-lijst {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 8px;
+    .card h2 {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #202124;
+      margin-bottom: 16px;
     }
 
-    .naam-chip {
-      background: var(--paars-licht);
-      color: var(--paars-donker);
+    .card h2 .stap {
+      display: inline-block;
+      background: #673ab7;
+      color: #fff;
+      border-radius: 50%;
+      width: 24px; height: 24px;
       font-size: 0.8rem;
-      padding: 4px 10px;
-      border-radius: 20px;
+      line-height: 24px;
+      text-align: center;
+      margin-right: 8px;
+    }
+
+    /* Keuzekaarten */
+    .keuze-rij {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 4px;
+    }
+
+    .keuze-kaart {
+      border: 2px solid #dadce0;
+      border-radius: 8px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+    }
+
+    .keuze-kaart:hover { border-color: #673ab7; background: #faf8ff; }
+
+    .keuze-kaart.geselecteerd {
+      border-color: #673ab7;
+      background: #ede7f6;
+    }
+
+    .keuze-kaart .icoon { font-size: 1.8rem; margin-bottom: 8px; }
+
+    .keuze-kaart .keuze-titel {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 0.9rem;
       font-weight: 500;
+      color: #202124;
+      margin-bottom: 4px;
     }
 
-    .naam-chip.ingevuld {
-      background: var(--groen-licht);
-      color: var(--groen);
+    .keuze-kaart .keuze-omschrijving {
+      font-size: 0.78rem;
+      color: #5f6368;
+      line-height: 1.4;
     }
 
-    /* Antwoorden-tabel */
-    .antwoorden-tabel {
+    /* Velden */
+    .veld-label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #202124;
+      margin-bottom: 6px;
+      margin-top: 16px;
+      display: block;
+    }
+
+    .veld-label:first-of-type { margin-top: 0; }
+
+    input[type="text"], input[type="number"], textarea {
       width: 100%;
-      border-collapse: collapse;
-      font-size: 0.875rem;
+      padding: 10px 12px;
+      border: 1px solid #dadce0;
+      border-radius: 4px;
+      font-family: 'Roboto', sans-serif;
+      font-size: 0.9rem;
+      color: #202124;
+      outline: none;
+      resize: vertical;
     }
 
-    .antwoorden-tabel th {
-      background: var(--paars-licht);
-      padding: 8px 12px;
-      text-align: left;
-      font-weight: 600;
-      color: var(--paars-donker);
-      border-bottom: 2px solid #d1c4e9;
-    }
+    input[type="text"]:focus, input[type="number"]:focus, textarea:focus { border-color: #673ab7; }
 
-    .antwoorden-tabel td {
-      padding: 8px 12px;
-      border-bottom: 1px solid var(--rand);
-      vertical-align: top;
-    }
+    .hint-tekst { font-size: 0.78rem; color: #5f6368; margin-top: 4px; }
 
-    .antwoorden-tabel tr:hover td { background: #faf8ff; }
-
-    .antwoorden-tabel .keuzes {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-    }
-
-    .keuze-chip {
-      font-size: 0.75rem;
-      padding: 2px 8px;
-      border-radius: 12px;
-      font-weight: 500;
-    }
-
-    .keuze-chip.positief { background: var(--groen-licht); color: var(--groen); }
-    .keuze-chip.negatief { background: var(--rood-licht); color: var(--rood); }
-
-    .tijdstip { font-size: 0.75rem; color: var(--grijs); }
-
-    /* Download knop */
-    .download-rij {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
+    /* Sessie-invoer */
+    .sessie-invoer-wrap {
+      display: none;
       margin-top: 16px;
     }
 
-    /* Laden */
-    .laden-tekst {
-      text-align: center;
-      padding: 32px;
-      color: var(--grijs);
-    }
-
-    .spinner {
-      width: 28px; height: 28px;
-      border: 3px solid var(--rand);
-      border-top-color: var(--paars);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin: 0 auto 12px;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .melding {
-      padding: 12px 16px;
-      border-radius: 6px;
-      font-size: 0.9rem;
-      margin-top: 12px;
-      display: none;
-    }
-
-    .melding.succes { background: var(--groen-licht); color: var(--groen); }
-    .melding.fout   { background: var(--rood-licht);  color: var(--rood);  }
-
-    .invoer-hint {
-      font-size: 0.8rem;
-      color: var(--grijs);
-      margin-top: -8px;
+    .sessie-invoer-rij {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
       margin-bottom: 12px;
     }
 
-    @media (max-width: 600px) {
-      .antwoorden-tabel { font-size: 0.8rem; }
-      .main { padding: 16px 12px; }
+    @media (max-width: 480px) {
+      .sessie-invoer-rij { grid-template-columns: 1fr; }
     }
+
+    .sessie-invoer-rij label {
+      font-size: 0.82rem;
+      color: #5f6368;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .token-hint {
+      font-size: 0.78rem;
+      color: #5f6368;
+      margin-top: 4px;
+    }
+
+    /* Vraag-blokken */
+    .vraag-blok {
+      border: 1px solid #dadce0;
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 12px;
+      background: #fafafa;
+    }
+
+    .vraag-blok-titel {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #673ab7;
+      margin-bottom: 12px;
+    }
+
+    .vraag-rij { display: flex; gap: 10px; align-items: flex-start; }
+    .vraag-rij .veld-wrap { flex: 1; }
+    .vraag-rij .veld-wrap label { font-size: 0.78rem; color: #5f6368; display: block; margin-bottom: 4px; }
+
+    .verwijder-knop {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #5f6368;
+      padding: 8px 4px;
+      font-size: 1.1rem;
+      line-height: 1;
+      margin-top: 22px;
+    }
+    .verwijder-knop:hover { color: #d93025; }
+
+    .toevoeg-knop {
+      background: none;
+      border: 1px dashed #673ab7;
+      color: #673ab7;
+      border-radius: 4px;
+      padding: 8px 16px;
+      font-family: 'Google Sans', sans-serif;
+      font-size: 0.875rem;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 4px;
+    }
+    .toevoeg-knop:hover { background: #ede7f6; }
+
+    /* Knoppen */
+    button.primair {
+      background: #673ab7; color: #fff; border: none;
+      padding: 10px 24px; border-radius: 4px;
+      font-family: 'Google Sans', sans-serif; font-size: 0.875rem; font-weight: 500;
+      cursor: pointer; transition: background 0.15s;
+    }
+    button.primair:hover { background: #5e35b1; }
+    button.primair:disabled { background: #dadce0; color: #5f6368; cursor: not-allowed; }
+
+    button.secundair {
+      background: #fff; color: #673ab7; border: 1px solid #673ab7;
+      padding: 10px 24px; border-radius: 4px;
+      font-family: 'Google Sans', sans-serif; font-size: 0.875rem; font-weight: 500;
+      cursor: pointer;
+    }
+    button.secundair:hover { background: #ede7f6; }
+
+    .knop-rij { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    .status { font-size: 0.8rem; color: #5f6368; margin-top: 8px; }
+    .status.fout { color: #d93025; }
+    .status.ok { color: #137333; }
+
+    /* Resultaatkaart */
+    .resultaat-card {
+      display: none;
+      background: #ede7f6; border: 1px solid #ce93d8;
+      border-radius: 8px; padding: 20px 24px; margin-bottom: 16px;
+    }
+    .resultaat-card h3 {
+      font-family: 'Google Sans', sans-serif; font-size: 0.85rem; font-weight: 500;
+      color: #4a148c; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .link-box {
+      background: #fff; border: 1px solid #ce93d8; border-radius: 4px;
+      padding: 10px 12px; font-size: 0.85rem; color: #1155cc;
+      word-break: break-all; margin-bottom: 12px; font-family: monospace;
+    }
+
+    .verborgen { display: none; }
+
+    /* Reactie-overzicht */
+    .voortgang-balk-wrap {
+      background: #f1f3f4;
+      border-radius: 99px;
+      height: 10px;
+      margin: 12px 0 20px;
+      overflow: hidden;
+    }
+
+    .voortgang-balk {
+      background: #673ab7;
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.4s ease;
+    }
+
+    .voortgang-label {
+      font-size: 0.85rem;
+      color: #5f6368;
+      margin-bottom: 4px;
+    }
+
+    .voortgang-label strong { color: #202124; }
+
+    .reactie-lijsten {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 520px) {
+      .reactie-lijsten { grid-template-columns: 1fr; }
+    }
+
+    .reactie-groep h3 {
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+
+    .reactie-groep.gereageerd h3 { color: #137333; }
+    .reactie-groep.niet-gereageerd h3 { color: #b55b00; }
+
+    .reactie-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 0;
+      border-bottom: 1px solid #f1f3f4;
+      font-size: 0.875rem;
+    }
+
+    .reactie-item:last-child { border-bottom: none; }
+
+    .reactie-item .naam { flex: 1; color: #202124; }
+
+    .reactie-item .tijdstip {
+      font-size: 0.75rem;
+      color: #5f6368;
+      white-space: nowrap;
+    }
+
+    .reactie-item .bolletje {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .gereageerd .bolletje { background: #137333; }
+    .niet-gereageerd .bolletje { background: #e37400; }
+
+    .refresh-knop {
+      background: none;
+      border: none;
+      color: #673ab7;
+      font-size: 0.8rem;
+      cursor: pointer;
+      padding: 0;
+      font-family: 'Google Sans', sans-serif;
+    }
+    .refresh-knop:hover { text-decoration: underline; }
+
+    /* Export sectie */
+    .export-knop-rij {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .export-vraag-knop {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border: 1px solid #dadce0;
+      border-radius: 4px;
+      background: #fafafa;
+      font-size: 0.875rem;
+      color: #202124;
+    }
+
+    .export-vraag-knop .vraag-label { flex: 1; }
+    .export-vraag-knop .type-badge {
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 99px;
+      margin-right: 10px;
+      font-weight: 500;
+    }
+
+    .type-badge.positieve { background: #d8f3dc; color: #137333; }
+    .type-badge.negatieve { background: #ffe5e5; color: #d93025; }
+
+    .download-knop {
+      background: #673ab7;
+      color: #fff;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 4px;
+      font-family: "Google Sans", sans-serif;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .download-knop:hover { background: #5e35b1; }
+
+    /* Extra vragen */
+    .extra-vraag-blok {
+      border: 1px solid #dadce0;
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 12px;
+      background: #fafafa;
+    }
+
+    .extra-vraag-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .extra-vraag-titel {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #202124;
+    }
+
+    .type-label {
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 99px;
+      font-weight: 500;
+      margin-left: 8px;
+    }
+
+    .type-label.open     { background: #e8f0fe; color: #1a73e8; }
+    .type-label.likert   { background: #fce8b2; color: #b06000; }
+    .type-label.meerkeuze { background: #e6f4ea; color: #137333; }
+
+    .extra-veld-rij {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .optie-lijst { display: flex; flex-direction: column; gap: 6px; }
+
+    .optie-rij {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .optie-rij input { flex: 1; }
+
+    .optie-verwijder {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #5f6368;
+      font-size: 1rem;
+      padding: 2px 4px;
+    }
+
+    .optie-verwijder:hover { color: #d93025; }
+
+    .likert-schaal-wrap {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .likert-schaal-wrap .veld-wrap { flex: 1; min-width: 80px; }
+    .likert-schaal-wrap .veld-wrap label { font-size: 0.78rem; color: #5f6368; display: block; margin-bottom: 4px; }
+    .likert-schaal-wrap input[type="number"] {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #dadce0;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+
+    .wis-knop {
+      margin-left: auto;
+      background: none;
+      border: none;
+      color: #c00;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      opacity: 0.5;
+    }
+    .wis-knop:hover {
+      opacity: 1;
+      background: #fee;
+    }
+
+    #namen-tabel td { height: 28px; }
+    #namen-tabel input { height: 24px; }
+
+    /* Sessie-ID sectie stijl */
+    .sessie-id-info {
+      background: #f8f9fa;
+      border: 1px solid #dadce0;
+      border-radius: 6px;
+      padding: 14px 16px;
+      margin-top: 16px;
+      font-size: 0.875rem;
+    }
+    .sessie-id-info .label {
+      font-size: 0.78rem;
+      color: #5f6368;
+      margin-bottom: 4px;
+    }
+    .sessie-id-info .waarde {
+      font-family: monospace;
+      color: #202124;
+      font-size: 0.95rem;
+    }
+
+    .laden-spinner {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid #e8eaed;
+      border-top-color: #673ab7;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
 
-<header>
-  <div>
-    <div style="font-size:1.4rem;">📊</div>
-  </div>
-  <div>
-    <h1>Sociogram Beheer</h1>
-    <div class="subtitel" id="header-subtitel">Formuliermodule</div>
-  </div>
-</header>
+<div class="container">
 
-<div class="main">
-
-  <!-- Tabs -->
-  <div class="tabs">
-    <div class="tab actief" onclick="toonTab('maak')">Nieuwe sessie</div>
-    <div class="tab" onclick="toonTab('bekijk')">Reacties bekijken</div>
+  <div class="header-card">
+    <div style="margin-bottom:12px;">
+      <a href="/" style="font-size:0.82rem; color:#1a73e8; text-decoration:none;">&#8592; Terug naar overzicht</a>
+    </div>
+    <h1>Vragenlijst – Beheer</h1>
+    <p>Maak een nieuwe vragenlijst aan of laad een bestaande vragenlijst om te bewerken.</p>
   </div>
 
-  <!-- Tab: Nieuwe sessie maken -->
-  <div class="tab-inhoud actief" id="tab-maak">
-
-    <div class="kaart">
-      <h2>Nieuwe vragenlijst aanmaken</h2>
-
-      <label for="sessie-naam">Naam van de sessie (bijv. "Groep 7B – januari")</label>
-      <input type="text" id="sessie-naam" placeholder="Klas of groepsnaam…">
-
-      <label for="namen-invoer">Leerlingnamen</label>
-      <textarea id="namen-invoer" placeholder="Één naam per regel:
-Emma de Vries
-Liam Bakker
-Sofia Jansen
-…"></textarea>
-      <p class="invoer-hint">Voer één naam per regel in. Minimaal 2 leerlingen.</p>
-
-      <button class="knop knop-primair" onclick="maakSessie()">Sessie aanmaken</button>
-      <div class="melding" id="maak-melding"></div>
+  <!-- Stap 1: Keuze startpunt -->
+  <div class="card">
+    <h2><span class="stap">1</span>Kies een startpunt</h2>
+    <div class="keuze-rij">
+      <div class="keuze-kaart" id="keuze-nieuw" onclick="kiesStartpunt('nieuw')">
+        <div class="icoon">✏️</div>
+        <div class="keuze-titel">Nieuwe vragenlijst</div>
+        <div class="keuze-omschrijving">Namen en vragen zelf invoeren</div>
+      </div>
+      <div class="keuze-kaart" id="keuze-bestaand" onclick="kiesStartpunt('bestaand')">
+        <div class="icoon">📂</div>
+        <div class="keuze-titel">Bestaande vragenlijst</div>
+        <div class="keuze-omschrijving">Gegevens laden met sessie-ID en beheertoken</div>
+      </div>
     </div>
 
-    <div class="link-box" id="link-box">
-      <div class="label">✓ Sessie aangemaakt</div>
-      <p style="font-size:0.875rem; margin-bottom:10px; color: var(--groen);">
-        Deel de onderstaande link met je leerlingen. Ze kunnen het formulier invullen zonder Google-account.
-      </p>
-      <div class="label" style="margin-top:8px;">Leerlingenlink</div>
-      <div class="url" id="formulier-link-url"></div>
-      <button class="knop knop-secundair kopieer-knop" onclick="kopieer('formulier-link-url')">Kopieer link</button>
-
-      <div class="label" style="margin-top:16px;">Beheerpagina (bewaar dit voor jezelf!)</div>
-      <div class="url" id="beheer-link-url"></div>
-      <button class="knop knop-secundair kopieer-knop" onclick="kopieer('beheer-link-url')">Kopieer link</button>
-
-      <p style="font-size:0.8rem; color:var(--grijs); margin-top:12px;">
-        ⚠️ Sla de beheerpaginalink op. Via deze link kun je de reacties later bekijken.
-      </p>
-    </div>
-
-  </div>
-
-  <!-- Tab: Reacties bekijken -->
-  <div class="tab-inhoud" id="tab-bekijk">
-
-    <div class="kaart">
-      <h2>Sessie laden</h2>
-      <p style="font-size:0.875rem; color:var(--grijs); margin-bottom:12px;">
-        Als je via de beheerpaginalink bent gekomen, wordt de sessie automatisch geladen.
-        Anders kun je de sessie-ID en het beheertoken hieronder invoeren.
-      </p>
-
-      <label for="bekijk-sessie-id">Sessie-ID</label>
-      <input type="text" id="bekijk-sessie-id" placeholder="bijv. a3f2c81e9d042b7f">
-
-      <label for="bekijk-token">Beheertoken</label>
-      <input type="text" id="bekijk-token" placeholder="bijv. 4a8c2b1e…">
-
-      <button class="knop knop-primair" onclick="laadReacties()">Reacties laden</button>
-      <div class="melding" id="bekijk-melding"></div>
-    </div>
-
-    <div id="reacties-wrap" style="display:none;">
-
-      <div class="kaart">
-        <h2 id="reacties-titel">Voortgang</h2>
-        <div class="voortgang-balk">
-          <div class="voortgang-balk-vulling" id="voortgang-vulling" style="width:0%"></div>
+    <!-- Bestaande sessie laden -->
+    <div id="bron-sessie-wrap" class="sessie-invoer-wrap">
+      <div class="sessie-invoer-rij">
+        <div>
+          <label>Sessie-ID</label>
+          <input type="text" id="laden-sessie-id" placeholder="bijv. klas4a-2024">
         </div>
-        <div class="voortgang-tekst" id="voortgang-tekst">0 van 0 leerlingen hebben ingevuld</div>
+        <div>
+          <label>Beheertoken</label>
+          <input type="text" id="laden-token" placeholder="geheim token">
+        </div>
+      </div>
+      <button class="primair" style="padding:8px 20px; font-size:0.875rem;" onclick="laadBestaandeSessie()">Laden</button>
+      <div class="status" id="status-laden"></div>
+    </div>
+  </div>
 
-        <div class="namen-lijst" id="namen-chips"></div>
+  <!-- Stap 2: Namen invoeren -->
+  <div id="stap2-kaart" class="card verborgen">
+    <h2><span class="stap">2</span>Namen invoeren</h2>
+    <div style="overflow-x:auto;">
+      <table id="namen-tabel" style="width:100%; border-collapse:collapse; margin-bottom:8px;">
+        <thead>
+          <tr>
+            <th style="padding:8px; background:#e8f0fe; border:1px solid #dadce0; font-size:0.85rem; text-align:left;">Naam</th>
+            <th style="padding:8px; background:#e8f0fe; border:1px solid #dadce0; font-size:0.85rem; text-align:left;">Geslacht (M/V/X) <span style="font-weight:normal; color:#5f6368;">optioneel</span></th>
+            <th style="padding:8px; background:#e8f0fe; border:1px solid #dadce0; font-size:0.85rem; text-align:left;">Gefingeerde naam <span style="font-weight:normal; color:#5f6368;">optioneel</span></th>
+            <th style="width:32px; background:#e8f0fe; border:1px solid #dadce0;"></th>
+          </tr>
+        </thead>
+        <tbody id="namen-tbody"></tbody>
+      </table>
+    </div>
+    <div style="display:flex; gap:8px; margin-bottom:8px;">
+      <button class="secundair" style="padding:6px 14px; font-size:0.82rem;" onclick="voegNaamRijToe()">+ Naam toevoegen</button>
+      <button class="secundair" style="padding:6px 14px; font-size:0.82rem;" onclick="importeerNamenTekst()">Plakken vanuit tekst</button>
+    </div>
+    <div id="namen-plak-wrap" style="display:none; margin-bottom:8px;">
+      <textarea id="namen-invoer" rows="5" placeholder="Anna de Vries; V; Aukje&#10;Bram Janssen; M; Berend&#10;..." style="margin-bottom:6px;"></textarea>
+      <button class="primair" style="padding:6px 14px; font-size:0.82rem;" onclick="verwerkNamenTekst()">Verwerken</button>
+    </div>
+    <div class="hint-tekst">Voer namen in, of plak een lijst met namen. Geslachten en gefingeerde namen zijn optioneel. Scheidingstekens: ,;| of tab.</div>
+  </div>
+
+  <!-- Stap 3: Vragen definiëren -->
+  <div id="stap3-kaart" class="card verborgen">
+    <h2><span class="stap">3</span>Vragen definiëren</h2>
+
+    <label class="veld-label">Formuliertitel</label>
+    <input type="text" id="formulier-titel" value="Vragenlijst">
+
+    <label class="veld-label">Beschrijving</label>
+    <input type="text" id="formulier-beschrijving" value="Geef aan met wie je graag samenwerkt en met wie liever niet.">
+
+    <label class="veld-label">Vraagtekst naamkeuze</label>
+    <input type="text" id="naam-vraag-titel" value="Wat is je naam?">
+
+    <div style="margin-top: 24px;">
+      <div style="font-size:0.9rem; font-weight:500; color:#202124; margin-bottom:10px;">✅ Positieve vragen</div>
+      <div id="positieve-vragen"></div>
+      <button class="toevoeg-knop" onclick="voegVraagToe('positief')">+ Positieve vraag toevoegen</button>
+    </div>
+
+    <div style="margin-top: 24px;">
+      <div style="font-size:0.9rem; font-weight:500; color:#202124; margin-bottom:10px;">❌ Negatieve vragen</div>
+      <div id="negatieve-vragen"></div>
+      <button class="toevoeg-knop" onclick="voegVraagToe('negatief')">+ Negatieve vraag toevoegen</button>
+    </div>
+
+    <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid #e8eaed;">
+      <div style="font-size:0.9rem; font-weight:500; color:#202124; margin-bottom:4px;">💬 Extra vragen</div>
+      <div style="font-size:0.78rem; color:#5f6368; margin-bottom:12px;">Deze vragen verschijnen na de sociogram-vragen.</div>
+      <div id="extra-vragen"></div>
+      <div style="display:flex; gap:8px; margin-top:4px; flex-wrap:wrap;">
+        <button class="toevoeg-knop" style="flex:1;" onclick="voegExtraVraagToe('open')">+ Open vraag</button>
+        <button class="toevoeg-knop" style="flex:1;" onclick="voegExtraVraagToe('likert')">+ Likert-schaal</button>
+        <button class="toevoeg-knop" style="flex:1;" onclick="voegExtraVraagToe('meerkeuze')">+ Meerkeuze-vraag</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stap 4: Opslaan -->
+  <div id="stap4-kaart" class="card verborgen">
+    <h2><span class="stap">4</span>Opslaan</h2>
+
+    <div id="sessie-id-wrap">
+      <div class="sessie-invoer-rij" style="margin-bottom:0;">
+        <div>
+          <label class="veld-label" style="margin-top:0;">Sessie-ID</label>
+          <input type="text" id="opslaan-sessie-id" placeholder="bijv. klas4a-2024">
+          <div class="token-hint">Kies een unieke ID voor deze sessie (alleen letters, cijfers en koppeltekens).</div>
+        </div>
+        <div>
+          <label class="veld-label" style="margin-top:0;">Beheertoken</label>
+          <input type="text" id="opslaan-token" placeholder="geheim token">
+          <div class="token-hint">Bewaar dit token goed — je hebt het nodig om later te laden of te bewerken.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;">
+      <button class="primair" id="btn-opslaan" onclick="slaAllesOp()">Opslaan &amp; link genereren</button>
+      <div class="status" id="status-opslaan"></div>
+    </div>
+  </div>
+
+  <!-- Resultaat -->
+  <div class="resultaat-card" id="resultaat-card">
+    <h3>Formulierlink voor deelnemers</h3>
+    <div class="link-box" id="link-box"></div>
+    <div class="knop-rij">
+      <button class="primair" onclick="kopieerLink()">Kopieer link</button>
+      <button class="secundair" onclick="openLink()">Open formulier</button>
+    </div>
+    <div class="status" id="status-kopieer"></div>
+  </div>
+
+  <!-- Reactie-overzicht -->
+  <div class="card" id="reactie-kaart">
+    <h2 style="cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="toggleSectie('reactie-inhoud-wrap', 'reactie-pijl')">
+      Reactiestatus
+      <span id="reactie-pijl" style="font-size:1rem; color:#673ab7;">▼</span>
+    </h2>
+    <div id="reactie-inhoud-wrap" class="verborgen">
+      <p style="font-size:0.85rem; color:#5f6368; margin-bottom:12px;">
+        Vul de sessie-ID en het beheertoken in om de reactiestatus te bekijken.
+      </p>
+      <div class="sessie-invoer-rij">
+        <div>
+          <label>Sessie-ID</label>
+          <input type="text" id="reactie-sessie-id" placeholder="bijv. klas4a-2024">
+        </div>
+        <div>
+          <label>Beheertoken</label>
+          <input type="text" id="reactie-token" placeholder="geheim token">
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+        <button class="primair" style="padding:8px 20px; font-size:0.875rem;" onclick="laadReacties()">Laden</button>
+        <button class="refresh-knop" onclick="laadReacties()">↻ Vernieuwen</button>
       </div>
 
-      <div class="kaart">
-        <h2>Antwoorden</h2>
-        <div id="antwoorden-container">
-          <div class="laden-tekst">
-            <div class="spinner"></div>
-            <p>Laden…</p>
+      <div id="reactie-inhoud" class="verborgen">
+        <div class="voortgang-label">
+          <strong id="reactie-aantal">0</strong> van <strong id="reactie-totaal">0</strong> deelnemers hebben gereageerd
+        </div>
+        <div class="voortgang-balk-wrap">
+          <div class="voortgang-balk" id="voortgang-balk" style="width:0%"></div>
+        </div>
+
+        <div class="reactie-lijsten">
+          <div class="reactie-groep gereageerd">
+            <h3>✅ Gereageerd</h3>
+            <div id="lijst-gereageerd"></div>
+          </div>
+          <div class="reactie-groep niet-gereageerd">
+            <h3>⏳ Nog niet gereageerd</h3>
+            <div id="lijst-niet-gereageerd"></div>
           </div>
         </div>
-        <div class="download-rij">
-          <button class="knop knop-secundair" onclick="downloadJson()">Download JSON</button>
-          <button class="knop knop-secundair" onclick="downloadCsv()">Download CSV</button>
-          <button class="knop" onclick="openSociogram()" style="background:var(--paars);">📊 Sociogram visualiseren</button>
-        </div>
       </div>
 
+      <div class="status" id="status-reacties"></div>
     </div>
+  </div>
 
+  <!-- Export -->
+  <div class="card" id="export-kaart">
+    <h2 style="cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="toggleSectie('export-inhoud-wrap', 'export-pijl')">
+      Download sociogram-data
+      <span id="export-pijl" style="font-size:1rem; color:#673ab7;">▼</span>
+    </h2>
+    <div id="export-inhoud-wrap" class="verborgen">
+      <p style="font-size:0.85rem; color:#5f6368; margin-bottom:12px;">
+        Vul de sessie-ID en het beheertoken in om de sociogram-data te downloaden.
+      </p>
+      <div class="sessie-invoer-rij">
+        <div>
+          <label>Sessie-ID</label>
+          <input type="text" id="export-sessie-id" placeholder="bijv. klas4a-2024">
+        </div>
+        <div>
+          <label>Beheertoken</label>
+          <input type="text" id="export-token" placeholder="geheim token">
+        </div>
+      </div>
+      <button class="primair" style="padding:8px 20px; font-size:0.875rem; margin-bottom:16px;" onclick="laadExportData()">Laden</button>
+
+      <div id="export-inhoud" class="verborgen">
+        <div class="export-knop-rij" id="export-knop-rij"></div>
+      </div>
+
+      <div class="status" id="status-export"></div>
+
+      <div style="margin-top:16px; padding-top:16px; border-top:1px solid #e8eaed;">
+        <div style="margin-bottom:12px;">
+          <span style="background-color:#3498db; color:white; font-size:11px; font-weight:bold; padding:2px 6px; border-radius:3px; margin-right:6px;">TIP!</span>
+          Gebruik de
+          <a href="/visualisatie.html" style="font-size:1.0rem; color:#1a73e8; text-decoration:none;">Visualisatie-tool</a>
+          om de sociogram-data te analyseren.
+        </div>
+        <div style="margin-bottom:12px;">
+          <span style="background-color:#3498db; color:white; font-size:11px; font-weight:bold; padding:2px 6px; border-radius:3px; margin-right:6px;">TIP!</span>
+          Gebruik de
+          <a href="/teamindeling.html" style="font-size:1.0rem; color:#1a73e8; text-decoration:none;">Teamindelings-tool</a>
+          voor het maken van teamindelingen.
+        </div>
+      </div>
+    </div>
   </div>
 
 </div>
 
 <script>
-  // ---- Tab-navigatie ----
-  function toonTab(naam) {
-    document.querySelectorAll(".tab").forEach(function(t, i) {
-      var namen = ["maak", "bekijk"];
-      t.classList.toggle("actief", namen[i] === naam);
-    });
-    document.querySelectorAll(".tab-inhoud").forEach(function(el) {
-      el.classList.remove("actief");
-    });
-    document.getElementById("tab-" + naam).classList.add("actief");
+  var startpunt      = "";
+  var formulierLink  = "";
+  var huidigeSessieId   = "";  // actief geladen sessie-ID (voor reacties wissen)
+  var huidigeBeheerToken = "";
+
+  // Initialiseer met één lege naamrij
+  voegNaamRijToe();
+
+  // ── Stap 1: startpunt kiezen ──────────────────────────────
+
+  function kiesStartpunt(keuze) {
+    startpunt = keuze;
+    document.getElementById("keuze-nieuw").classList.toggle("geselecteerd", keuze === "nieuw");
+    document.getElementById("keuze-bestaand").classList.toggle("geselecteerd", keuze === "bestaand");
+
+    document.getElementById("bron-sessie-wrap").style.display = (keuze === "bestaand") ? "block" : "none";
+
+    if (keuze === "nieuw") {
+      toonStap2MetDefaults();
+    }
   }
 
-  // ---- Sessie aanmaken ----
-  async function maakSessie() {
-    var naam  = document.getElementById("sessie-naam").value.trim();
-    var input = document.getElementById("namen-invoer").value.trim();
-    var melding = document.getElementById("maak-melding");
-    melding.style.display = "none";
+  function toonStap2MetDefaults() {
+    document.getElementById("namen-tbody").innerHTML = "";
+    voegNaamRijToe();
+    document.getElementById("namen-invoer").value = "";
+    document.getElementById("formulier-titel").value = "Vragenlijst";
+    document.getElementById("formulier-beschrijving").value = "Geef aan met wie je graag samenwerkt en met wie liever niet.";
+    document.getElementById("naam-vraag-titel").value = "Wat is je naam?";
+    document.getElementById("positieve-vragen").innerHTML = "";
+    document.getElementById("negatieve-vragen").innerHTML = "";
+    document.getElementById("extra-vragen").innerHTML = "";
+    voegVraagToe("positief", "Met wie werk je graag samen?", "Vink maximaal 3 personen aan.", 3);
+    voegVraagToe("negatief", "Met wie werk je liever niet samen?", "Vink maximaal 3 personen aan.", 3);
+    document.getElementById("stap2-kaart").classList.remove("verborgen");
+    document.getElementById("stap3-kaart").classList.remove("verborgen");
+    document.getElementById("stap4-kaart").classList.remove("verborgen");
+  }
 
-    if (!naam) {
-      toonMelding("maak-melding", "Voer een naam in voor de sessie.", "fout");
+  // ── Bestaande sessie laden ────────────────────────────────
+
+  function laadBestaandeSessie() {
+    var sessieId = document.getElementById("laden-sessie-id").value.trim();
+    var token    = document.getElementById("laden-token").value.trim();
+    var status   = document.getElementById("status-laden");
+
+    if (!sessieId || !token) {
+      status.textContent = "Vul sessie-ID en beheertoken in.";
+      status.className = "status fout";
       return;
     }
 
-    var namen = input.split("\n")
-      .map(function(n) { return n.trim(); })
-      .filter(function(n) { return n.length > 0; });
+    status.innerHTML = '<span class="laden-spinner"></span>Laden…';
+    status.className = "status";
 
-    if (namen.length < 2) {
-      toonMelding("maak-melding", "Voer minimaal 2 leerlingnamen in.", "fout");
-      return;
-    }
+    fetch("/api/get-responses?sessie=" + encodeURIComponent(sessieId) + "&token=" + encodeURIComponent(token))
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        if (!res.succes) {
+          status.textContent = "Fout: " + (res.fout || "onbekende fout");
+          status.className = "status fout";
+          return;
+        }
 
-    try {
-      var res = await fetch("/api/create-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ naam: naam, namen: namen }),
+        huidigeSessieId    = sessieId;
+        huidigeBeheerToken = token;
+
+        // Vul namen in
+        document.getElementById("namen-tbody").innerHTML = "";
+        var alleNamen = res.alleNamen || [];
+        if (alleNamen.length === 0) {
+          voegNaamRijToe();
+        } else {
+          alleNamen.forEach(function(naamItem) {
+            if (typeof naamItem === "string") {
+              voegNaamRijToe(naamItem, "", "");
+            } else {
+              voegNaamRijToe(naamItem.naam || naamItem, naamItem.geslacht || "", naamItem.fakeName || "");
+            }
+          });
+        }
+
+        // Vul vragen in vanuit config
+        var config = res.config || {};
+        var vragen = config.vragen || {};
+
+        document.getElementById("formulier-titel").value       = vragen.formulier_titel       || "Vragenlijst";
+        document.getElementById("formulier-beschrijving").value = vragen.formulier_beschrijving || "";
+        document.getElementById("naam-vraag-titel").value      = vragen.naam_vraag_titel       || "Wat is je naam?";
+
+        document.getElementById("positieve-vragen").innerHTML = "";
+        document.getElementById("negatieve-vragen").innerHTML = "";
+        document.getElementById("extra-vragen").innerHTML = "";
+
+        var positiefVragen = vragen.positief || [];
+        var negatiefVragen = vragen.negatief || [];
+        // Backwards compat: oud formaat had 'vragen' array met type-veld
+        if (vragen.vragen && vragen.vragen.length > 0 && positiefVragen.length === 0 && negatiefVragen.length === 0) {
+          vragen.vragen.forEach(function(v) {
+            if (v.type === "positieve") positiefVragen.push(v);
+            else negatiefVragen.push(v);
+          });
+        }
+
+        positiefVragen.forEach(function(v) {
+          voegVraagToe("positief", v.titel, v.hint, v.max);
+        });
+        negatiefVragen.forEach(function(v) {
+          voegVraagToe("negatief", v.titel, v.hint, v.max);
+        });
+
+        if (vragen.extra && vragen.extra.length > 0) {
+          vragen.extra.forEach(function(v) {
+            voegExtraVraagToe(v.type, v.titel, v.hint, v);
+          });
+        }
+
+        // Vul opslaan-velden alvast in
+        document.getElementById("opslaan-sessie-id").value = sessieId;
+        document.getElementById("opslaan-token").value     = token;
+
+        // Toon formulierlink
+        formulierLink = window.location.origin + "/formulier.html?sessie=" + encodeURIComponent(sessieId);
+        document.getElementById("link-box").textContent = formulierLink;
+        document.getElementById("resultaat-card").style.display = "block";
+
+        status.textContent = "✓ Geladen (" + (res.aantalIngevuld || 0) + "/" + (res.aantalTotaal || 0) + " reacties)";
+        status.className = "status ok";
+
+        document.getElementById("stap2-kaart").classList.remove("verborgen");
+        document.getElementById("stap3-kaart").classList.remove("verborgen");
+        document.getElementById("stap4-kaart").classList.remove("verborgen");
+      })
+      .catch(function(err) {
+        status.textContent = "Netwerkfout: " + err.message;
+        status.className = "status fout";
       });
-      var data = await res.json();
-
-      if (!data.succes) {
-        toonMelding("maak-melding", "Fout: " + (data.fout || "Onbekende fout."), "fout");
-        return;
-      }
-
-      var basis = window.location.origin;
-      document.getElementById("formulier-link-url").textContent = basis + data.formulierLink;
-      document.getElementById("beheer-link-url").textContent    = basis + data.beheerLink;
-      document.getElementById("link-box").style.display = "block";
-
-    } catch (err) {
-      toonMelding("maak-melding", "Verbindingsfout: " + err.message, "fout");
-    }
   }
 
-  // ---- Reacties laden ----
-  var huidigeReacties = null;
+  // ── Stap 2 & 3: vragen beheren ───────────────────────────
 
-  async function laadReacties() {
-    var sessieId = document.getElementById("bekijk-sessie-id").value.trim();
-    var token    = document.getElementById("bekijk-token").value.trim();
+  function voegVraagToe(type, titel, hint, max) {
+    var container = document.getElementById(type === "positief" ? "positieve-vragen" : "negatieve-vragen");
+    var index = container.children.length + 1;
+    var blok = document.createElement("div");
+    blok.className = "vraag-blok";
+    blok.innerHTML =
+      '<div class="vraag-blok-titel">' + (type === "positief" ? "Positieve" : "Negatieve") + " vraag " + index + "</div>" +
+      '<div class="vraag-rij">' +
+        '<div class="veld-wrap"><label>Vraagtekst</label><input type="text" class="vraag-titel-input" value="' + (titel || "") + '"></div>' +
+        '<div class="veld-wrap"><label>Hint</label><input type="text" class="vraag-hint-input" value="' + (hint || "Vink maximaal 3 personen aan.") + '"></div>' +
+        '<div class="veld-wrap" style="max-width:80px"><label>Max. keuzes</label><input type="number" class="vraag-max-input" min="1" max="10" value="' + (max || 3) + '" style="width:60px; padding:8px; border:1px solid #dadce0; border-radius:4px; font-size:0.9rem;"></div>' +
+        '<button class="verwijder-knop" onclick="verwijderVraag(this)" title="Verwijder"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>' +
+      "</div>";
+    container.appendChild(blok);
+  }
+
+  function verwijderVraag(knop) {
+    var blok = knop.closest(".vraag-blok");
+    var container = blok.parentElement;
+    container.removeChild(blok);
+    var type = container.id === "positieve-vragen" ? "Positieve" : "Negatieve";
+    Array.from(container.querySelectorAll(".vraag-blok")).forEach(function(b, i) {
+      b.querySelector(".vraag-blok-titel").textContent = type + " vraag " + (i + 1);
+    });
+  }
+
+  // ── Stap 4: opslaan ──────────────────────────────────────
+
+  function slaAllesOp() {
+    var btn    = document.getElementById("btn-opslaan");
+    var status = document.getElementById("status-opslaan");
+
+    var sessieId = document.getElementById("opslaan-sessie-id").value.trim();
+    var token    = document.getElementById("opslaan-token").value.trim();
 
     if (!sessieId) {
-      toonMelding("bekijk-melding", "Voer een sessie-ID in.", "fout");
+      status.textContent = "Voer een sessie-ID in.";
+      status.className = "status fout";
+      return;
+    }
+    if (!token) {
+      status.textContent = "Voer een beheertoken in.";
+      status.className = "status fout";
       return;
     }
 
-    try {
-      var url = "/api/get-responses?sessie=" + encodeURIComponent(sessieId);
-      if (token) url += "&token=" + encodeURIComponent(token);
+    var namenData = getNamenUitTabel();
+    var namen     = namenData.namen;
+    var extra     = namenData.extra;
 
-      var res  = await fetch(url);
-      var data = await res.json();
+    if (namen.length < 2) {
+      status.textContent = "Voer minimaal 2 namen in.";
+      status.className = "status fout";
+      return;
+    }
 
-      if (!data.succes) {
-        toonMelding("bekijk-melding", data.fout || "Sessie niet gevonden.", "fout");
+    var positief = [];
+    document.getElementById("positieve-vragen").querySelectorAll(".vraag-blok").forEach(function(blok) {
+      var titel = blok.querySelector(".vraag-titel-input").value.trim();
+      var hint  = blok.querySelector(".vraag-hint-input").value.trim();
+      var max   = parseInt(blok.querySelector(".vraag-max-input").value) || 3;
+      if (titel !== "") positief.push({ type: "positieve", titel: titel, hint: hint, max: max });
+    });
+
+    var negatief = [];
+    document.getElementById("negatieve-vragen").querySelectorAll(".vraag-blok").forEach(function(blok) {
+      var titel = blok.querySelector(".vraag-titel-input").value.trim();
+      var hint  = blok.querySelector(".vraag-hint-input").value.trim();
+      var max   = parseInt(blok.querySelector(".vraag-max-input").value) || 3;
+      if (titel !== "") negatief.push({ type: "negatieve", titel: titel, hint: hint, max: max });
+    });
+
+    if (positief.length === 0 && negatief.length === 0) {
+      status.textContent = "Voer minimaal één vraag in.";
+      status.className = "status fout";
+      return;
+    }
+
+    var vragen = {
+      formulier_titel:        document.getElementById("formulier-titel").value.trim()        || "Vragenlijst samenwerking",
+      formulier_beschrijving: document.getElementById("formulier-beschrijving").value.trim() || "",
+      naam_vraag_titel:       document.getElementById("naam-vraag-titel").value.trim()       || "Wat is je naam?",
+      naam_vraag_hint:        "Kies je eigen naam uit de lijst.",
+      positief: positief,
+      negatief: negatief,
+      extra:    getExtraVragen()
+    };
+
+    btn.disabled = true;
+    btn.textContent = "Bezig…";
+    status.textContent = "";
+    status.className = "status";
+
+    fetch("/api/save-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sessieId:     sessieId,
+        beheerToken:  token,
+        namen:        namen,
+        namenExtra:   extra,
+        config:       { vragen: vragen, beheerToken: token }
+      })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      btn.disabled = false;
+      btn.textContent = "Opslaan & link genereren";
+      if (!res.succes) {
+        status.textContent = "Fout: " + (res.fout || "onbekende fout");
+        status.className = "status fout";
         return;
       }
+      huidigeSessieId    = sessieId;
+      huidigeBeheerToken = token;
+      formulierLink = window.location.origin + "/formulier.html?sessie=" + encodeURIComponent(sessieId);
+      document.getElementById("link-box").textContent = formulierLink;
+      document.getElementById("resultaat-card").style.display = "block";
+      status.innerHTML = "&#10003; Opgeslagen en link gegenereerd.";
+      status.className = "status ok";
 
-      huidigeReacties = data;
-      toonReacties(data);
-      document.getElementById("reacties-wrap").style.display = "block";
-      document.getElementById("bekijk-melding").style.display = "none";
-      document.getElementById("header-subtitel").textContent = data.sessieNaam;
-
-    } catch (err) {
-      toonMelding("bekijk-melding", "Verbindingsfout: " + err.message, "fout");
-    }
+      // Vul reactie/export velden alvast in
+      document.getElementById("reactie-sessie-id").value = sessieId;
+      document.getElementById("reactie-token").value     = token;
+      document.getElementById("export-sessie-id").value  = sessieId;
+      document.getElementById("export-token").value      = token;
+    })
+    .catch(function(err) {
+      btn.disabled = false;
+      btn.textContent = "Opslaan & link genereren";
+      status.textContent = "Netwerkfout: " + err.message;
+      status.className = "status fout";
+    });
   }
 
-  function toonReacties(data) {
-    // Voortgang
-    var pct = data.aantalTotaal > 0
-      ? Math.round((data.aantalIngevuld / data.aantalTotaal) * 100)
-      : 0;
-    document.getElementById("voortgang-vulling").style.width = pct + "%";
-    document.getElementById("voortgang-tekst").textContent =
-      data.aantalIngevuld + " van " + data.aantalTotaal + " leerlingen hebben ingevuld (" + pct + "%)";
-    document.getElementById("reacties-titel").textContent = data.sessieNaam + " – voortgang";
+  // ── Link-acties ──────────────────────────────────────────
 
-    // Namen-chips
-    var ingevuldNamen = data.antwoorden.map(function(a) { return a.naam; });
-    var chipsEl = document.getElementById("namen-chips");
-    chipsEl.innerHTML = "";
-    data.alleNamen.forEach(function(item) {
-      var naam = item.naam || item;
-      var chip = document.createElement("span");
-      chip.className = "naam-chip" + (ingevuldNamen.includes(naam) ? " ingevuld" : "");
-      chip.textContent = naam + (ingevuldNamen.includes(naam) ? " ✓" : "");
-      chipsEl.appendChild(chip);
+  function kopieerLink() {
+    if (!formulierLink) return;
+    navigator.clipboard.writeText(formulierLink).then(function() {
+      var s = document.getElementById("status-kopieer");
+      s.textContent = "✓ Link gekopieerd!";
+      s.className = "status ok";
+      setTimeout(function() { s.textContent = ""; }, 2000);
     });
+  }
 
-    // Antwoorden tabel
-    var container = document.getElementById("antwoorden-container");
+  function openLink() {
+    if (formulierLink) window.open(formulierLink, "_blank");
+  }
 
-    if (data.antwoorden.length === 0) {
-      container.innerHTML = "<p style='color:var(--grijs); font-size:0.875rem; padding:12px 0;'>Nog geen antwoorden ontvangen.</p>";
+  // ── Inklapbare secties ───────────────────────────────────
+
+  function toggleSectie(wrapId, pijlId) {
+    var wrap = document.getElementById(wrapId);
+    var pijl = document.getElementById(pijlId);
+    var open = wrap.classList.contains("verborgen");
+    wrap.classList.toggle("verborgen", !open);
+    pijl.textContent = open ? "▲" : "▼";
+  }
+
+  // ── Reactie-overzicht ────────────────────────────────────
+
+  function laadReacties() {
+    var sessieId = document.getElementById("reactie-sessie-id").value.trim();
+    var token    = document.getElementById("reactie-token").value.trim();
+    var status   = document.getElementById("status-reacties");
+
+    if (!sessieId || !token) {
+      status.textContent = "Vul sessie-ID en beheertoken in.";
+      status.className = "status fout";
       return;
     }
 
-    var vragen   = data.config.vragen || [];
-    var html = "<table class='antwoorden-tabel'><thead><tr><th>Naam</th>";
+    status.innerHTML = '<span class="laden-spinner"></span>Laden…';
+    status.className = "status";
+    document.getElementById("reactie-inhoud").classList.add("verborgen");
 
-    vragen.forEach(function(v) {
-      html += "<th>" + escapeHtml(v.titel) + "</th>";
-    });
-    html += "<th>Tijdstip</th></tr></thead><tbody>";
+    fetch("/api/get-responses?sessie=" + encodeURIComponent(sessieId) + "&token=" + encodeURIComponent(token))
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        if (!res.succes) {
+          status.textContent = "Fout: " + (res.fout || "onbekende fout");
+          status.className = "status fout";
+          return;
+        }
 
-    data.antwoorden.forEach(function(antwoord) {
-      html += "<tr><td><strong>" + escapeHtml(antwoord.naam) + "</strong></td>";
-      vragen.forEach(function(v) {
-        var keuzes = antwoord.antwoorden[v.sleutel] || [];
-        var chipType = v.type === "positieve" ? "positief" : "negatief";
-        html += "<td><div class='keuzes'>";
-        keuzes.forEach(function(k) {
-          html += "<span class='keuze-chip " + chipType + "'>" + escapeHtml(k) + "</span>";
+        // Sla op voor wisReactie
+        huidigeSessieId    = sessieId;
+        huidigeBeheerToken = token;
+
+        status.textContent = "";
+
+        var alleNamen   = res.alleNamen   || [];
+        var antwoorden  = res.antwoorden  || {};
+        var aantalNamen = alleNamen.length;
+
+        // Wie heeft gereageerd?
+        var gereageerdSet = Object.keys(antwoorden);
+        var gereageerd    = [];
+        var nietGereageerd = [];
+
+        // Normaliseer namenlijst
+        var namenStrings = alleNamen.map(function(n) { return typeof n === "string" ? n : (n.naam || ""); });
+
+        namenStrings.forEach(function(naam) {
+          if (gereageerdSet.indexOf(naam) !== -1) {
+            var ant = antwoorden[naam];
+            gereageerd.push({ naam: naam, tijdstip: ant.tijdstip || "" });
+          } else {
+            nietGereageerd.push(naam);
+          }
         });
-        if (keuzes.length === 0) html += "<span style='color:var(--grijs);font-size:0.75rem;'>–</span>";
-        html += "</div></td>";
-      });
-      var tijdstip = antwoord.tijdstip
-        ? new Date(antwoord.tijdstip).toLocaleString("nl-NL")
-        : "–";
-      html += "<td class='tijdstip'>" + tijdstip + "</td></tr>";
-    });
 
-    html += "</tbody></table>";
-    container.innerHTML = html;
+        var pct = aantalNamen > 0 ? Math.round((gereageerd.length / aantalNamen) * 100) : 0;
+        document.getElementById("reactie-aantal").textContent = gereageerd.length;
+        document.getElementById("reactie-totaal").textContent = aantalNamen;
+        document.getElementById("voortgang-balk").style.width = pct + "%";
+
+        // Gereageerd
+        var lijstG = document.getElementById("lijst-gereageerd");
+        lijstG.innerHTML = "";
+        if (gereageerd.length === 0) {
+          lijstG.innerHTML = "<div class='reactie-item' style='color:#5f6368'>Nog niemand</div>";
+        } else {
+          gereageerd.forEach(function(item) {
+            var div = document.createElement("div");
+            div.className = "reactie-item";
+            div.innerHTML =
+              '<span class="bolletje" style="background:#137333;"></span>' +
+              '<span class="naam">' + escapeHtml(item.naam) + '</span>' +
+              '<span class="tijdstip">' + escapeHtml(item.tijdstip) + '</span>' +
+              '<button class="wis-knop" title="Reactie verwijderen" onclick="wisReactie(\'' + escapeSingleQuote(item.naam) + '\', this)">🗑️</button>';
+            lijstG.appendChild(div);
+          });
+        }
+
+        // Niet gereageerd
+        var lijstN = document.getElementById("lijst-niet-gereageerd");
+        lijstN.innerHTML = "";
+        if (nietGereageerd.length === 0) {
+          lijstN.innerHTML = "<div class='reactie-item' style='color:#5f6368'>Iedereen heeft gereageerd 🎉</div>";
+        } else {
+          nietGereageerd.forEach(function(naam) {
+            var div = document.createElement("div");
+            div.className = "reactie-item";
+            div.innerHTML =
+              '<span class="bolletje" style="background:#e37400;"></span>' +
+              '<span class="naam">' + escapeHtml(naam) + '</span>';
+            lijstN.appendChild(div);
+          });
+        }
+
+        document.getElementById("reactie-inhoud").classList.remove("verborgen");
+      })
+      .catch(function(err) {
+        status.textContent = "Netwerkfout: " + err.message;
+        status.className = "status fout";
+      });
   }
 
-  // ---- Sociogram visualisatie ----
-  function openSociogram() {
-    var params = new URLSearchParams(window.location.search);
-    var sessie = params.get('sessie');
-    var token  = params.get('token');
-    if (!sessie || !token) {
-      alert("Sessie-ID of token ontbreekt in de URL. Laad de beheerpagina via de beheerlink.");
+  function wisReactie(naam, knop) {
+    if (!confirm("Reactie van " + naam + " verwijderen?")) return;
+    knop.disabled = true;
+    knop.textContent = "…";
+
+    fetch("/api/delete-response", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sessieId: huidigeSessieId, token: huidigeBeheerToken, naam: naam })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      if (res.succes) {
+        knop.closest(".reactie-item").remove();
+        // Update teller
+        var aantal = document.getElementById("reactie-aantal");
+        var totaal = document.getElementById("reactie-totaal");
+        var n = parseInt(aantal.textContent) - 1;
+        var t = parseInt(totaal.textContent);
+        aantal.textContent = n;
+        var pct = t > 0 ? Math.round((n / t) * 100) : 0;
+        document.getElementById("voortgang-balk").style.width = pct + "%";
+      } else {
+        alert("Fout: " + (res.fout || "onbekende fout"));
+        knop.disabled = false;
+        knop.textContent = "🗑️";
+      }
+    })
+    .catch(function(err) {
+      alert("Netwerkfout: " + err.message);
+      knop.disabled = false;
+      knop.textContent = "🗑️";
+    });
+  }
+
+  // ── Export ───────────────────────────────────────────────
+
+  function laadExportData() {
+    var sessieId = document.getElementById("export-sessie-id").value.trim();
+    var token    = document.getElementById("export-token").value.trim();
+    var status   = document.getElementById("status-export");
+
+    if (!sessieId || !token) {
+      status.textContent = "Vul sessie-ID en beheertoken in.";
+      status.className = "status fout";
       return;
     }
-    window.open('/sociogram.html?sessie=' + encodeURIComponent(sessie) + '&token=' + encodeURIComponent(token), '_blank');
-  }
 
-  // ---- Download ----
-  function downloadJson() {
-    if (!huidigeReacties) return;
-    var blob = new Blob([JSON.stringify(huidigeReacties, null, 2)], { type: "application/json" });
-    var a    = document.createElement("a");
-    a.href   = URL.createObjectURL(blob);
-    a.download = (huidigeReacties.sessieNaam || "reacties") + ".json";
-    a.click();
-  }
+    status.innerHTML = '<span class="laden-spinner"></span>Laden…';
+    status.className = "status";
+    document.getElementById("export-inhoud").classList.add("verborgen");
 
-  function downloadCsv() {
-    if (!huidigeReacties) return;
-    var vragen = huidigeReacties.config.vragen || [];
-    var rijen  = [["Naam"].concat(vragen.map(function(v) { return v.titel; })).concat(["Tijdstip"])];
+    fetch("/api/get-responses?sessie=" + encodeURIComponent(sessieId) + "&token=" + encodeURIComponent(token))
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        if (!res.succes) {
+          status.textContent = "Fout: " + (res.fout || "onbekende fout");
+          status.className = "status fout";
+          return;
+        }
 
-    huidigeReacties.antwoorden.forEach(function(a) {
-      var rij = [a.naam];
-      vragen.forEach(function(v) {
-        var keuzes = a.antwoorden[v.sleutel] || [];
-        rij.push(keuzes.join("; "));
+        status.textContent = res.aantalIngevuld + " van " + res.aantalTotaal + " reacties aanwezig";
+        status.className = "status";
+
+        var config   = res.config || {};
+        var vragen   = (config.vragen || {});
+        var positief = vragen.positief || [];
+        var negatief = vragen.negatief || [];
+
+        // Backwards compat
+        if (vragen.vragen && vragen.vragen.length > 0 && positief.length === 0 && negatief.length === 0) {
+          vragen.vragen.forEach(function(v) {
+            if (v.type === "positieve") positief.push(v);
+            else negatief.push(v);
+          });
+        }
+
+        var alleVragen = positief.map(function(v) { return { type: "positieve", sleutel: "pos_" + v.titel.replace(/\s+/g, "_").slice(0, 20), titel: v.titel }; })
+          .concat(negatief.map(function(v) { return { type: "negatieve", sleutel: "neg_" + v.titel.replace(/\s+/g, "_").slice(0, 20), titel: v.titel }; }));
+
+        var rij = document.getElementById("export-knop-rij");
+        rij.innerHTML = "";
+
+        if (alleVragen.length === 0) {
+          rij.innerHTML = "<div style='color:#5f6368; font-size:0.875rem'>Geen sociogram-vragen gevonden in deze sessie.</div>";
+        } else {
+          alleVragen.forEach(function(vraag) {
+            var div = document.createElement("div");
+            div.className = "export-vraag-knop";
+            div.innerHTML =
+              '<span class="vraag-label">' + escapeHtml(vraag.titel) + '</span>' +
+              '<span class="type-badge ' + vraag.type + '">' + vraag.type + '</span>' +
+              '<button class="download-knop" onclick="downloadJson(' +
+                JSON.stringify(sessieId) + ', ' +
+                JSON.stringify(token) + ', ' +
+                JSON.stringify(vraag.sleutel) + ', ' +
+                JSON.stringify(vraag.type) + ')">↓ Download sociogram-data</button>';
+            rij.appendChild(div);
+          });
+        }
+
+        document.getElementById("export-inhoud").classList.remove("verborgen");
+      })
+      .catch(function(err) {
+        status.textContent = "Netwerkfout: " + err.message;
+        status.className = "status fout";
       });
-      rij.push(a.tijdstip || "");
-      rijen.push(rij);
+  }
+
+  function downloadJson(sessieId, token, sleutel, type) {
+    var status = document.getElementById("status-export");
+    status.innerHTML = '<span class="laden-spinner"></span>Exporteren…';
+    status.className = "status";
+
+    fetch("/api/get-responses?sessie=" + encodeURIComponent(sessieId) + "&token=" + encodeURIComponent(token))
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        if (!res.succes) {
+          status.textContent = "Fout: " + (res.fout || "onbekende fout");
+          status.className = "status fout";
+          return;
+        }
+
+        // Bouw sociogram export-formaat
+        var alleNamen  = (res.alleNamen || []).map(function(n) { return typeof n === "string" ? n : (n.naam || ""); });
+        var antwoorden = res.antwoorden || {};
+        var config     = res.config || {};
+        var vragen     = (config.vragen || {});
+        var positief   = vragen.positief || [];
+        var negatief   = vragen.negatief || [];
+        if (vragen.vragen && vragen.vragen.length > 0 && positief.length === 0 && negatief.length === 0) {
+          vragen.vragen.forEach(function(v) {
+            if (v.type === "positieve") positief.push(v);
+            else negatief.push(v);
+          });
+        }
+
+        // Zoek de bijbehorende vraag
+        var vraagTekst = sleutel;
+        (type === "positieve" ? positief : negatief).forEach(function(v) {
+          var s = (type === "positieve" ? "pos_" : "neg_") + v.titel.replace(/\s+/g, "_").slice(0, 20);
+          if (s === sleutel) vraagTekst = v.titel;
+        });
+
+        // Bouw verbindingen
+        var verbindingen = [];
+        alleNamen.forEach(function(van) {
+          var ant = antwoorden[van];
+          if (!ant) return;
+          var keuzes = (type === "positieve") ? (ant.positief || ant.pos || []) : (ant.negatief || ant.neg || []);
+          // Als antwoorden per vraag gestructureerd zijn
+          if (ant.vragen) {
+            Object.keys(ant.vragen).forEach(function(vraagKey) {
+              if (vraagKey.indexOf(type === "positieve" ? "positieve" : "negatieve") !== -1) {
+                keuzes = keuzes.concat(ant.vragen[vraagKey] || []);
+              }
+            });
+          }
+          keuzes.forEach(function(naar) {
+            if (alleNamen.indexOf(naar) !== -1) {
+              verbindingen.push({ van: van, naar: naar, gewicht: 1 });
+            }
+          });
+        });
+
+        var namenExtra = (res.alleNamen || []).map(function(n) {
+          if (typeof n === "string") return { naam: n, geslacht: "", fakeName: "" };
+          return { naam: n.naam || n, geslacht: n.geslacht || "", fakeName: n.fakeName || "" };
+        });
+
+        var exportData = {
+          sessieId:    sessieId,
+          sessieNaam:  res.sessieNaam || sessieId,
+          datum:       new Date().toISOString().slice(0, 10),
+          vraag:       vraagTekst,
+          type:        type,
+          studenten:   namenExtra,
+          verbindingen: verbindingen
+        };
+
+        var datumStr = new Date().toISOString().slice(0, 10);
+        var bestandsnaam = "Sociogram_" + sleutel + "_" + datumStr + ".json";
+        var json = JSON.stringify(exportData, null, 2);
+        var blob = new Blob([json], { type: "application/json" });
+        var url  = URL.createObjectURL(blob);
+        var a    = document.createElement("a");
+        a.href     = url;
+        a.download = bestandsnaam;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        status.textContent = "✓ " + bestandsnaam + " gedownload.";
+        status.className = "status ok";
+      })
+      .catch(function(err) {
+        status.textContent = "Netwerkfout: " + err.message;
+        status.className = "status fout";
+      });
+  }
+
+  // ── Extra vragen beheren ─────────────────────────────────
+
+  function voegExtraVraagToe(type, titel, hint, config) {
+    var container = document.getElementById("extra-vragen");
+    var index     = container.children.length + 1;
+    var blok      = document.createElement("div");
+    blok.className = "extra-vraag-blok";
+
+    var typeLabels = { open: "Open vraag", likert: "Likert-schaal", meerkeuze: "Meerkeuze" };
+    var typeKleur  = { open: "open", likert: "likert", meerkeuze: "meerkeuze" };
+
+    var typeSpecifiek = "";
+
+    if (type === "open") {
+      typeSpecifiek =
+        '<div class="extra-veld-rij">' +
+        '<div><label style="font-size:0.78rem; color:#5f6368; display:block; margin-bottom:4px;">Vraagtekst</label>' +
+        '<input type="text" class="extra-titel-input" value="' + (titel || "") + '"></div>' +
+        '<div><label style="font-size:0.78rem; color:#5f6368; display:block; margin-bottom:4px;">Hint (optioneel)</label>' +
+        '<input type="text" class="extra-hint-input" value="' + (hint || "") + '"></div>' +
+        '</div>';
+
+    } else if (type === "likert") {
+      var min      = (config && config.schaalMin)      || 1;
+      var max      = (config && config.schaalMax)      || 5;
+      var minLabel = (config && config.schaalMinLabel) || "";
+      var maxLabel = (config && config.schaalMaxLabel) || "";
+      typeSpecifiek =
+        '<div class="extra-veld-rij">' +
+        '<div><label style="font-size:0.78rem; color:#5f6368; display:block; margin-bottom:4px;">Vraagtekst</label>' +
+        '<input type="text" class="extra-titel-input" value="' + (titel || "") + '"></div>' +
+        '<div><label style="font-size:0.78rem; color:#5f6368; display:block; margin-bottom:4px;">Hint (optioneel)</label>' +
+        '<input type="text" class="extra-hint-input" value="' + (hint || "") + '"></div>' +
+        '<div class="likert-schaal-wrap">' +
+          '<div class="veld-wrap"><label>Min. waarde</label><input type="number" class="likert-min" min="0" max="10" value="' + min + '"></div>' +
+          '<div class="veld-wrap"><label>Max. waarde</label><input type="number" class="likert-max" min="1" max="10" value="' + max + '"></div>' +
+          '<div class="veld-wrap"><label>Label min.</label><input type="text" class="likert-min-label" value="' + minLabel + '" placeholder="bijv. Helemaal mee oneens"></div>' +
+          '<div class="veld-wrap"><label>Label max.</label><input type="text" class="likert-max-label" value="' + maxLabel + '" placeholder="bijv. Helemaal mee eens"></div>' +
+        '</div>' +
+        '</div>';
+
+    } else if (type === "meerkeuze") {
+      var opties = (config && config.opties) ? config.opties : ["", ""];
+      var optieHtml = '<div class="optie-lijst" id="opties-' + index + '">';
+      opties.forEach(function(o) {
+        optieHtml += '<div class="optie-rij">' +
+          '<input type="text" class="optie-input" value="' + escapeAttr(o) + '" placeholder="Optie…">' +
+          '<button class="optie-verwijder" onclick="verwijderOptie(this)" title="Verwijder">✕</button>' +
+          '</div>';
+      });
+      optieHtml += '</div>';
+      typeSpecifiek =
+        '<div class="extra-veld-rij">' +
+        '<div><label style="font-size:0.78rem; color:#5f6368; display:block; margin-bottom:4px;">Vraagtekst</label>' +
+        '<input type="text" class="extra-titel-input" value="' + (titel || "") + '"></div>' +
+        '<div><label style="font-size:0.78rem; color:#5f6368; display:block; margin-bottom:4px;">Hint (optioneel)</label>' +
+        '<input type="text" class="extra-hint-input" value="' + (hint || "") + '"></div>' +
+        '<div>' +
+          '<label style="font-size:0.78rem; color:#5f6368; display:block; margin-bottom:6px;">Antwoordopties</label>' +
+          optieHtml +
+          '<button class="toevoeg-knop" style="margin-top:6px;" onclick="voegOptieToeBijBlok(this)">+ Optie toevoegen</button>' +
+        '</div>' +
+        '</div>';
+    }
+
+    blok.dataset.type = type;
+    blok.innerHTML =
+      '<div class="extra-vraag-header">' +
+        '<span class="extra-vraag-titel">Extra vraag ' + index +
+          '<span class="type-label ' + typeKleur[type] + '">' + typeLabels[type] + '</span>' +
+        '</span>' +
+        '<button class="verwijder-knop" onclick="verwijderExtraVraag(this)" title="Verwijder">' +
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>' +
+        '</button>' +
+      '</div>' +
+      typeSpecifiek;
+
+    container.appendChild(blok);
+  }
+
+  function verwijderExtraVraag(knop) {
+    var blok = knop.closest(".extra-vraag-blok");
+    blok.parentElement.removeChild(blok);
+    hernummerExtraVragen();
+  }
+
+  function hernummerExtraVragen() {
+    var blokken = document.getElementById("extra-vragen").querySelectorAll(".extra-vraag-blok");
+    var typeLabels = { open: "Open vraag", likert: "Likert-schaal", meerkeuze: "Meerkeuze" };
+    blokken.forEach(function(b, i) {
+      var type  = b.dataset.type;
+      var titel = b.querySelector(".extra-vraag-titel");
+      titel.innerHTML = "Extra vraag " + (i + 1) +
+        '<span class="type-label ' + type + '">' + typeLabels[type] + '</span>';
+    });
+  }
+
+  function voegOptieToeBijBlok(knop) {
+    var lijst = knop.previousElementSibling;
+    var rij   = document.createElement("div");
+    rij.className = "optie-rij";
+    rij.innerHTML = '<input type="text" class="optie-input" placeholder="Optie…">' +
+      '<button class="optie-verwijder" onclick="verwijderOptie(this)" title="Verwijder">✕</button>';
+    lijst.appendChild(rij);
+  }
+
+  function verwijderOptie(knop) {
+    var rij = knop.closest(".optie-rij");
+    rij.parentElement.removeChild(rij);
+  }
+
+  function getExtraVragen() {
+    var extra = [];
+    var blokken = document.getElementById("extra-vragen").querySelectorAll(".extra-vraag-blok");
+    blokken.forEach(function(blok) {
+      var type  = blok.dataset.type;
+      var titel = blok.querySelector(".extra-titel-input").value.trim();
+      var hint  = blok.querySelector(".extra-hint-input") ? blok.querySelector(".extra-hint-input").value.trim() : "";
+      if (!titel) return;
+
+      var vraag = { type: type, titel: titel, hint: hint };
+
+      if (type === "likert") {
+        vraag.schaalMin      = parseInt(blok.querySelector(".likert-min").value)       || 1;
+        vraag.schaalMax      = parseInt(blok.querySelector(".likert-max").value)       || 5;
+        vraag.schaalMinLabel = blok.querySelector(".likert-min-label").value.trim();
+        vraag.schaalMaxLabel = blok.querySelector(".likert-max-label").value.trim();
+      } else if (type === "meerkeuze") {
+        vraag.opties = Array.from(blok.querySelectorAll(".optie-input"))
+          .map(function(i) { return i.value.trim(); })
+          .filter(function(v) { return v !== ""; });
+      }
+
+      extra.push(vraag);
+    });
+    return extra;
+  }
+
+  // ── Namen-tabel ──────────────────────────────────────────
+
+  function voegNaamRijToe(naam, geslacht, fakeName) {
+    var tbody = document.getElementById("namen-tbody");
+    var rij   = document.createElement("tr");
+    rij.innerHTML =
+      '<td style="padding:2px 4px; border:1px solid #dadce0;"><input type="text" value="' + escapeAttr(naam || "") + '" placeholder="Naam..." style="width:100%; padding:3px 6px; border:1px solid #dadce0; border-radius:4px; font-size:0.875rem;"></td>' +
+      '<td style="padding:2px 4px; border:1px solid #dadce0;"><input type="text" value="' + escapeAttr(geslacht || "") + '" placeholder="M/V/X" style="width:60px; padding:3px 6px; border:1px solid #dadce0; border-radius:4px; font-size:0.875rem;"></td>' +
+      '<td style="padding:2px 4px; border:1px solid #dadce0;"><input type="text" value="' + escapeAttr(fakeName || "") + '" placeholder="Gefingeerde naam..." style="width:100%; padding:3px 6px; border:1px solid #dadce0; border-radius:4px; font-size:0.875rem;"></td>' +
+      '<td style="padding:2px 4px; border:1px solid #dadce0; text-align:center; width:32px;"><button onclick="verwijderNaamRij(this)" class="verwijder-knop" title="Verwijder" style="padding:2px; margin:0; line-height:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button></td>';
+    tbody.appendChild(rij);
+  }
+
+  function verwijderNaamRij(knop) {
+    knop.closest("tr").remove();
+  }
+
+  function importeerNamenTekst() {
+    var wrap = document.getElementById("namen-plak-wrap");
+    wrap.style.display = wrap.style.display === "none" ? "block" : "none";
+  }
+
+  function verwerkNamenTekst() {
+    document.getElementById("namen-tbody").innerHTML = "";
+    var tekst  = document.getElementById("namen-invoer").value;
+    var regels = tekst.split("\n").map(function(r) { return r.trim(); }).filter(function(r) { return r !== ""; });
+
+    regels.forEach(function(regel) {
+      var delen = regel.split(/[;,|\t]/).map(function(d) { return d.trim(); });
+      var naam     = delen[0] || "";
+      var geslacht = delen[1] || "";
+      var fakeName = delen[2] || "";
+      if (naam) voegNaamRijToe(naam, geslacht, fakeName);
     });
 
-    var csv  = rijen.map(function(r) {
-      return r.map(function(cel) {
-        return '"' + String(cel).replace(/"/g, '""') + '"';
-      }).join(",");
-    }).join("\n");
-
-    var blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
-    var a    = document.createElement("a");
-    a.href   = URL.createObjectURL(blob);
-    a.download = (huidigeReacties.sessieNaam || "reacties") + ".csv";
-    a.click();
+    document.getElementById("namen-invoer").value = "";
+    document.getElementById("namen-plak-wrap").style.display = "none";
   }
 
-  // ---- Hulpfuncties ----
-  function toonMelding(id, tekst, type) {
-    var el = document.getElementById(id);
-    el.textContent = tekst;
-    el.className   = "melding " + type;
-    el.style.display = "block";
-  }
-
-  function kopieer(elementId) {
-    var tekst = document.getElementById(elementId).textContent;
-    navigator.clipboard.writeText(tekst).then(function() {
-      alert("Link gekopieerd!");
-    }).catch(function() {
-      // Fallback voor oudere browsers
-      var el = document.createElement("textarea");
-      el.value = tekst;
-      document.body.appendChild(el);
-      el.select();
-      document.execCommand("copy");
-      document.body.removeChild(el);
-      alert("Link gekopieerd!");
+  function getNamenUitTabel() {
+    var rijen = document.getElementById("namen-tbody").querySelectorAll("tr");
+    var namen = [];
+    var extra = [];
+    rijen.forEach(function(rij) {
+      var inputs   = rij.querySelectorAll("input");
+      var naam     = inputs[0].value.trim();
+      if (!naam) return;
+      var geslacht = inputs[1].value.trim();
+      var fakeName = inputs[2].value.trim();
+      namen.push(naam);
+      extra.push({ naam: naam, geslacht: geslacht, fakeName: fakeName });
     });
+    return { namen: namen, extra: extra };
   }
+
+  // ── Hulpfuncties ─────────────────────────────────────────
 
   function escapeHtml(str) {
-    return String(str || "")
+    if (!str) return "";
+    return String(str)
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  function escapeAttr(str) {
+    if (!str) return "";
+    return String(str)
+      .replace(/&/g, "&amp;")
       .replace(/"/g, "&quot;");
   }
 
-  // ---- Auto-laden via URL-parameters ----
-  (function() {
-    var params   = new URLSearchParams(window.location.search);
-    var sessieId = params.get("sessie");
-    var token    = params.get("token");
-
-    if (sessieId) {
-      document.getElementById("bekijk-sessie-id").value = sessieId;
-      if (token) document.getElementById("bekijk-token").value = token;
-      toonTab("bekijk");
-      laadReacties();
-    }
-  })();
+  function escapeSingleQuote(str) {
+    if (!str) return "";
+    return String(str).replace(/'/g, "\\'");
+  }
 </script>
 
 </body>
